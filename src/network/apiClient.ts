@@ -1,6 +1,6 @@
 export default class ApiClient {
 
-    private baseUrl = 'http://192.168.2.141:8080'
+    private baseUrl = 'http://192.168.2.141:8080';
 
     get(urlPath: string, params: { [key: string]: any } = {}) {
         let urlEncoded = urlPath;
