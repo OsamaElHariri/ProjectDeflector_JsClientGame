@@ -1,30 +1,53 @@
 import { Subject } from 'rxjs';
 
+export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
+
 export default class WsClient {
     private baseUrl = 'ws://192.168.2.141:8080';
 
-    private client: WebSocket;
+    private client?: WebSocket;
     private eventSubject: Subject<any>;
     private sendSubject: Subject<any>;
+    private connectionStatusSubject: Subject<ConnectionStatus>;
+    private connectionStatus: ConnectionStatus = 'disconnected';
 
 
-    constructor(playerId: string) {
-        this.client = new WebSocket(this.baseUrl + '/realtime/ws/' + playerId);
+    constructor() {
         this.eventSubject = new Subject();
         this.sendSubject = new Subject();
+        this.connectionStatusSubject = new Subject();
+    }
 
+    connect(playerId: string) {
+        this.client = new WebSocket(this.baseUrl + '/realtime/ws/' + playerId);
+        this.updateConnectionStatus('connecting');
         this.client.addEventListener('message', (evt) => {
             if (evt.data) {
                 this.eventSubject.next(JSON.parse(evt.data));
             }
         });
 
-
         this.client.addEventListener('open', () => {
+            this.updateConnectionStatus('connected');
             this.sendSubject.subscribe(data => {
-                this.client.send(JSON.stringify(data));
-            })
+                if (this.connectionStatus === 'connected') {
+                    this.client?.send(JSON.stringify(data));
+                }
+            });
         });
+
+        this.client.addEventListener('close', () => {
+            this.updateConnectionStatus('disconnected');
+        });
+    }
+
+    private updateConnectionStatus(status: ConnectionStatus) {
+        this.connectionStatus = status;
+        this.connectionStatusSubject.next(status);
+    }
+
+    status() {
+        return this.connectionStatusSubject;
     }
 
     events() {
@@ -32,7 +55,7 @@ export default class WsClient {
     }
 
     send(data: any) {
+        if (!this.client) throw new Error('WS Client is not connected');
         this.sendSubject.next(data);
     }
-
 }
