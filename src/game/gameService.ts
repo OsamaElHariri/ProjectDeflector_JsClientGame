@@ -1,4 +1,6 @@
 import ApiClient from "../network/apiClient";
+import { Pawn, Position, ScoreBoard } from "../types/types";
+import { Deflection, DeflectionEvent, Game, MatchPointPlayers, PlayerVariants } from "./types";
 
 export default class GameService {
 
@@ -30,5 +32,89 @@ export default class GameService {
         const json = await res.json();
 
         return json;
+    }
+
+    async getGame(gameId: string): Promise<Game> {
+        const res = await (new ApiClient).get(`/game/game/${gameId}`);
+        const json = await res.json();
+        return json;
+    }
+
+    async addPawn(req: { gameId: string, x: number, y: number, playerSide: string })
+        : Promise<{
+            scoreBoard: ScoreBoard,
+            variants: PlayerVariants,
+            newPawn: Pawn
+        }> {
+
+        const res = await (new ApiClient).post(`/game/pawn`, req);
+        const json = await res.json();
+        return json;
+    }
+
+    async endTurn(req: { gameId: string, playerSide: string })
+        : Promise<{
+            scoreBoard: ScoreBoard,
+            variants: PlayerVariants,
+            playerTurn: string,
+            deflectionSource: Position,
+            allDeflections: Deflection[][],
+            winner: string,
+            matchPointPlayers: MatchPointPlayers
+        }> {
+
+        const res = await (new ApiClient).post(`/game/turn`, req);
+        const json = await res.json();
+        return {
+            ...json,
+            allDeflections: json.allDeflections.map(
+                (deflections: any[]) => deflections.map(
+                    deflection => this.parseDeflection(deflection)
+                )
+            )
+        };
+    }
+
+    async shuffle(req: { gameId: string, x: number, y: number, hasPeek: boolean, playerSide: string })
+        : Promise<{
+            hasPeek: boolean,
+            variants: PlayerVariants,
+            newPawn: Pawn
+            deflections: Deflection[]
+        }> {
+
+        const res = await (new ApiClient).post(`/game/shuffle`, req);
+        const json = await res.json();
+        return {
+            ...json,
+            deflections: json.deflections.map((deflection: any) => this.parseDeflection(deflection))
+        };
+    }
+
+    async peek(req: { gameId: string, x: number, y: number, playerSide: string })
+        : Promise<{
+            newPawn: Pawn
+            deflections: Deflection[]
+        }> {
+
+        const res = await (new ApiClient).post(`/game/peek`, req);
+        const json = await res.json();
+        return {
+            ...json,
+            deflections: json.deflections.map((deflection: any) => this.parseDeflection(deflection))
+        };
+    }
+
+    parseDeflection(deflection: any): Deflection {
+        const directionMap: { [key: number]: string } = {
+            0: 'UP',
+            1: 'DOWN',
+            2: 'LEFT',
+            3: 'RIGHT',
+        }
+        return {
+            ...deflection,
+            toDirection: directionMap[deflection.toDirection]
+        }
     }
 }
