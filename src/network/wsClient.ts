@@ -1,4 +1,5 @@
 import { Subject } from 'rxjs';
+import { GameWsEvent } from './types';
 
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
@@ -6,7 +7,7 @@ export default class WsClient {
     private baseUrl = 'ws://192.168.2.141:8080';
 
     private client?: WebSocket;
-    private eventSubject: Subject<any>;
+    private eventSubject: Subject<GameWsEvent>;
     private sendSubject: Subject<any>;
     private connectionStatusSubject: Subject<ConnectionStatus>;
     private connectionStatus: ConnectionStatus = 'disconnected';

@@ -5,9 +5,12 @@ import {
     Text,
     View,
 } from 'react-native';
+import GameService from '../game/gameService';
+import { usePlayer } from '../main_providers/player_provider';
 import { AppNavigation } from '../types/uiTypes';
 
 const LobbyScreen = () => {
+    const player = usePlayer();
     const nav = useNavigation<AppNavigation>()
     return (
         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'stretch', position: 'relative', height: '100%' }}>
@@ -16,10 +19,11 @@ const LobbyScreen = () => {
             </View>
             <Button
                 onPress={() => {
-                    console.log('You tapped the button!');
-                    nav.replace('Game', { gameId: 'some game' })
+                    if (!player) return;
+                    (new GameService).findSolo(player.id)
+                    nav.replace('AwaitingGame')
                 }}
-                title="Press Me"
+                title="Practice Game"
             />
         </View>
     );

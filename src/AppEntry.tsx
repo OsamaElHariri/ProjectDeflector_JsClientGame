@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LobbyScreen from './lobby/LobbyScreen';
 import GameScreen from './game/GameScreen';
+import AwaitingGameScreen from './game/AwaitingGameScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -21,6 +22,10 @@ const AppEntry = () => {
                         <Stack.Screen
                             name="Lobby"
                             component={LobbyScreen} />
+
+                        <Stack.Screen
+                            name="AwaitingGame"
+                            component={AwaitingGameScreen} />
 
                         <Stack.Screen
                             name="Game"

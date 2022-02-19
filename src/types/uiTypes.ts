@@ -1,8 +1,10 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
+import { Game } from "../game/types"
 
 export type GameNavigatorParamList = {
     Lobby: undefined
-    Game: { gameId: string }
+    AwaitingGame: undefined
+    Game: { game: Game }
 }
 
 export type AppNavigation = NativeStackNavigationProp<GameNavigatorParamList>

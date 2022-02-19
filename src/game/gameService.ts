@@ -1,6 +1,7 @@
 import ApiClient from "../network/apiClient";
+import { AddPawn } from "../network/types";
 import { Pawn, Position, ScoreBoard } from "../types/types";
-import { Deflection, DeflectionEvent, Game, MatchPointPlayers, PlayerVariants } from "./types";
+import { Deflection, Game, MatchPointPlayers, PlayerVariants } from "./types";
 
 export default class GameService {
 
@@ -41,11 +42,7 @@ export default class GameService {
     }
 
     async addPawn(req: { gameId: string, x: number, y: number, playerSide: string })
-        : Promise<{
-            scoreBoard: ScoreBoard,
-            variants: PlayerVariants,
-            newPawn: Pawn
-        }> {
+        : Promise<AddPawn> {
 
         const res = await (new ApiClient).post(`/game/pawn`, req);
         const json = await res.json();
