@@ -10,13 +10,14 @@ import { Game } from './types';
 import { RouteProp } from '@react-navigation/native';
 import ScoreBar from './ScoreBar';
 import PawnVisual from './PawnVisual';
+import TurnTimer from './TurnTimer';
 
 interface ShuffleButtonProps {
     width: number
 }
 
 const ShuffleButton = ({ width }: ShuffleButtonProps) => {
-    return <View style={{ display: 'flex', alignItems: 'center', paddingTop: 16, paddingBottom: 16 }}>
+    return <View style={{ display: 'flex', alignItems: 'center', paddingTop: 8, paddingBottom: 16 }}>
         <View style={{ width: width, height: width * 0.4 }}>
             <Image source={require('./assets/shuffle.png')} style={{
                 resizeMode: 'center',
@@ -35,7 +36,7 @@ interface PawnPreviewContainerProps {
 }
 
 const PawnPreviewContainer = ({ width, children }: PawnPreviewContainerProps) => {
-    return <View style={{ padding: 8, height: width * 0.8, width: width * 0.8 }}>
+    return <View style={{ marginTop: 8, padding: 8, height: width * 0.8, width: width * 0.8 }}>
         <View style={{ ...styles.pawnPreviewContainer }}>
             {children}
         </View>
@@ -66,38 +67,42 @@ const GameScreen = ({ route }: Props) => {
 
     return (
         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'stretch', position: 'relative', height: '100%' }}>
-            <View style={{ width: hudWidth }}>
-                <View style={{ display: 'flex', height: '100%', alignItems: 'center' }}>
-                    <View style={{ width: '100%', height: '100%', flex: 1, backgroundColor: 'blue' }}></View>
-                    <PawnPreviewContainer width={hudWidth}>
-                        <PawnVisual durability={5} variant={'BACKSLASH'}></PawnVisual>
-                    </PawnPreviewContainer>
-                    <ShuffleButton width={hudWidth} />
+            <View style={{ display: 'flex', height: '100%', alignItems: 'center' }}>
+                <View style={{ width: '100%', flex: 1 }}>
+                    <TurnTimer />
                 </View>
+                <PawnPreviewContainer width={hudWidth}>
+                    <PawnVisual durability={5} variant={'BACKSLASH'}></PawnVisual>
+                </PawnPreviewContainer>
+                <ShuffleButton width={hudWidth} />
             </View>
+
             <View style={{ position: 'relative' }}>
                 <View style={{ width: scoreBarWidth }}>
                     <ScoreBar score={4} maxScore={7} isMatchPoint={true} />
                 </View>
             </View>
+
             <View style={{ backgroundColor: 'green', alignItems: 'center', justifyContent: 'center' }}>
                 <View style={{ position: 'relative', display: 'flex', flexDirection: 'row', flexWrap: 'wrap', width: gridSize, height: gridSize, backgroundColor: 'yellow' }}>
                     {table}
                 </View>
             </View>
+
             <View style={{ position: 'relative' }}>
                 <View style={{ width: scoreBarWidth }}>
                     <ScoreBar score={4} maxScore={7} isMatchPoint={true} />
                 </View>
             </View>
-            <View style={{ width: hudWidth }}>
-                <View style={{ display: 'flex', height: '100%', alignItems: 'center' }}>
-                    <View style={{ width: '100%', height: '100%', flex: 1, backgroundColor: 'blue' }}></View>
-                    <PawnPreviewContainer width={hudWidth}>
-                        <PawnVisual durability={5} variant={'SLASH'}></PawnVisual>
-                    </PawnPreviewContainer>
-                    <ShuffleButton width={hudWidth} />
+
+            <View style={{ display: 'flex', height: '100%', alignItems: 'center' }}>
+                <View style={{ width: '100%', flex: 1 }}>
+                    <TurnTimer />
                 </View>
+                <PawnPreviewContainer width={hudWidth}>
+                    <PawnVisual durability={5} variant={'BACKSLASH'}></PawnVisual>
+                </PawnPreviewContainer>
+                <ShuffleButton width={hudWidth} />
             </View>
         </View >
     );
