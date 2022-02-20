@@ -11,6 +11,7 @@ import { RouteProp } from '@react-navigation/native';
 import ScoreBar from './ScoreBar';
 import PawnVisual from './PawnVisual';
 import TurnTimer from './TurnTimer';
+import GridVisuals from './GridVisuals';
 
 interface ShuffleButtonProps {
     width: number
@@ -83,11 +84,7 @@ const GameScreen = ({ route }: Props) => {
                 </View>
             </View>
 
-            <View style={{ backgroundColor: 'green', alignItems: 'center', justifyContent: 'center' }}>
-                <View style={{ position: 'relative', display: 'flex', flexDirection: 'row', flexWrap: 'wrap', width: gridSize, height: gridSize, backgroundColor: 'yellow' }}>
-                    {table}
-                </View>
-            </View>
+            <GridVisuals gridSize={gridSize} />
 
             <View style={{ position: 'relative' }}>
                 <View style={{ width: scoreBarWidth }}>
