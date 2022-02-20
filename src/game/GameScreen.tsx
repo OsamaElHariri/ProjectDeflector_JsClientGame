@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import {
+    Image,
     StyleSheet,
     Text,
     useWindowDimensions,
@@ -10,13 +11,31 @@ import { RouteProp } from '@react-navigation/native';
 import ScoreBar from './ScoreBar';
 import PawnVisual from './PawnVisual';
 
+interface ShuffleButtonProps {
+    width: number
+}
+
+const ShuffleButton = ({ width }: ShuffleButtonProps) => {
+    return <View style={{ display: 'flex', alignItems: 'center', paddingTop: 16, paddingBottom: 16 }}>
+        <View style={{ width: width, height: width * 0.4 }}>
+            <Image source={require('./assets/shuffle.png')} style={{
+                resizeMode: 'center',
+                width: '100%',
+                height: '100%',
+                tintColor: 'black',
+            }} />
+        </View>
+        <Text style={{ fontWeight: 'bold', color: 'black', paddingTop: 8 }}>Shuffle</Text>
+    </View>
+}
+
 interface PawnPreviewContainerProps {
     width: number
     children: ReactNode
 }
 
 const PawnPreviewContainer = ({ width, children }: PawnPreviewContainerProps) => {
-    return <View style={{ padding: 8, height: width, width: width }}>
+    return <View style={{ padding: 8, height: width * 0.8, width: width * 0.8 }}>
         <View style={{ ...styles.pawnPreviewContainer }}>
             {children}
         </View>
@@ -30,7 +49,7 @@ interface Props {
 const GameScreen = ({ route }: Props) => {
     const dimensions = useWindowDimensions();
 
-    const hudWidth = 100;
+    const hudWidth = 120;
     const scoreBarWidth = 50;
     const gridSize = Math.min(dimensions.width - hudWidth * 2 - scoreBarWidth * 2, dimensions.height);
 
@@ -48,12 +67,12 @@ const GameScreen = ({ route }: Props) => {
     return (
         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'stretch', position: 'relative', height: '100%' }}>
             <View style={{ width: hudWidth }}>
-                <View style={{ display: 'flex', height: '100%' }}>
+                <View style={{ display: 'flex', height: '100%', alignItems: 'center' }}>
                     <View style={{ width: '100%', height: '100%', flex: 1, backgroundColor: 'blue' }}></View>
                     <PawnPreviewContainer width={hudWidth}>
                         <PawnVisual durability={5} variant={'BACKSLASH'}></PawnVisual>
                     </PawnPreviewContainer>
-                    <View style={{ backgroundColor: 'cyan', height: 150 }}></View>
+                    <ShuffleButton width={hudWidth} />
                 </View>
             </View>
             <View style={{ position: 'relative' }}>
@@ -72,12 +91,12 @@ const GameScreen = ({ route }: Props) => {
                 </View>
             </View>
             <View style={{ width: hudWidth }}>
-                <View style={{ display: 'flex', height: '100%' }}>
+                <View style={{ display: 'flex', height: '100%', alignItems: 'center' }}>
                     <View style={{ width: '100%', height: '100%', flex: 1, backgroundColor: 'blue' }}></View>
                     <PawnPreviewContainer width={hudWidth}>
                         <PawnVisual durability={5} variant={'SLASH'}></PawnVisual>
                     </PawnPreviewContainer>
-                    <View style={{ backgroundColor: 'cyan', height: 150 }}></View>
+                    <ShuffleButton width={hudWidth} />
                 </View>
             </View>
         </View >
@@ -86,7 +105,7 @@ const GameScreen = ({ route }: Props) => {
 
 const styles = StyleSheet.create({
     pawnPreviewContainer: {
-        borderWidth: 6,
+        borderWidth: 4,
     },
 });
 
