@@ -61,7 +61,7 @@ const ScoreDot = ({ isPoint }: ScoreDotProps) => {
         ).start();
     }, [expandAnim, isPoint]);
 
-    return <Animated.View style={{ ...styles.expanded, backgroundColor: 'green', borderRadius: 100, transform: [{ scale: expandAnim }] }}></Animated.View>
+    return <Animated.View style={{ ...styles.expanded, backgroundColor: '#73956F', borderRadius: 100, transform: [{ scale: expandAnim }] }}></Animated.View>
 }
 
 interface Props {
@@ -94,7 +94,7 @@ const ScoreBar = ({ score, maxScore, isMatchPoint }: Props) => {
                     <View style={{ ...styles.expanded, position: 'absolute', top: -width * 0.5, left: -width * 0.5, transform: [{ translateX: width * 0.5 }, { translateY: width * 0.5 }] }}>
                         <ScoreDot isPoint={isPoint} />
                     </View>
-                    <View style={{ ...styles.expanded, borderColor: 'green', borderWidth: width * 0.25 }}></View>
+                    <View style={{ ...styles.expanded, borderColor: '#73956F', borderWidth: width * 0.25 }}></View>
                 </ScoreBox>
             </View>
         });

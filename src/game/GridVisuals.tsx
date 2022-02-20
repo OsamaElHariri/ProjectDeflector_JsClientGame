@@ -1,6 +1,6 @@
+import { useTheme } from '@react-navigation/native';
 import React from 'react';
 import {
-    StyleSheet,
     View,
 } from 'react-native';
 
@@ -9,6 +9,7 @@ interface Props {
 }
 
 const GridVisuals = ({ gridSize }: Props) => {
+    const theme = useTheme();
 
     const rows = 3;
     const rowsWithPadding = rows + 1;
@@ -21,7 +22,7 @@ const GridVisuals = ({ gridSize }: Props) => {
 
         const columns = Array(cols).fill(undefined).map((_, colIdx) => {
             return <View key={`cell_${colIdx}`} style={{
-                ...styles.gridCell,
+                borderColor: theme.colors.text,
                 borderTopWidth: rowIdx === 0 ? gridBorder * 2 : gridBorder,
                 borderLeftWidth: colIdx === 0 ? gridBorder * 2 : gridBorder,
                 borderBottomWidth: rowIdx === rows - 1 ? gridBorder * 2 : gridBorder,
@@ -50,11 +51,5 @@ const GridVisuals = ({ gridSize }: Props) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    gridCell: {
-        borderColor: 'black',
-    }
-});
 
 export default GridVisuals;

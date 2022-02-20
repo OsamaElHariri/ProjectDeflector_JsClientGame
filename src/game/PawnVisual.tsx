@@ -1,3 +1,4 @@
+import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useRef } from 'react';
 import {
     Animated,
@@ -23,6 +24,7 @@ interface Props {
 }
 
 const PawnVisual = ({ variant, durability }: Props) => {
+    const theme = useTheme();
     const rotateAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -51,11 +53,11 @@ const PawnVisual = ({ variant, durability }: Props) => {
         }}>
             <Image source={baseImage} style={{
                 ...styles.imageBasics,
-                tintColor: 'black',
+                tintColor: theme.colors.text,
             }} />
             <Image source={durabilityImageMap[displayedDurability]} style={{
                 ...styles.imageBasics,
-                tintColor: 'green'
+                tintColor: '#73956F'
             }} />
         </Animated.View>
     );
