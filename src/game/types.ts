@@ -1,6 +1,6 @@
-import { GameBoard, Position } from "../types/types";
+import { GameBoard, PawnVariant, Position } from "../types/types";
 
-export type PlayerVariants = { [playerId: string]: string[] }
+export type PlayerVariants = { [playerId: string]: PawnVariant[] }
 
 export type MatchPointPlayers = string[]
 
