@@ -4,8 +4,15 @@ import {
     useWindowDimensions,
     View,
 } from 'react-native';
+import { Game } from './types';
+import { RouteProp } from '@react-navigation/native';
+import ScoreBar from './ScoreBar';
 
-const GameScreen = () => {
+interface Props {
+    route: RouteProp<{ params: { game: Game } }, 'params'>
+}
+
+const GameScreen = ({ route }: Props) => {
     const dimensions = useWindowDimensions();
 
     const gridSize = Math.min(0.6 * dimensions.width, dimensions.height);
@@ -28,6 +35,11 @@ const GameScreen = () => {
                     <View style={{ width: '100%', height: '100%', flex: 1, backgroundColor: 'blue' }}></View>
                     <View style={{ backgroundColor: 'skyblue', height: 200 }}></View>
                     <View style={{ backgroundColor: 'cyan', height: 150 }}></View>
+                </View>
+            </View>
+            <View style={{ position: 'relative' }}>
+                <View style={{ width: 50 }}>
+                    <ScoreBar score={5} maxScore={7} />
                 </View>
             </View>
             <View style={{ backgroundColor: 'green', alignItems: 'center', justifyContent: 'center' }}>

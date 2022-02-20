@@ -20,6 +20,10 @@ const AppEntry = () => {
                     <Stack.Navigator screenOptions={{ headerShown: false }}>
 
                         <Stack.Screen
+                            name="Game"
+                            component={GameScreen} />
+
+                        <Stack.Screen
                             name="Lobby"
                             component={LobbyScreen} />
 
@@ -27,9 +31,6 @@ const AppEntry = () => {
                             name="AwaitingGame"
                             component={AwaitingGameScreen} />
 
-                        <Stack.Screen
-                            name="Game"
-                            component={GameScreen} />
 
                     </Stack.Navigator>
 
