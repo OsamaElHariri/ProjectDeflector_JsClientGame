@@ -39,7 +39,7 @@ const GameScreen = ({ route }: Props) => {
             </View>
             <View style={{ position: 'relative' }}>
                 <View style={{ width: 50 }}>
-                    <ScoreBar score={5} maxScore={7} />
+                    <ScoreBar score={4} maxScore={7} isMatchPoint={false} />
                 </View>
             </View>
             <View style={{ backgroundColor: 'green', alignItems: 'center', justifyContent: 'center' }}>
