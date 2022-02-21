@@ -1,6 +1,6 @@
 import ApiClient from "../network/apiClient";
 import { AddPawn } from "../network/types";
-import { Pawn, Position, ScoreBoard } from "../types/types";
+import { Pawn, PawnVariant, Position, ScoreBoard } from "../types/types";
 import { Deflection, Game, MatchPointPlayers, PlayerVariants } from "./types";
 
 export default class GameService {
@@ -37,7 +37,10 @@ export default class GameService {
 
     async getGame(gameId: string): Promise<Game> {
         const res = await (new ApiClient).get(`/game/game/${gameId}`);
-        const json = await res.json();
+        const json: Game = await res.json();
+        Object.keys(json.variants).forEach(playerId => {
+            json.variants[playerId] = json.variants[playerId].map(v => v.toUpperCase() as PawnVariant);
+        });
         return json;
     }
 
@@ -62,6 +65,9 @@ export default class GameService {
 
         const res = await (new ApiClient).post(`/game/turn`, req);
         const json = await res.json();
+        Object.keys(json.variants).forEach(playerId => {
+            json.variants[playerId] = json.variants[playerId].map((v: string) => v.toUpperCase() as PawnVariant);
+        });
         return {
             ...json,
             allDeflections: json.allDeflections.map(
@@ -82,9 +88,12 @@ export default class GameService {
 
         const res = await (new ApiClient).post(`/game/shuffle`, req);
         const json = await res.json();
+        Object.keys(json.variants).forEach(playerId => {
+            json.variants[playerId] = json.variants[playerId].map((v: string) => v.toUpperCase() as PawnVariant);
+        });
         return {
             ...json,
-            deflections: json.deflections.map((deflection: any) => this.parseDeflection(deflection))
+            deflections: json.deflections?.map((deflection: any) => this.parseDeflection(deflection))
         };
     }
 

@@ -28,3 +28,7 @@ export interface Deflection {
     toDirection: Direction
     events: DeflectionEvent[]
 }
+
+export interface GameState {
+    game: Game
+}
