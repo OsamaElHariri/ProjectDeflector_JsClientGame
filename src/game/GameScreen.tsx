@@ -30,7 +30,7 @@ const GameScreen = ({ route }: Props) => {
             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'stretch', position: 'relative', height: '100%' }}>
                 <View style={{ display: 'flex', height: '100%', alignItems: 'center' }}>
                     <View style={{ width: '100%', flex: 1 }}>
-                        <TurnTimer />
+                        <TurnTimer playerId={initialGame.playerIds[0]} />
                     </View>
                     <PawnPreviewContainer width={hudWidth} playerId={initialGame.playerIds[0]}></PawnPreviewContainer>
                     <ShuffleButton width={hudWidth} playerId={initialGame.playerIds[0]} />
@@ -38,7 +38,7 @@ const GameScreen = ({ route }: Props) => {
 
                 <View style={{ position: 'relative' }}>
                     <View style={{ width: scoreBarWidth }}>
-                        <ScoreBar score={4} maxScore={7} isMatchPoint={true} />
+                        <ScoreBar score={4} maxScore={7} isMatchPoint={false} />
                     </View>
                 </View>
 
@@ -46,13 +46,13 @@ const GameScreen = ({ route }: Props) => {
 
                 <View style={{ position: 'relative' }}>
                     <View style={{ width: scoreBarWidth }}>
-                        <ScoreBar score={4} maxScore={7} isMatchPoint={true} />
+                        <ScoreBar score={4} maxScore={7} isMatchPoint={false} />
                     </View>
                 </View>
 
                 <View style={{ display: 'flex', height: '100%', alignItems: 'center' }}>
                     <View style={{ width: '100%', flex: 1 }}>
-                        <TurnTimer />
+                        <TurnTimer playerId={initialGame.playerIds[1]} />
                     </View>
                     <PawnPreviewContainer width={hudWidth} playerId={initialGame.playerIds[1]}></PawnPreviewContainer>
                     <ShuffleButton width={hudWidth} playerId={initialGame.playerIds[1]} />

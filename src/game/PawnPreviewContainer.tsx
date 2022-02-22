@@ -14,8 +14,8 @@ interface PawnPreviewContainerProps {
 
 const PawnPreviewContainer = ({ width, playerId }: PawnPreviewContainerProps) => {
     const theme = useTheme();
-    const { state } = useGameState();
-    const [variant] = state.game.variants[playerId].slice(-1);
+    const { state: { game: { variants } } } = useGameState();
+    const [variant] = variants[playerId].slice(-1);
 
     return <View style={{ marginTop: 8, padding: 8, height: width * 0.8, width: width * 0.8 }}>
         <View style={{ ...styles.pawnPreviewContainer, borderColor: theme.colors.text }}>
