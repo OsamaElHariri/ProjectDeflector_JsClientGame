@@ -85,6 +85,7 @@ const TurnTimer = ({ playerId }: Props) => {
         const { allDeflections, ...gameUpdates } = res;
         updateState({
             ...state,
+            allDeflections,
             game: {
                 ...state.game,
                 ...gameUpdates

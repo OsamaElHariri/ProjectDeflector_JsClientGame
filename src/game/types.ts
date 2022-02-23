@@ -31,4 +31,5 @@ export interface Deflection {
 
 export interface GameState {
     game: Game
+    allDeflections: Deflection[][]
 }

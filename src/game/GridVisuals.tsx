@@ -34,20 +34,27 @@ const GridVisuals = ({ gridSize }: Props) => {
         return <View key={`grid_row_${rowIdx}`} style={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
             {columns}
         </View>
-
     });
 
-    const paddedGrid = [
-        <View key={`grid_row_pad_1`} style={{ flex: 0.5 }}></View>,
-        ...grid,
-        <View key={`grid_row_pad_2`} style={{ flex: 0.5 }}></View>,
-    ]
-
+    const ballDiameter = 40;
     return (
-        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-            <View style={{ position: 'relative', display: 'flex', flexDirection: 'column', width: cellSize * cols, height: cellSize * rowsWithPadding }}>
-                {paddedGrid}
+        <View style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column' }}>
+            <View style={{ height: cellSize / 2 }}></View>
+            <View style={{ width: '100%', top: -ballDiameter / 2 + cellSize / 2, left: -ballDiameter / 2 + cellSize / 2 }}>
+                <View style={{
+                    width: ballDiameter,
+                    height: ballDiameter,
+                    borderRadius: 100,
+                    position: 'absolute',
+                    backgroundColor: 'black',
+                    // Should animate these to move the ball across the grid
+                    transform: [{ translateX: cellSize * 0 }, { translateY: cellSize * 0 }]
+                }}></View>
             </View>
+            <View style={{ position: 'relative', display: 'flex', flexDirection: 'column', width: cellSize * cols, height: cellSize * rows }}>
+                {grid}
+            </View>
+            <View style={{ height: cellSize / 2 }}></View>
         </View>
     );
 };
