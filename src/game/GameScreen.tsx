@@ -38,7 +38,7 @@ const GameScreen = ({ route }: Props) => {
 
                 <View style={{ position: 'relative' }}>
                     <View style={{ width: scoreBarWidth }}>
-                        <ScoreBar score={4} maxScore={7} isMatchPoint={false} />
+                        <ScoreBar playerId={initialGame.playerIds[0]} maxScore={7} />
                     </View>
                 </View>
 
@@ -46,7 +46,7 @@ const GameScreen = ({ route }: Props) => {
 
                 <View style={{ position: 'relative' }}>
                     <View style={{ width: scoreBarWidth }}>
-                        <ScoreBar score={4} maxScore={7} isMatchPoint={false} />
+                        <ScoreBar playerId={initialGame.playerIds[1]} maxScore={7} />
                     </View>
                 </View>
 

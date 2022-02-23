@@ -2,7 +2,7 @@ import { GameBoard, PawnVariant, Position } from "../types/types";
 
 export type PlayerVariants = { [playerId: string]: PawnVariant[] }
 
-export type MatchPointPlayers = string[]
+export type MatchPointPlayers = { [playerId: string]: boolean }
 
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
 

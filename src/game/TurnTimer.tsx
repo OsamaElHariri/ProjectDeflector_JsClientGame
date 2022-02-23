@@ -97,13 +97,18 @@ const TurnTimer = ({ playerId }: Props) => {
                 });
             });
         });
+        const { scoreBoard, ...remainingUpdates } = gameUpdates;
 
         updateState({
             ...state,
             allDeflections,
             game: {
                 ...state.game,
-                ...gameUpdates
+                ...remainingUpdates,
+                gameBoard: {
+                    ...state.game.gameBoard,
+                    scoreBoard
+                }
             }
         });
     }

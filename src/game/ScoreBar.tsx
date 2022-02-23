@@ -5,6 +5,7 @@ import {
     StyleSheet,
     View,
 } from 'react-native';
+import { useGameState } from './game_state_provider';
 
 
 interface ScoreBoxProps {
@@ -65,13 +66,16 @@ const ScoreDot = ({ isPoint }: ScoreDotProps) => {
 }
 
 interface Props {
-    score: number
+    playerId: string
     maxScore: number
-    isMatchPoint: boolean
 }
 
-const ScoreBar = ({ score, maxScore, isMatchPoint }: Props) => {
+const ScoreBar = ({ playerId, maxScore }: Props) => {
     const [currentLayout, setCurrentLayout] = useState<{ width: number, height: number }>();
+    const { state: { game: { matchPointPlayers, gameBoard: { scoreBoard } } } } = useGameState();
+
+    const score = scoreBoard[playerId];
+    const isMatchPoint = matchPointPlayers[playerId];
 
     const onLayout = (evt: any) => {
         setCurrentLayout(evt.nativeEvent.layout)
