@@ -6,6 +6,7 @@ import {
     Image,
     ImageSourcePropType,
     StyleSheet,
+    View,
 } from 'react-native';
 import { PawnVariant } from '../types/types';
 
@@ -39,6 +40,10 @@ const PawnVisual = ({ variant, durability }: Props) => {
         ).start();
     }, [rotateAnim, variant]);
     const displayedDurability = Math.min(5, Math.max(1, durability));
+
+    if (variant === '') {
+        return <View></View>;
+    }
 
     return (
         <Animated.View style={{

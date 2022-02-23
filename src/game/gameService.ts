@@ -41,7 +41,13 @@ export default class GameService {
         Object.keys(json.variants).forEach(playerId => {
             json.variants[playerId] = json.variants[playerId].map(v => v.toUpperCase() as PawnVariant);
         });
-        return json;
+        return {
+            ...json,
+            gameBoard: {
+                ...json.gameBoard,
+                pawns: json.gameBoard.pawns.map(pawnArray => pawnArray.map(pawn => this.parsePawn(pawn)))
+            }
+        };
     }
 
     async addPawn(req: { gameId: string, x: number, y: number, playerSide: string })
@@ -49,7 +55,13 @@ export default class GameService {
 
         const res = await (new ApiClient).post(`/game/pawn`, req);
         const json = await res.json();
-        return json;
+        Object.keys(json.variants).forEach(playerId => {
+            json.variants[playerId] = json.variants[playerId].map((v: string) => v.toUpperCase() as PawnVariant);
+        });
+        return {
+            ...json,
+            newPawn: this.parsePawn(json.newPawn),
+        };
     }
 
     async endTurn(req: { gameId: string, playerSide: string })
@@ -93,6 +105,7 @@ export default class GameService {
         });
         return {
             ...json,
+            newPawn: json.newPawn && this.parsePawn(json.newPawn),
             deflections: json.deflections?.map((deflection: any) => this.parseDeflection(deflection))
         };
     }
@@ -107,8 +120,16 @@ export default class GameService {
         const json = await res.json();
         return {
             ...json,
+            newPawn: this.parsePawn(json.newPawn),
             deflections: json.deflections.map((deflection: any) => this.parseDeflection(deflection))
         };
+    }
+
+    parsePawn(pawn: any): Pawn {
+        return {
+            ...pawn,
+            name: pawn.name.toUpperCase()
+        }
     }
 
     parseDeflection(deflection: any): Deflection {
@@ -120,6 +141,7 @@ export default class GameService {
         }
         return {
             ...deflection,
+            events: deflection.events.map((evt: any) => ({ ...evt, name: evt.name.toUpperCase() })),
             toDirection: directionMap[deflection.toDirection]
         }
     }

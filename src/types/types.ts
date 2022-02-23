@@ -9,7 +9,7 @@ export interface Position {
 }
 
 export type ScoreBoard =  { [playerId: string]: number }
-export type PawnVariant = 'SLASH' | 'BACKSLASH'
+export type PawnVariant = 'SLASH' | 'BACKSLASH' | ''
 
 export interface Pawn {
     position: Position

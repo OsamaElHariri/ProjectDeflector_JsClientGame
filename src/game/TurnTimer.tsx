@@ -83,6 +83,21 @@ const TurnTimer = ({ playerId }: Props) => {
         });
 
         const { allDeflections, ...gameUpdates } = res;
+        const { game: { gameBoard: { pawns } } } = state;
+
+        allDeflections.forEach(deflections => {
+            deflections.forEach((deflection, i) => {
+                if (i === 0) return;
+
+                pawns[deflection.position.y][deflection.position.x].durability -= 1;
+                deflection.events.forEach(event => {
+                    if (event.name === 'DESTROY_PAWN') {
+                        pawns[event.position.y][event.position.x].name = '';
+                    }
+                });
+            });
+        });
+
         updateState({
             ...state,
             allDeflections,
@@ -96,7 +111,7 @@ const TurnTimer = ({ playerId }: Props) => {
     const isCurrentPlayerTimer = playerId === player?.id;
 
     return (
-        <TouchableWithoutFeedback onPress={endTurn}>
+        <TouchableWithoutFeedback onPress={playerTurn === playerId ? endTurn : undefined}>
             <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
                 <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
                     <Animated.View style={{ width: '100%', height: '100%', backgroundColor: '#73956F', transform: [{ scaleY: scaleAnim }] }} ></Animated.View>

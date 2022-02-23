@@ -87,7 +87,7 @@ const ScoreBar = ({ score, maxScore, isMatchPoint }: Props) => {
             width = (currentLayout.height - width * ratioMargin) / (maxScore * (1 + ratioMargin));
         }
 
-        nodes = Array(maxScore).fill(null).map((_, idx) => {
+        nodes = Array(maxScore).fill(undefined).map((_, idx) => {
             const isPoint = idx < score;
             return <View key={`score_${idx}`} style={{ marginBottom: width * ratioMargin, marginTop: idx === maxScore - 1 ? width * ratioMargin : 0 }}>
                 <ScoreBox index={idx} isMatchPoint={isMatchPoint} width={width}>
