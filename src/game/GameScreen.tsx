@@ -7,7 +7,7 @@ import { Game } from './types';
 import { RouteProp } from '@react-navigation/native';
 import ScoreBar from './ScoreBar';
 import TurnTimer from './TurnTimer';
-import GridVisuals from './GridVisuals';
+import GameGrid from './GameGrid';
 import { GameStateProvider } from './game_state_provider';
 import ShuffleButton from './ShuffleButton';
 import PawnPreviewContainer from './PawnPreviewContainer';
@@ -43,7 +43,7 @@ const GameScreen = ({ route }: Props) => {
                     </View>
                 </View>
 
-                <GridVisuals gridSize={gridSize} />
+                <GameGrid gridSize={gridSize} />
 
                 <View style={{ position: 'relative' }}>
                     <View style={{ width: scoreBarWidth }}>

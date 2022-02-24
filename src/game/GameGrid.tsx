@@ -1,6 +1,7 @@
 import { useTheme } from '@react-navigation/native';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
+    Animated,
     TouchableWithoutFeedback,
     View,
 } from 'react-native';
@@ -12,16 +13,48 @@ interface Props {
     gridSize: number
 }
 
-const GridVisuals = ({ gridSize }: Props) => {
+const startAnimation = async (animation: { start: Function }) => {
+    return new Promise(resolve => {
+        animation.start(() => {
+            resolve(true);
+        });
+    });
+}
+
+const GameGrid = ({ gridSize }: Props) => {
     const theme = useTheme();
     const { state, updateState } = useGameState();
-    const { game: { gameBoard: { pawns } } } = state;
+    const { game: { gameBoard: { pawns, xMax, yMax } }, allDeflections } = state;
+    const posAnim = useRef(new Animated.ValueXY()).current;
 
-    const rows = 3;
+    useEffect(() => {
+        if (allDeflections.length === 0) return;
+
+        (async () => {
+            for (let i = 0; i < allDeflections.length; i++) {
+                const deflections = allDeflections[i];
+                posAnim.setValue(deflections[0].position);
+                const animations = deflections.map(deflection => (
+                    Animated.timing(
+                        posAnim,
+                        {
+                            toValue: deflection.position,
+                            duration: 200,
+                            useNativeDriver: true
+                        }
+                    )
+                ));
+                await startAnimation(Animated.sequence(animations));
+            }
+        })();
+    }, [allDeflections])
+
+    const rows = xMax + 1;
     const rowsWithPadding = rows + 1;
-    const cols = 3;
+    const cols = yMax + 1;
 
     const cellSize = Math.min(gridSize / rowsWithPadding, gridSize / cols);
+
 
     const gridBorder = 2;
 
@@ -47,8 +80,8 @@ const GridVisuals = ({ gridSize }: Props) => {
         })
     }
 
-    const grid = Array(cols).fill(undefined).map((_, rowIdx) => {
-        const columns = Array(rows).fill(undefined).map((_, colIdx) => {
+    const grid = Array(rows).fill(undefined).map((_, rowIdx) => {
+        const columns = Array(cols).fill(undefined).map((_, colIdx) => {
             const pawn = pawns[rowIdx][colIdx];
 
             return <TouchableWithoutFeedback key={`cell_${colIdx}`} onPress={pawn.name === '' ? (() => addPawn(colIdx, rowIdx)) : undefined}>
@@ -65,25 +98,24 @@ const GridVisuals = ({ gridSize }: Props) => {
             </TouchableWithoutFeedback>
         });
 
-        return <View key={`grid_${rowIdx}`} style={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
+        return <View key={`grid_${rowIdx}`} style={{ display: 'flex', flexDirection: 'row', flex: 1, width: '100%', height: '100%' }}>
             {columns}
         </View>
     });
 
-    const ballDiameter = 40;
+    const ballDiameter = 30;
     return (
         <View style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column' }}>
             <View style={{ height: cellSize / 2 }}></View>
             <View style={{ width: '100%', top: -ballDiameter / 2 + cellSize / 2, left: -ballDiameter / 2 + cellSize / 2 }}>
-                <View style={{
+                <Animated.View style={{
                     width: ballDiameter,
                     height: ballDiameter,
                     borderRadius: 100,
                     position: 'absolute',
                     backgroundColor: 'black',
-                    // Should animate these to move the ball across the grid
-                    transform: [{ translateX: cellSize * 0 }, { translateY: cellSize * 0 }]
-                }}></View>
+                    transform: [{ translateX: Animated.multiply(posAnim.x, cellSize) }, { translateY: Animated.multiply(posAnim.y, cellSize) }]
+                }}></Animated.View>
             </View>
             <View style={{ position: 'relative', display: 'flex', flexDirection: 'column', width: cellSize * cols, height: cellSize * rows }}>
                 {grid}
@@ -93,4 +125,4 @@ const GridVisuals = ({ gridSize }: Props) => {
     );
 };
 
-export default GridVisuals;
+export default GameGrid;
