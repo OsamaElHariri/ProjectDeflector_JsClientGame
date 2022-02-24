@@ -82,7 +82,7 @@ const TurnTimer = ({ playerId }: Props) => {
             playerSide: playerId,
         });
 
-        const { allDeflections, ...gameUpdates } = res;
+        const { allDeflections, winner,...gameUpdates } = res;
         const { game: { gameBoard: { pawns } } } = state;
 
         allDeflections.forEach(deflections => {
@@ -101,6 +101,7 @@ const TurnTimer = ({ playerId }: Props) => {
 
         updateState({
             ...state,
+            winner,
             allDeflections,
             game: {
                 ...state.game,

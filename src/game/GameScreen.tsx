@@ -11,6 +11,7 @@ import GridVisuals from './GridVisuals';
 import { GameStateProvider } from './game_state_provider';
 import ShuffleButton from './ShuffleButton';
 import PawnPreviewContainer from './PawnPreviewContainer';
+import WinnerOverlay from './WinnerOverlay';
 
 interface Props {
     route: RouteProp<{ params: { game: Game } }, 'params'>
@@ -58,6 +59,7 @@ const GameScreen = ({ route }: Props) => {
                     <ShuffleButton width={hudWidth} playerId={initialGame.playerIds[1]} />
                 </View>
             </View>
+            <WinnerOverlay />
         </GameStateProvider>
     );
 };

@@ -31,5 +31,6 @@ export interface Deflection {
 
 export interface GameState {
     game: Game
+    winner: string
     allDeflections: Deflection[][]
 }
