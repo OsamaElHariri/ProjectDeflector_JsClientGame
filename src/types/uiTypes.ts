@@ -8,3 +8,10 @@ export type GameNavigatorParamList = {
 }
 
 export type AppNavigation = NativeStackNavigationProp<GameNavigatorParamList>
+
+export type GestureState = {
+    isEnabled: boolean
+    isHeld: boolean
+    isLongPressTriggered: boolean
+    isPressTriggered: boolean
+}
