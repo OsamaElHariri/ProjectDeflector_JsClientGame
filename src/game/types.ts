@@ -1,4 +1,4 @@
-import { GameBoard, PawnVariant, Position } from "../types/types";
+import { GameBoard, Pawn, PawnVariant, Position } from "../types/types";
 
 export type PlayerVariants = { [playerId: string]: PawnVariant[] }
 
@@ -33,4 +33,6 @@ export interface GameState {
     game: Game
     winner: string
     allDeflections: Deflection[][]
+    deflectionPreview?: Deflection[]
+    previewPawn?: Pawn
 }

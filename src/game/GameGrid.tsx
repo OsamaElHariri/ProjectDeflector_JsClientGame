@@ -98,6 +98,7 @@ const GameGrid = ({ gridSize }: Props) => {
         state.game.gameBoard.pawns[y][x] = res.newPawn;
         updateState({
             ...state,
+            previewPawn: undefined,
             game: {
                 ...state.game,
                 variants: res.variants,
@@ -106,16 +107,31 @@ const GameGrid = ({ gridSize }: Props) => {
                     scoreBoard: res.scoreBoard,
                     pawns: [...state.game.gameBoard.pawns]
                 }
-            }
+            },
         });
     }
 
-    const onLongPress = (key: string) => {
+    const peek = async (x: number, y: number) => {
+        const res = await (new GameService).peek({
+            gameId: state.game.gameId,
+            playerSide: state.game.playerTurn,
+            x,
+            y,
+        });
+        updateState({
+            ...state,
+            deflectionPreview: res.deflections,
+            previewPawn: res.newPawn
+        });
+    }
+
+    const onLongPress = (key: string, x: number, y: number) => {
         gestureHandlers.current[key].next({
             ...gestureHandlers.current[key].value,
             isHeld: false,
             isLongPressTriggered: true
-        })
+        });
+        addPawn(x, y);
     }
 
     const onPress = (key: string, x: number, y: number) => {
@@ -124,8 +140,7 @@ const GameGrid = ({ gridSize }: Props) => {
             isHeld: false,
             isPressTriggered: true
         });
-
-        addPawn(x, y);
+        peek(x, y);
     }
 
     const onPressIn = (key: string) => {
@@ -147,7 +162,16 @@ const GameGrid = ({ gridSize }: Props) => {
 
     const grid = Array(rows).fill(undefined).map((_, rowIdx) => {
         const columns = Array(cols).fill(undefined).map((_, colIdx) => {
-            const pawn = pawns[rowIdx][colIdx];
+            let pawn = pawns[rowIdx][colIdx];
+            let isPreview = false;
+            if (pawn.name === '' && state.previewPawn) {
+                const previewPos = state.previewPawn.position;
+                if (previewPos.x === colIdx && previewPos.y === rowIdx) {
+                    isPreview = true;
+                    pawn = state.previewPawn;
+                }
+            }
+
             const key = `cell_${rowIdx}_${colIdx}`;
             if (!gestureHandlers.current[key]) {
                 gestureHandlers.current[key] = new BehaviorSubject<GestureState>({
@@ -158,11 +182,14 @@ const GameGrid = ({ gridSize }: Props) => {
                 });
             }
 
+            const canPress = pawn.name === '';
+            const canLongPress = pawn.name === '' || isPreview;
+
             return <TouchableWithoutFeedback
                 key={key}
                 delayLongPress={LONG_PRESS_DELAY}
-                onPress={pawn.name === '' ? (() => onPress(key, colIdx, rowIdx)) : undefined}
-                onLongPress={() => onLongPress(key)}
+                onPress={canPress ? (() => onPress(key, colIdx, rowIdx)) : undefined}
+                onLongPress={canLongPress ? (() => onLongPress(key, colIdx, rowIdx)) : undefined}
                 onPressIn={() => onPressIn(key)}
                 onPressOut={() => onPressOut(key)}
             >
@@ -175,7 +202,9 @@ const GameGrid = ({ gridSize }: Props) => {
                     flex: 1
                 }}>
                     <PressIndicator gestureStateObservable={gestureHandlers.current[key]} bounceAnim={bounceAnim} />
-                    <PawnVisual durability={pawn.durability} variant={pawn.name}></PawnVisual>
+                    <View style={{ opacity: isPreview ? 0.4 : 1 }}>
+                        <PawnVisual durability={pawn.durability} variant={pawn.name}></PawnVisual>
+                    </View>
                 </View>
             </TouchableWithoutFeedback>
         });
@@ -199,7 +228,10 @@ const GameGrid = ({ gridSize }: Props) => {
                     borderRadius: 100,
                     position: 'absolute',
                     backgroundColor: 'black',
-                    transform: [{ translateX: Animated.multiply(posAnim.x, cellSize) }, { translateY: Animated.multiply(posAnim.y, cellSize) }]
+                    transform: [
+                        { translateX: Animated.multiply(posAnim.x, cellSize) },
+                        { translateY: Animated.multiply(posAnim.y, cellSize) }
+                    ]
                 }}></Animated.View>
             </View>
             <View style={{ height: cellSize / 2 }}></View>
