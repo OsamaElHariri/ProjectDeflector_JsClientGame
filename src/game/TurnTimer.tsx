@@ -88,6 +88,7 @@ const TurnTimer = ({ playerId }: Props) => {
         allDeflections.forEach(deflections => {
             deflections.forEach((deflection, i) => {
                 if (i === 0) return;
+                if (!pawns[deflection.position.y] || !pawns[deflection.position.y][deflection.position.x]) return;
 
                 pawns[deflection.position.y][deflection.position.x].durability -= 1;
                 deflection.events.forEach(event => {

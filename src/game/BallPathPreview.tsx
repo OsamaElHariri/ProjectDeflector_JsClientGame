@@ -96,7 +96,10 @@ const BallPathPreview = ({ cellSize }: Props) => {
 
         const currentPos = deflection.position;
         const nextPos = deflectionPreview[i + 1].position;
-        const width = Math.abs(nextPos.x - currentPos.x + nextPos.y - currentPos.y) * cellSize;
+        let width = Math.abs(nextPos.x - currentPos.x + nextPos.y - currentPos.y) * cellSize;
+        if (i === deflectionPreview.length - 2) {
+            width -= cellSize * 0.45;
+        }
 
         return <View
             key={`line_${currentPos.x}_${currentPos.y}_${i}`}
