@@ -116,16 +116,43 @@ const TurnTimer = ({ playerId }: Props) => {
         });
     }
 
+    const cancelPawn = () => {
+        updateState({
+            ...state,
+            previewPawn: undefined,
+            deflectionPreview: undefined,
+        });
+    }
+
+    const onPress = () => {
+        if (state.previewPawn) {
+            cancelPawn();
+        } else {
+            endTurn();
+        }
+    }
+
     const isCurrentPlayerTimer = playerId === player?.id;
 
+    const getTimerIcon = () => {
+        if (!isCurrentPlayerTimer) {
+            if (playerId === playerTurn) return 'CLOCK';
+            else return 'WAITING';
+        } else {
+            if (state.previewPawn) return 'CANCEL';
+            else if (playerId === playerTurn) return 'END';
+            else return 'WAITING';
+        }
+    }
+
     return (
-        <TouchableWithoutFeedback onPress={playerTurn === playerId ? endTurn : undefined}>
+        <TouchableWithoutFeedback onPress={playerTurn === playerId ? onPress : undefined}>
             <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
                 <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
                     <Animated.View style={{ width: '100%', height: '100%', backgroundColor: '#73956F', transform: [{ scaleY: scaleAnim }] }} ></Animated.View>
                 </View>
                 <View style={styles.iconContainer}>
-                    <TurnTimerIcon icon='WAITING' dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} />
+                    <TurnTimerIcon key={'timer_icon'} icon={getTimerIcon()} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} />
                 </View>
                 <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
             </View>
