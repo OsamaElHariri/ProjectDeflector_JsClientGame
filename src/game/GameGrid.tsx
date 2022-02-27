@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { LONG_PRESS_DELAY } from '../constants';
 import PressIndicator from '../gesture_feedback/PressIndicator';
 import { GestureState } from '../types/uiTypes';
+import BallPathPreview from './BallPathPreview';
 import GameService from './gameService';
 import { useGameState } from './game_state_provider';
 import PawnVisual from './PawnVisual';
@@ -220,6 +221,9 @@ const GameGrid = ({ gridSize }: Props) => {
             <View style={{ height: cellSize / 2 }}></View>
             <View style={{ position: 'relative', display: 'flex', flexDirection: 'column', width: cellSize * cols, height: cellSize * rows }}>
                 {grid}
+            </View>
+            <View style={{ position: 'absolute', width: cellSize * rows, height: cellSize * cols }}>
+                <BallPathPreview cellSize={cellSize} />
             </View>
             <View style={{ width: '100%', top: -ballDiameter / 2 - cellSize * (rows - 0.5), left: -ballDiameter / 2 + cellSize / 2 }}>
                 <Animated.View style={{

@@ -104,6 +104,7 @@ const TurnTimer = ({ playerId }: Props) => {
             winner,
             allDeflections,
             previewPawn: undefined,
+            deflectionPreview: undefined,
             game: {
                 ...state.game,
                 ...remainingUpdates,
