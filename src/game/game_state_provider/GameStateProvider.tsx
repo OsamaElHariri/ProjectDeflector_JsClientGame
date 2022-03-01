@@ -12,6 +12,7 @@ export function GameStateProvider({ children, game }: Props) {
     const [currentState, setCurrentState] = useState<GameState>({
         game,
         allDeflections: [],
+        winner: '',
     });
 
     const updateState = (updatedState: GameState) => {

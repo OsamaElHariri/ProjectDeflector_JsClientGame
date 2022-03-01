@@ -1,3 +1,4 @@
+import Svg, { Text, TSpan } from "react-native-svg";
 import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useRef } from 'react';
 import {
@@ -5,7 +6,6 @@ import {
     Easing,
     Image,
     StyleSheet,
-    Text,
     TouchableWithoutFeedback,
     View,
 } from 'react-native';
@@ -28,30 +28,111 @@ const WaitingDots = ({ color }: { color: string }) => {
 type TurnTimerIconOption = 'CLOCK' | 'END' | 'CANCEL' | 'WAITING'
 const TurnTimerIcon = ({ icon, dotColor }: { icon: TurnTimerIconOption, dotColor: string }) => {
     const theme = useTheme();
-    if (icon === 'CLOCK') {
-        return <Image source={require('./assets/stop_watch.png')} style={{
-            resizeMode: 'contain',
-            tintColor: theme.colors.background,
-            width: '40%',
-            height: 60,
-        }} />
-    } else if (icon === 'END') {
-        return <View style={{ backgroundColor: '#73956F' + '99', width: '100%', padding: 8 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', color: theme.colors.background }}>END {'\n'}TURN</Text>
-        </View>
-    } else if (icon === 'CANCEL') {
-        return <View style={{ backgroundColor: theme.colors.text + '99', width: '100%', padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Image source={require('./assets/cancel.png')} style={{
-                resizeMode: 'center',
+
+    const clockAnim = useRef(new Animated.Value(0)).current;
+    const endAnim = useRef(new Animated.Value(0)).current;
+    const cancelAnim = useRef(new Animated.Value(0)).current;
+    const waitingAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        const hideValues = {
+            toValue: 0,
+            speed: 25,
+            bounciness: 5,
+            useNativeDriver: true
+        };
+        const showValues = {
+            toValue: 1,
+            speed: 20,
+            bounciness: 15,
+            useNativeDriver: true
+        };
+
+        Animated.spring(
+            clockAnim,
+            icon === 'CLOCK' ? showValues : hideValues
+        ).start()
+        Animated.spring(
+            endAnim,
+            icon === 'END' ? showValues : hideValues
+        ).start()
+        Animated.spring(
+            cancelAnim,
+            icon === 'CANCEL' ? showValues : hideValues
+        ).start()
+        Animated.spring(
+            waitingAnim,
+            icon === 'WAITING' ? showValues : hideValues
+        ).start()
+    }, [icon, clockAnim, endAnim, cancelAnim, waitingAnim]);
+
+    return <View style={{ width: '100%', height: '100%' }}>
+        <Animated.View style={{ ...styles.iconPosition, transform: [{ scale: clockAnim }] }}>
+            <Image source={require('./assets/stop_watch.png')} style={{
+                resizeMode: 'contain',
                 tintColor: theme.colors.background,
-                width: '100%',
-                height: 30,
+                width: '40%',
+                height: 60,
             }} />
-            <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', color: theme.colors.background, paddingTop: 4 }}>CANCEL</Text>
-        </View>
-    } else {
-        return <WaitingDots color={dotColor} />
-    }
+        </Animated.View>
+        <Animated.View style={{ ...styles.iconPosition, transform: [{ scale: endAnim }] }}>
+            <View style={{ height: 60, width: '100%' }}>
+                <Svg height='100%' width='100%' viewBox='0 0 60 60'>
+                    <Text
+                        y={'-10'}
+                        textAnchor='middle'
+                        stroke={'#73956F'}
+                        strokeWidth="2"
+                        fill={theme.colors.background}
+                        fontSize="28"
+                        fontWeight='bold'
+                    >
+                        <TSpan x='30' dy='1.1em'>END</TSpan>
+                        <TSpan x='30' dy='1.1em'>TURN</TSpan>
+                    </Text>
+                </Svg>
+            </View>
+        </Animated.View>
+        <Animated.View style={{ ...styles.iconPosition, transform: [{ scale: cancelAnim }] }}>
+            <View style={{ width: '100%', height: '100%', padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <View style={{ width: '100%' }}>
+                    <Image source={require('./assets/cancel.png')} style={{
+                        position: 'absolute',
+                        resizeMode: 'center',
+                        tintColor: theme.colors.text,
+                        width: '100%',
+                        height: 30,
+                        transform: [{ scale: 0.99 }]
+                    }} />
+                    <Image source={require('./assets/cancel_border.png')} style={{
+                        resizeMode: 'center',
+                        tintColor: theme.colors.background,
+                        width: '100%',
+                        height: 30,
+                    }} />
+                </View>
+                <View style={{ height: 40, width: '100%' }}>
+                    <Svg height='100%' width='100%' viewBox='0 0 50 50'>
+                        <Text
+                            x={'25'}
+                            y={'34'}
+                            textAnchor='middle'
+                            stroke={theme.colors.text}
+                            strokeWidth="2"
+                            fill={theme.colors.background}
+                            fontSize="28"
+                            fontWeight='bold'
+                        >
+                            CANCEL
+                        </Text>
+                    </Svg>
+                </View>
+            </View>
+        </Animated.View>
+        <Animated.View style={{ ...styles.iconPosition, transform: [{ scale: waitingAnim }] }}>
+            <WaitingDots color={dotColor} />
+        </Animated.View>
+    </View>
 }
 
 const TurnTimer = ({ playerId }: Props) => {
@@ -145,15 +226,32 @@ const TurnTimer = ({ playerId }: Props) => {
             else return 'WAITING';
         }
     }
+    const timerIcon = getTimerIcon();
+
+    const colorAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(
+            colorAnim,
+            {
+                toValue: timerIcon === 'CANCEL' ? 0 : 1,
+                duration: 100,
+                useNativeDriver: true
+            }
+        ).start();
+    }, [colorAnim, timerIcon]);
 
     return (
         <TouchableWithoutFeedback onPress={playerTurn === playerId ? onPress : undefined}>
             <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
                 <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
-                    <Animated.View style={{ width: '100%', height: '100%', backgroundColor: '#73956F', transform: [{ scaleY: scaleAnim }] }} ></Animated.View>
+                    <Animated.View style={{ width: '100%', height: '100%', backgroundColor: theme.colors.text, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+                </View>
+                <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
+                    <Animated.View style={{ width: '100%', height: '100%', backgroundColor: '#73956F', opacity: colorAnim, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
                 </View>
                 <View style={styles.iconContainer}>
-                    <TurnTimerIcon key={'timer_icon'} icon={getTimerIcon()} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} />
+                    <TurnTimerIcon key={'timer_icon'} icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} />
                 </View>
                 <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
             </View>
@@ -178,6 +276,14 @@ const styles = StyleSheet.create({
         height: '100%',
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    iconPosition: {
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     waitingDot: {
         width: 12,
