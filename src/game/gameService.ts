@@ -1,6 +1,6 @@
 import ApiClient from "../network/apiClient";
 import { AddPawn } from "../network/types";
-import { Pawn, PawnVariant, Position, ScoreBoard } from "../types/types";
+import { Pawn, PawnVariant, ScoreBoard } from "../types/types";
 import { Deflection, Game, MatchPointPlayers, PlayerVariants } from "./types";
 
 export default class GameService {
@@ -43,9 +43,10 @@ export default class GameService {
         });
         return {
             ...json,
+            deflections: json.deflections.map(this.parseDeflection),
             gameBoard: {
                 ...json.gameBoard,
-                pawns: json.gameBoard.pawns.map(pawnArray => pawnArray.map(pawn => this.parsePawn(pawn)))
+                pawns: json.gameBoard.pawns.map(pawnArray => pawnArray.map(this.parsePawn))
             }
         };
     }
@@ -69,10 +70,10 @@ export default class GameService {
             scoreBoard: ScoreBoard,
             variants: PlayerVariants,
             playerTurn: string,
-            deflectionSource: Position,
             allDeflections: Deflection[][],
             winner: string,
-            matchPointPlayers: MatchPointPlayers
+            matchPointPlayers: MatchPointPlayers,
+            deflections: Deflection[],
         }> {
 
         const res = await (new ApiClient).post(`/game/turn`, req);
@@ -82,10 +83,9 @@ export default class GameService {
         });
         return {
             ...json,
+            deflections: json.deflections.map(this.parseDeflection),
             allDeflections: json.allDeflections.map(
-                (deflections: any[]) => deflections.map(
-                    deflection => this.parseDeflection(deflection)
-                )
+                (deflections: any[]) => deflections.map(this.parseDeflection)
             )
         };
     }
@@ -106,7 +106,7 @@ export default class GameService {
         return {
             ...json,
             newPawn: json.newPawn && this.parsePawn(json.newPawn),
-            deflections: json.deflections?.map((deflection: any) => this.parseDeflection(deflection))
+            deflections: json.deflections?.map(this.parseDeflection)
         };
     }
 
@@ -121,7 +121,7 @@ export default class GameService {
         return {
             ...json,
             newPawn: this.parsePawn(json.newPawn),
-            deflections: json.deflections.map((deflection: any) => this.parseDeflection(deflection))
+            deflections: json.deflections.map(this.parseDeflection)
         };
     }
 

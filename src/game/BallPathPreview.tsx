@@ -77,11 +77,9 @@ interface Props {
 }
 
 const BallPathPreview = ({ cellSize }: Props) => {
-    const { state: { deflectionPreview } } = useGameState();
+    const { state: { deflectionPreview, game: { deflections } } } = useGameState();
 
-    if (!deflectionPreview) {
-        return <></>;
-    }
+    const deflectionPath = deflectionPreview || deflections;
 
     const getRotationDegrees = (direction: Direction) => {
         if (direction === 'UP') return '90deg';
@@ -91,17 +89,19 @@ const BallPathPreview = ({ cellSize }: Props) => {
         return '0deg';
     }
 
-    const lines = deflectionPreview.map((deflection, i) => {
-        if (i === deflectionPreview.length - 1) return undefined;
+    const lines = deflectionPath.map((deflection, i) => {
+        if (i === deflectionPath.length - 1) return undefined;
 
         const currentPos = deflection.position;
-        const nextPos = deflectionPreview[i + 1].position;
+        const nextPos = deflectionPath[i + 1].position;
+
         let width = Math.abs(nextPos.x - currentPos.x + nextPos.y - currentPos.y) * cellSize;
-        if (i === deflectionPreview.length - 2) {
+        if (i === deflectionPath.length - 2) {
             width -= cellSize * 0.45;
         }
 
         return <View
+            pointerEvents='none'
             key={`line_${currentPos.x}_${currentPos.y}_${i}`}
             style={{
                 width: 0,

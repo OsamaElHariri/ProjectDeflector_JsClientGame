@@ -12,10 +12,10 @@ export interface Game {
     gameBoard: GameBoard
     playerTurn: string
     variants: PlayerVariants
-    deflectionSource: Position
     targetScore: number
     matchPointPlayers: MatchPointPlayers
     colors: { [playerId: string]: string }
+    deflections: Deflection[]
 }
 
 export interface DeflectionEvent {
