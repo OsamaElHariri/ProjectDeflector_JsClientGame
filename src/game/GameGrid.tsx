@@ -8,6 +8,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { LONG_PRESS_DELAY } from '../constants';
 import PressIndicator from '../gesture_feedback/PressIndicator';
+import { usePlayer } from '../main_providers/player_provider';
 import { GestureState } from '../types/uiTypes';
 import BallPathPreview from './BallPathPreview';
 import GameService from './gameService';
@@ -28,8 +29,9 @@ const startAnimation = async (animation: { start: Function }) => {
 
 const GameGrid = ({ gridSize }: Props) => {
     const theme = useTheme();
+    const player = usePlayer();
     const { state, updateState } = useGameState();
-    const { game: { gameBoard: { pawns, xMax, yMax } }, allDeflections } = state;
+    const { game: { playerTurn, gameBoard: { pawns, xMax, yMax } }, allDeflections } = state;
     const posAnim = useRef(new Animated.ValueXY()).current;
     const gestureHandlers = useRef<{ [key: string]: BehaviorSubject<GestureState> }>({})
 
@@ -79,7 +81,7 @@ const GameGrid = ({ gridSize }: Props) => {
                 await startAnimation(Animated.sequence(animations));
             }
         })();
-    }, [allDeflections])
+    }, [allDeflections]);
 
     const rows = xMax + 1;
     const rowsWithPadding = rows + 1;
@@ -130,6 +132,7 @@ const GameGrid = ({ gridSize }: Props) => {
         gestureHandlers.current[key].next({
             ...gestureHandlers.current[key].value,
             isHeld: false,
+            isEnabled: false,
             isPressTriggered: false,
             isLongPressTriggered: true
         });
@@ -216,6 +219,24 @@ const GameGrid = ({ gridSize }: Props) => {
             {columns}
         </View>
     });
+
+    useEffect(() => {
+        pawns.forEach((pawnRow, rowIdx) => pawnRow.forEach((pawn, colIdx) => {
+            const key = `cell_${rowIdx}_${colIdx}`;
+
+            if (pawn.name === '' && playerTurn === player?.id) {
+                gestureHandlers.current[key].next({
+                    ...gestureHandlers.current[key].value,
+                    isEnabled: true
+                });
+            } else {
+                gestureHandlers.current[key].next({
+                    ...gestureHandlers.current[key].value,
+                    isEnabled: false
+                });
+            }
+        }))
+    }, [playerTurn])
 
     const ballDiameter = 30;
     return (
