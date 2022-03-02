@@ -61,6 +61,7 @@ export default class GameService {
         });
         return {
             ...json,
+            deflections: json.deflections.map(this.parseDeflection),
             newPawn: this.parsePawn(json.newPawn),
         };
     }

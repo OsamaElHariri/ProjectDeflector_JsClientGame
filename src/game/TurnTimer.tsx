@@ -68,6 +68,7 @@ const TurnTimer = ({ playerId }: Props) => {
             allDeflections,
             previewPawn: undefined,
             deflectionPreview: undefined,
+            currentTurnDeflections: undefined,
             game: {
                 ...state.game,
                 ...remainingUpdates,

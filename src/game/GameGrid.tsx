@@ -102,6 +102,7 @@ const GameGrid = ({ gridSize }: Props) => {
         updateState({
             ...state,
             previewPawn: undefined,
+            currentTurnDeflections: res.deflections,
             game: {
                 ...state.game,
                 variants: res.variants,

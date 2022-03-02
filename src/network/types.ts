@@ -1,4 +1,4 @@
-import { PlayerVariants } from "../game/types"
+import { Deflection, PlayerVariants } from "../game/types"
 import { Pawn, ScoreBoard } from "../types/types"
 
 type WsMatchFound = {
@@ -12,6 +12,7 @@ export type AddPawn = {
     scoreBoard: ScoreBoard,
     variants: PlayerVariants,
     newPawn: Pawn
+    deflections: Deflection[]
 }
 
 type WsAddPawn = {

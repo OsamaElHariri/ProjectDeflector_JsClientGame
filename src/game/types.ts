@@ -33,6 +33,7 @@ export interface GameState {
     game: Game
     winner: string
     allDeflections: Deflection[][]
+    currentTurnDeflections?: Deflection[]
     deflectionPreview?: Deflection[]
     previewPawn?: Pawn
 }

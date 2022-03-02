@@ -77,9 +77,9 @@ interface Props {
 }
 
 const BallPathPreview = ({ cellSize }: Props) => {
-    const { state: { deflectionPreview, game: { deflections } } } = useGameState();
+    const { state: { deflectionPreview, currentTurnDeflections, game: { deflections } } } = useGameState();
 
-    const deflectionPath = deflectionPreview || deflections;
+    const deflectionPath = deflectionPreview || currentTurnDeflections || deflections;
 
     const getRotationDegrees = (direction: Direction) => {
         if (direction === 'UP') return '90deg';
