@@ -2,7 +2,7 @@ import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useRef } from 'react';
 import {
     Animated,
-    TouchableWithoutFeedback,
+    Pressable,
     View,
 } from 'react-native';
 import { BehaviorSubject } from 'rxjs';
@@ -130,6 +130,7 @@ const GameGrid = ({ gridSize }: Props) => {
         gestureHandlers.current[key].next({
             ...gestureHandlers.current[key].value,
             isHeld: false,
+            isPressTriggered: false,
             isLongPressTriggered: true
         });
         addPawn(x, y);
@@ -139,7 +140,8 @@ const GameGrid = ({ gridSize }: Props) => {
         gestureHandlers.current[key].next({
             ...gestureHandlers.current[key].value,
             isHeld: false,
-            isPressTriggered: true
+            isPressTriggered: true,
+            isLongPressTriggered: false
         });
         peek(x, y);
     }
@@ -179,35 +181,35 @@ const GameGrid = ({ gridSize }: Props) => {
                     isEnabled: true,
                     isHeld: false,
                     isLongPressTriggered: false,
-                    isPressTriggered: false
+                    isPressTriggered: false,
                 });
             }
 
             const canPress = pawn.name === '';
             const canLongPress = pawn.name === '' || isPreview;
 
-            return <TouchableWithoutFeedback
-                key={key}
-                delayLongPress={LONG_PRESS_DELAY}
-                onPress={canPress ? (() => onPress(key, colIdx, rowIdx)) : undefined}
-                onLongPress={canLongPress ? (() => onLongPress(key, colIdx, rowIdx)) : undefined}
-                onPressIn={() => onPressIn(key)}
-                onPressOut={() => onPressOut(key)}
-            >
-                <View style={{
-                    borderColor: theme.colors.text,
-                    borderTopWidth: rowIdx === 0 ? gridBorder * 2 : gridBorder,
-                    borderLeftWidth: colIdx === 0 ? gridBorder * 2 : gridBorder,
-                    borderBottomWidth: rowIdx === rows - 1 ? gridBorder * 2 : gridBorder,
-                    borderRightWidth: colIdx === cols - 1 ? gridBorder * 2 : gridBorder,
-                    flex: 1
-                }}>
+            return <View key={key} style={{
+                borderColor: theme.colors.text,
+                borderTopWidth: rowIdx === 0 ? gridBorder * 2 : gridBorder,
+                borderLeftWidth: colIdx === 0 ? gridBorder * 2 : gridBorder,
+                borderBottomWidth: rowIdx === rows - 1 ? gridBorder * 2 : gridBorder,
+                borderRightWidth: colIdx === cols - 1 ? gridBorder * 2 : gridBorder,
+                flex: 1
+            }}>
+                <Pressable
+                    style={{ width: '100%', height: '100%' }}
+                    delayLongPress={LONG_PRESS_DELAY}
+                    onPress={canPress ? (() => onPress(key, colIdx, rowIdx)) : undefined}
+                    onLongPress={canLongPress ? (() => onLongPress(key, colIdx, rowIdx)) : undefined}
+                    onPressIn={() => onPressIn(key)}
+                    onPressOut={() => onPressOut(key)}
+                >
                     <PressIndicator gestureStateObservable={gestureHandlers.current[key]} bounceAnim={bounceAnim} />
                     <View style={{ opacity: isPreview ? 0.4 : 1 }}>
                         <PawnVisual durability={pawn.durability} variant={pawn.name}></PawnVisual>
                     </View>
-                </View>
-            </TouchableWithoutFeedback>
+                </Pressable>
+            </View>
         });
 
         return <View key={`grid_${rowIdx}`} style={{ display: 'flex', flexDirection: 'row', flex: 1, width: '100%', height: '100%' }}>

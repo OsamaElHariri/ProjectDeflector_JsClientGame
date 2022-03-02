@@ -3,8 +3,8 @@ import React from 'react';
 
 import {
     Image,
+    Pressable,
     Text,
-    TouchableWithoutFeedback,
     View,
 } from 'react-native';
 import GameService from './gameService';
@@ -36,7 +36,7 @@ const ShuffleButton = ({ width, playerId }: Props) => {
         });
     }
 
-    return <TouchableWithoutFeedback onPress={shuffle}>
+    return <Pressable onPress={shuffle}>
         <View style={{ display: 'flex', alignItems: 'center', paddingTop: 8, paddingBottom: 16 }}>
             <View style={{ width: width, height: width * 0.4 }}>
                 <Image source={require('./assets/shuffle.png')} style={{
@@ -48,7 +48,7 @@ const ShuffleButton = ({ width, playerId }: Props) => {
             </View>
             <Text style={{ fontWeight: 'bold', color: theme.colors.text, paddingTop: 8 }}>Shuffle</Text>
         </View>
-    </TouchableWithoutFeedback>
+    </Pressable>
 }
 
 export default ShuffleButton;

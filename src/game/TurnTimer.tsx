@@ -1,12 +1,10 @@
-import Svg, { Text, TSpan } from "react-native-svg";
 import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useRef } from 'react';
 import {
     Animated,
     Easing,
-    Image,
+    Pressable,
     StyleSheet,
-    TouchableWithoutFeedback,
     View,
 } from 'react-native';
 import { usePlayer } from '../main_providers/player_provider';
@@ -125,7 +123,7 @@ const TurnTimer = ({ playerId }: Props) => {
     }, [colorAnim, timerIcon]);
 
     return (
-        <TouchableWithoutFeedback onPress={playerTurn === playerId ? onPress : undefined}>
+        <Pressable onPress={playerTurn === playerId ? onPress : undefined}>
             <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
                 <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
                     <Animated.View style={{ width: '100%', height: '100%', backgroundColor: theme.colors.text, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
@@ -138,7 +136,7 @@ const TurnTimer = ({ playerId }: Props) => {
                 </View>
                 <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
             </View>
-        </TouchableWithoutFeedback>
+        </Pressable>
     );
 };
 
