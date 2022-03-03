@@ -44,48 +44,11 @@ const TurnTimer = ({ playerId }: Props) => {
             playerSide: playerId,
         });
 
-        const { allDeflections, winner, ...gameUpdates } = res;
-        const { game: { gameBoard: { pawns } } } = state;
-
-        allDeflections.forEach(deflections => {
-            deflections.forEach((deflection, i) => {
-                if (i === 0) return;
-                if (!pawns[deflection.position.y] || !pawns[deflection.position.y][deflection.position.x]) return;
-
-                pawns[deflection.position.y][deflection.position.x].durability -= 1;
-                deflection.events.forEach(event => {
-                    if (event.name === 'DESTROY_PAWN') {
-                        pawns[event.position.y][event.position.x].name = '';
-                    }
-                });
-            });
-        });
-        const { scoreBoard, ...remainingUpdates } = gameUpdates;
-
-        updateState({
-            ...state,
-            winner,
-            allDeflections,
-            previewPawn: undefined,
-            deflectionPreview: undefined,
-            currentTurnDeflections: undefined,
-            game: {
-                ...state.game,
-                ...remainingUpdates,
-                gameBoard: {
-                    ...state.game.gameBoard,
-                    scoreBoard
-                }
-            },
-        });
+        updateState.onEndTurn(res);
     }
 
     const cancelPawn = () => {
-        updateState({
-            ...state,
-            previewPawn: undefined,
-            deflectionPreview: undefined,
-        });
+        updateState.onCancelPeek();
     }
 
     const onPress = () => {

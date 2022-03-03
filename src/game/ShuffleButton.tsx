@@ -27,13 +27,7 @@ const ShuffleButton = ({ width, playerId }: Props) => {
             x: 0,
             y: 0
         });
-        updateState({
-            ...state,
-            game: {
-                ...state.game,
-                variants: res.variants
-            }
-        });
+        updateState.onShuffle(res);
     }
 
     return <Pressable onPress={shuffle}>

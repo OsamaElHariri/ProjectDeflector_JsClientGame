@@ -1,7 +1,7 @@
 import ApiClient from "../network/apiClient";
-import { AddPawn } from "../network/types";
-import { Pawn, PawnVariant, ScoreBoard } from "../types/types";
-import { Deflection, Game, MatchPointPlayers, PlayerVariants } from "./types";
+import { AddPawnResponse, EndTurnResponse, PeekResponse, ShuffleResponse } from "../network/types";
+import { Pawn, PawnVariant } from "../types/types";
+import { Deflection, Game } from "./types";
 
 export default class GameService {
 
@@ -51,11 +51,13 @@ export default class GameService {
         };
     }
 
-    async addPawn(req: { gameId: string, x: number, y: number, playerSide: string })
-        : Promise<AddPawn> {
-
+    async addPawn(req: { gameId: string, x: number, y: number, playerSide: string }): Promise<AddPawnResponse> {
         const res = await (new ApiClient).post(`/game/pawn`, req);
         const json = await res.json();
+        return this.parseAddPawnResponse(json);
+    }
+
+    parseAddPawnResponse(json: any): AddPawnResponse {
         Object.keys(json.variants).forEach(playerId => {
             json.variants[playerId] = json.variants[playerId].map((v: string) => v.toUpperCase() as PawnVariant);
         });
@@ -66,19 +68,13 @@ export default class GameService {
         };
     }
 
-    async endTurn(req: { gameId: string, playerSide: string })
-        : Promise<{
-            scoreBoard: ScoreBoard,
-            variants: PlayerVariants,
-            playerTurn: string,
-            allDeflections: Deflection[][],
-            winner: string,
-            matchPointPlayers: MatchPointPlayers,
-            deflections: Deflection[],
-        }> {
-
+    async endTurn(req: { gameId: string, playerSide: string }): Promise<EndTurnResponse> {
         const res = await (new ApiClient).post(`/game/turn`, req);
         const json = await res.json();
+        return this.parseEndTurnResponse(json);
+    }
+
+    parseEndTurnResponse(json: any): EndTurnResponse {
         Object.keys(json.variants).forEach(playerId => {
             json.variants[playerId] = json.variants[playerId].map((v: string) => v.toUpperCase() as PawnVariant);
         });
@@ -91,16 +87,13 @@ export default class GameService {
         };
     }
 
-    async shuffle(req: { gameId: string, x: number, y: number, hasPeek: boolean, playerSide: string })
-        : Promise<{
-            hasPeek: boolean,
-            variants: PlayerVariants,
-            newPawn: Pawn
-            deflections: Deflection[]
-        }> {
-
+    async shuffle(req: { gameId: string, x: number, y: number, hasPeek: boolean, playerSide: string }): Promise<ShuffleResponse> {
         const res = await (new ApiClient).post(`/game/shuffle`, req);
         const json = await res.json();
+        return this.parseShuffleResponse(json);
+    }
+
+    parseShuffleResponse(json: any): ShuffleResponse {
         Object.keys(json.variants).forEach(playerId => {
             json.variants[playerId] = json.variants[playerId].map((v: string) => v.toUpperCase() as PawnVariant);
         });
@@ -111,14 +104,13 @@ export default class GameService {
         };
     }
 
-    async peek(req: { gameId: string, x: number, y: number, playerSide: string })
-        : Promise<{
-            newPawn: Pawn
-            deflections: Deflection[]
-        }> {
-
+    async peek(req: { gameId: string, x: number, y: number, playerSide: string }): Promise<PeekResponse> {
         const res = await (new ApiClient).post(`/game/peek`, req);
         const json = await res.json();
+        return this.parsePeekResponse(json);
+    }
+
+    parsePeekResponse(json: any): PeekResponse {
         return {
             ...json,
             newPawn: this.parsePawn(json.newPawn),

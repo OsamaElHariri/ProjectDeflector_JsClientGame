@@ -128,21 +128,7 @@ const GameGrid = ({ gridSize }: Props) => {
             x,
             y,
         });
-        state.game.gameBoard.pawns[y][x] = res.newPawn;
-        updateState({
-            ...state,
-            previewPawn: undefined,
-            currentTurnDeflections: res.deflections,
-            game: {
-                ...state.game,
-                variants: res.variants,
-                gameBoard: {
-                    ...state.game.gameBoard,
-                    scoreBoard: res.scoreBoard,
-                    pawns: [...state.game.gameBoard.pawns]
-                }
-            },
-        });
+        updateState.onAddPawn(res);
     }
 
     const peek = async (x: number, y: number) => {
@@ -152,11 +138,7 @@ const GameGrid = ({ gridSize }: Props) => {
             x,
             y,
         });
-        updateState({
-            ...state,
-            deflectionPreview: res.deflections,
-            previewPawn: res.newPawn
-        });
+        updateState.onPeek(res);
     }
 
     const onLongPress = (key: string, x: number, y: number) => {
