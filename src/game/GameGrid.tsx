@@ -2,6 +2,7 @@ import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useRef } from 'react';
 import {
     Animated,
+    Easing,
     Pressable,
     View,
 } from 'react-native';
@@ -32,7 +33,6 @@ const GameGrid = ({ gridSize }: Props) => {
     const player = usePlayer();
     const { state, updateState } = useGameState();
     const { game: { playerTurn, gameBoard: { pawns, xMax, yMax } }, allDeflections } = state;
-    const posAnim = useRef(new Animated.ValueXY()).current;
     const gestureHandlers = useRef<{ [key: string]: BehaviorSubject<GestureState> }>({})
 
     const bounceAnim = useRef(new Animated.Value(0.5)).current;
@@ -61,23 +61,53 @@ const GameGrid = ({ gridSize }: Props) => {
         ).start();
     }, [bounceAnim]);
 
+
+    const posAnim = useRef(new Animated.ValueXY()).current;
+    const ballScaleAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
         if (allDeflections.length === 0) return;
 
         (async () => {
+            const expandBall = Animated.timing(
+                ballScaleAnim,
+                {
+                    toValue: 1,
+                    easing: Easing.elastic(1),
+                    duration: 300,
+                    useNativeDriver: true,
+                }
+            );
+
+            const shrinkBall = Animated.timing(
+                ballScaleAnim,
+                {
+                    toValue: 0,
+                    easing: Easing.back(1),
+                    duration: 200,
+                    useNativeDriver: true,
+                }
+            );
+
             for (let i = 0; i < allDeflections.length; i++) {
                 const deflections = allDeflections[i];
                 posAnim.setValue(deflections[0].position);
-                const animations = deflections.map(deflection => (
-                    Animated.timing(
+                const animations = deflections.map((deflection, idx) => {
+                    const anim = Animated.timing(
                         posAnim,
                         {
                             toValue: deflection.position,
                             duration: 200,
                             useNativeDriver: true
                         }
-                    )
-                ));
+                    );
+                    if (idx === 0) {
+                        return Animated.parallel([anim, expandBall]);
+                    } else if (idx === deflections.length - 1) {
+                        return Animated.parallel([anim, shrinkBall]);
+                    } else {
+                        return anim;
+                    }
+                });
                 await startAnimation(Animated.sequence(animations));
             }
         })();
@@ -258,7 +288,8 @@ const GameGrid = ({ gridSize }: Props) => {
                     backgroundColor: 'black',
                     transform: [
                         { translateX: Animated.multiply(posAnim.x, cellSize) },
-                        { translateY: Animated.multiply(posAnim.y, cellSize) }
+                        { translateY: Animated.multiply(posAnim.y, cellSize) },
+                        { scale: ballScaleAnim }
                     ]
                 }}></Animated.View>
             </View>
