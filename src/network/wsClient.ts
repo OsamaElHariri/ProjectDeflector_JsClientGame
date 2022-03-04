@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { GameWsEvent } from './types';
 
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
@@ -12,34 +12,82 @@ export default class WsClient {
     private connectionStatusSubject: Subject<ConnectionStatus>;
     private connectionStatus: ConnectionStatus = 'disconnected';
 
+    private maxSilenceTimeout = 15000;
+    private initialReconnectionTimeout = 500;
+    private reconnectionTimeout = 0;
+
 
     constructor() {
+        this.reconnectionTimeout = this.initialReconnectionTimeout;
         this.eventSubject = new Subject();
         this.sendSubject = new Subject();
         this.connectionStatusSubject = new Subject();
     }
 
     connect(playerId: string) {
-        this.client = new WebSocket(this.baseUrl + '/realtime/ws/' + playerId);
-        this.updateConnectionStatus('connecting');
-        this.client.addEventListener('message', (evt) => {
-            if (evt.data) {
-                this.eventSubject.next(JSON.parse(evt.data));
-            }
-        });
+        const client = new WebSocket(this.baseUrl + '/realtime/ws/' + playerId);
 
-        this.client.addEventListener('open', () => {
+        let shouldAttemptToReconnect = true;
+        const attemptReconnect = () => {
+            if (!shouldAttemptToReconnect) return;
+            shouldAttemptToReconnect = false;
+            setTimeout(() => this.connect(playerId), this.reconnectionTimeout);
+        };
+
+        this.client = client;
+        this.updateConnectionStatus('connecting');
+
+        let sendSubscription: Subscription | undefined;
+        const onOpen = () => {
+            this.reconnectionTimeout = this.initialReconnectionTimeout;
             this.updateConnectionStatus('connected');
-            this.sendSubject.subscribe(data => {
+
+            sendSubscription = this.sendSubject.subscribe(data => {
                 if (this.connectionStatus === 'connected') {
                     this.client?.send(JSON.stringify(data));
                 }
             });
-        });
+        };
+        client.addEventListener('open', onOpen);
 
-        this.client.addEventListener('close', () => {
+        let closed = false;
+        let lastMsgTime = new Date().getTime();
+
+        const onClose = () => {
+            closed = true;
+            lastMsgTime = 0;
             this.updateConnectionStatus('disconnected');
-        });
+            attemptReconnect();
+        };
+        client.addEventListener('close', onClose);
+
+        const onMessage = (evt: WebSocketMessageEvent) => {
+            lastMsgTime = new Date().getTime();
+            if (evt.data) {
+                this.eventSubject.next(JSON.parse(evt.data));
+            }
+        }
+        client.addEventListener('message', onMessage);
+
+        const interval = setInterval(() => {
+            const msgDiff = new Date().getTime() - lastMsgTime;
+
+            if (msgDiff > this.maxSilenceTimeout) {
+                this.reconnectionTimeout = Math.min(this.maxSilenceTimeout, this.reconnectionTimeout * 2);
+                clearInterval(interval);
+                client.removeEventListener('open', onOpen);
+                client.removeEventListener('message', onMessage);
+                client.removeEventListener('close', onClose);
+                
+                sendSubscription?.unsubscribe();
+                client.close();
+                attemptReconnect();
+            } else if (!closed) {
+                this.send({
+                    relay: '/realtime/status'
+                });
+            }
+        }, 5000);
     }
 
     private updateConnectionStatus(status: ConnectionStatus) {
