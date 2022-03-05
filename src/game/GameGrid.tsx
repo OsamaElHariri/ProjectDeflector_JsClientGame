@@ -10,14 +10,28 @@ import { BehaviorSubject } from 'rxjs';
 import { LONG_PRESS_DELAY } from '../constants';
 import PressIndicator from '../gesture_feedback/PressIndicator';
 import { usePlayer } from '../main_providers/player_provider';
+import { Pawn } from '../types/types';
 import { GestureState } from '../types/uiTypes';
 import BallPathPreview from './BallPathPreview';
 import GameService from './gameService';
 import { useGameState } from './game_state_provider';
 import PawnVisual from './PawnVisual';
+import { Deflection } from './types';
 
 interface Props {
     gridSize: number
+}
+
+const updatePawns = (deflection: Deflection, pawns: Pawn[][]): Pawn[][] => {
+    if (!pawns[deflection.position.y] || !pawns[deflection.position.y][deflection.position.x]) return pawns;
+
+    pawns[deflection.position.y][deflection.position.x].durability -= 1;
+    deflection.events.forEach(event => {
+        if (event.name === 'DESTROY_PAWN') {
+            pawns[event.position.y][event.position.x].name = '';
+        }
+    });
+    return [...pawns];
 }
 
 const startAnimation = async (animation: { start: Function }) => {
@@ -32,7 +46,7 @@ const GameGrid = ({ gridSize }: Props) => {
     const theme = useTheme();
     const player = usePlayer();
     const { state, updateState } = useGameState();
-    const { game: { playerTurn, gameBoard: { pawns, xMax, yMax } }, allDeflections } = state;
+    const { deflectionProcessing, game: { playerTurn, gameBoard: { pawns, xMax, yMax } }, allDeflections } = state;
     const gestureHandlers = useRef<{ [key: string]: BehaviorSubject<GestureState> }>({})
 
     const bounceAnim = useRef(new Animated.Value(0.5)).current;
@@ -64,54 +78,70 @@ const GameGrid = ({ gridSize }: Props) => {
 
     const posAnim = useRef(new Animated.ValueXY()).current;
     const ballScaleAnim = useRef(new Animated.Value(0)).current;
+
+    const expandBall = Animated.timing(
+        ballScaleAnim,
+        {
+            toValue: 1,
+            easing: Easing.elastic(1),
+            duration: 300,
+            useNativeDriver: true,
+        }
+    );
+
+    const shrinkBall = Animated.timing(
+        ballScaleAnim,
+        {
+            toValue: 0,
+            easing: Easing.back(1),
+            duration: 200,
+            useNativeDriver: true,
+        }
+    );
+
     useEffect(() => {
-        if (allDeflections.length === 0) return;
+        if (
+            !deflectionProcessing.isActive
+            || deflectionProcessing.allDeflectionsIndex >= allDeflections.length
+            || allDeflections[deflectionProcessing.allDeflectionsIndex].length === 0
+        ) return;
 
+        const deflections = allDeflections[deflectionProcessing.allDeflectionsIndex];
+
+        if (deflections.length > 0) {
+            posAnim.setValue(deflections[0].position)
+        }
         (async () => {
-            const expandBall = Animated.timing(
-                ballScaleAnim,
-                {
-                    toValue: 1,
-                    easing: Easing.elastic(1),
-                    duration: 300,
-                    useNativeDriver: true,
-                }
-            );
+            for (let i = 0; i < deflections.length; i++) {
+                const deflection = deflections[i];
 
-            const shrinkBall = Animated.timing(
-                ballScaleAnim,
-                {
-                    toValue: 0,
-                    easing: Easing.back(1),
-                    duration: 200,
-                    useNativeDriver: true,
-                }
-            );
-
-            for (let i = 0; i < allDeflections.length; i++) {
-                const deflections = allDeflections[i];
-                posAnim.setValue(deflections[0].position);
-                const animations = deflections.map((deflection, idx) => {
-                    const anim = Animated.timing(
-                        posAnim,
-                        {
-                            toValue: deflection.position,
-                            duration: 200,
-                            useNativeDriver: true
-                        }
-                    );
-                    if (idx === 0) {
-                        return Animated.parallel([anim, expandBall]);
-                    } else if (idx === deflections.length - 1) {
-                        return Animated.parallel([anim, shrinkBall]);
-                    } else {
-                        return anim;
+                let anim = Animated.timing(
+                    posAnim,
+                    {
+                        toValue: deflection.position,
+                        duration: 200,
+                        useNativeDriver: true
                     }
-                });
-                await startAnimation(Animated.sequence(animations));
+                );
+
+                if (i === 0) {
+                    anim = Animated.parallel([anim, expandBall]);
+                } else if (i === deflections.length - 1) {
+                    anim = Animated.parallel([anim, shrinkBall]);
+                }
+
+                await startAnimation(anim);
+                const updatedPawns = updatePawns(deflection, pawns);
+                updateState.updatePawns(updatedPawns);
             }
+
+            const nextIndex = deflectionProcessing.allDeflectionsIndex + 1;
+            updateState.updateDeflectionProcessing({
+                isActive: nextIndex < allDeflections.length,
+                allDeflectionsIndex: Math.min(nextIndex, allDeflections.length)
+            });
         })();
-    }, [allDeflections]);
+    }, [deflectionProcessing.isActive, deflectionProcessing.allDeflectionsIndex]);
 
     const rows = xMax + 1;
     const rowsWithPadding = rows + 1;

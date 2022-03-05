@@ -77,9 +77,13 @@ interface Props {
 }
 
 const BallPathPreview = ({ cellSize }: Props) => {
-    const { state: { deflectionPreview, currentTurnDeflections, game: { deflections } } } = useGameState();
+    const { state: { deflectionProcessing, allDeflections, deflectionPreview, currentTurnDeflections, game: { deflections } } } = useGameState();
 
-    const deflectionPath = deflectionPreview || currentTurnDeflections || deflections;
+    let deflectionPath = deflectionPreview || currentTurnDeflections || deflections;
+
+    if (deflectionProcessing.isActive && allDeflections[deflectionProcessing.allDeflectionsIndex]) {
+        deflectionPath = allDeflections[deflectionProcessing.allDeflectionsIndex];
+    }
 
     const getRotationDegrees = (direction: Direction) => {
         if (direction === 'UP') return '90deg';

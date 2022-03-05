@@ -18,26 +18,15 @@ export function GameStateProvider({ children, game }: Props) {
         game,
         allDeflections: [],
         winner: '',
+        deflectionProcessing: {
+            isActive: false,
+            allDeflectionsIndex: 0,
+        }
     });
 
     const gameStateUpdate: GameStateUpdate = {
         onEndTurn: (res) => {
             const { allDeflections, winner, ...gameUpdates } = res;
-            const { game: { gameBoard: { pawns } } } = currentState;
-
-            allDeflections.forEach(deflections => {
-                deflections.forEach((deflection, i) => {
-                    if (i === 0) return;
-                    if (!pawns[deflection.position.y] || !pawns[deflection.position.y][deflection.position.x]) return;
-
-                    pawns[deflection.position.y][deflection.position.x].durability -= 1;
-                    deflection.events.forEach(event => {
-                        if (event.name === 'DESTROY_PAWN') {
-                            pawns[event.position.y][event.position.x].name = '';
-                        }
-                    });
-                });
-            });
             const { scoreBoard, ...remainingUpdates } = gameUpdates;
 
             setCurrentState({
@@ -46,6 +35,7 @@ export function GameStateProvider({ children, game }: Props) {
                 allDeflections,
                 previewPawn: undefined,
                 deflectionPreview: undefined,
+                currentTurnDeflections: res.deflections,
                 game: {
                     ...currentState.game,
                     ...remainingUpdates,
@@ -54,6 +44,10 @@ export function GameStateProvider({ children, game }: Props) {
                         scoreBoard
                     }
                 },
+                deflectionProcessing: {
+                    isActive: true,
+                    allDeflectionsIndex: 0
+                }
             });
         },
 
@@ -64,6 +58,7 @@ export function GameStateProvider({ children, game }: Props) {
             setCurrentState({
                 ...currentState,
                 previewPawn: undefined,
+                deflectionPreview: undefined,
                 currentTurnDeflections: res.deflections,
                 game: {
                     ...currentState.game,
@@ -92,6 +87,25 @@ export function GameStateProvider({ children, game }: Props) {
                 ...currentState,
                 deflectionPreview: res.deflections,
                 previewPawn: res.newPawn
+            });
+        },
+
+        updatePawns: (pawns) => {
+            setCurrentState({
+                ...currentState,
+                game: {
+                    ...currentState.game,
+                    gameBoard: {
+                        ...currentState.game.gameBoard,
+                        pawns
+                    }
+                }
+            });
+        },
+        updateDeflectionProcessing: (deflectionProcessing) => {
+            setCurrentState({
+                ...currentState,
+                deflectionProcessing
             });
         },
 

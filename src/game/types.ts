@@ -29,6 +29,11 @@ export interface Deflection {
     events: DeflectionEvent[]
 }
 
+export interface DeflectionProcessing {
+    isActive: Boolean
+    allDeflectionsIndex: number
+}
+
 export interface GameState {
     game: Game
     winner: string
@@ -36,4 +41,5 @@ export interface GameState {
     currentTurnDeflections?: Deflection[]
     deflectionPreview?: Deflection[]
     previewPawn?: Pawn
+    deflectionProcessing: DeflectionProcessing
 }
