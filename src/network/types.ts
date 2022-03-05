@@ -1,26 +1,26 @@
 import { Deflection, MatchPointPlayers, PlayerVariants } from "../game/types"
 import { Pawn, ScoreBoard } from "../types/types"
 
-type WsMatchFound = {
+interface WsMatchFound {
     event: 'match_found'
     payload: {
         id: string
     }
 }
 
-export type AddPawnResponse = {
+export interface AddPawnResponse {
     scoreBoard: ScoreBoard,
     variants: PlayerVariants,
     newPawn: Pawn
     deflections: Deflection[]
 }
 
-type WsAddPawn = {
+interface WsAddPawn {
     event: 'pawn'
     payload: AddPawnResponse
 }
 
-export type EndTurnResponse = {
+export interface EndTurnResponse {
     scoreBoard: ScoreBoard,
     variants: PlayerVariants,
     playerTurn: string,
@@ -30,29 +30,29 @@ export type EndTurnResponse = {
     deflections: Deflection[],
 }
 
-type WsEndTurn = {
+interface WsEndTurn {
     event: 'turn'
     payload: EndTurnResponse
 }
 
-export type ShuffleResponse = {
+export interface ShuffleResponse {
     hasPeek: boolean,
     variants: PlayerVariants,
     newPawn: Pawn
     deflections: Deflection[]
 }
 
-type WsShuffle = {
+interface WsShuffle {
     event: 'shuffle'
     payload: ShuffleResponse
 }
 
-export type PeekResponse = {
+export interface PeekResponse {
     newPawn: Pawn
     deflections: Deflection[]
 }
 
-type WsPeek = {
+interface WsPeek {
     event: 'peek'
     payload: PeekResponse
 }
