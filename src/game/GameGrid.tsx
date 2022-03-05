@@ -1,21 +1,13 @@
-import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useRef } from 'react';
 import {
     Animated,
     Easing,
-    Pressable,
     View,
 } from 'react-native';
-import { BehaviorSubject } from 'rxjs';
-import { LONG_PRESS_DELAY } from '../constants';
-import PressIndicator from '../gesture_feedback/PressIndicator';
-import { usePlayer } from '../main_providers/player_provider';
 import { Pawn } from '../types/types';
-import { GestureState } from '../types/uiTypes';
 import BallPathPreview from './BallPathPreview';
-import GameService from './gameService';
 import { useGameState } from './game_state_provider';
-import PawnVisual from './PawnVisual';
+import GridCell from './GridCell';
 import { Deflection } from './types';
 
 interface Props {
@@ -43,11 +35,8 @@ const startAnimation = async (animation: { start: Function }) => {
 }
 
 const GameGrid = ({ gridSize }: Props) => {
-    const theme = useTheme();
-    const player = usePlayer();
     const { state, updateState } = useGameState();
     const { deflectionProcessing, game: { playerTurn, gameBoard: { pawns, xMax, yMax } }, allDeflections } = state;
-    const gestureHandlers = useRef<{ [key: string]: BehaviorSubject<GestureState> }>({})
 
     const bounceAnim = useRef(new Animated.Value(0.5)).current;
     useEffect(() => {
@@ -149,137 +138,15 @@ const GameGrid = ({ gridSize }: Props) => {
 
     const cellSize = Math.min(gridSize / rowsWithPadding, gridSize / cols);
 
-    const gridBorder = 2;
-
-    const addPawn = async (x: number, y: number) => {
-        const res = await (new GameService).addPawn({
-            gameId: state.game.gameId,
-            playerSide: state.game.playerTurn,
-            x,
-            y,
-        });
-        updateState.onAddPawn(res);
-    }
-
-    const peek = async (x: number, y: number) => {
-        const res = await (new GameService).peek({
-            gameId: state.game.gameId,
-            playerSide: state.game.playerTurn,
-            x,
-            y,
-        });
-        updateState.onPeek(res);
-    }
-
-    const onLongPress = (key: string, x: number, y: number) => {
-        gestureHandlers.current[key].next({
-            ...gestureHandlers.current[key].value,
-            isHeld: false,
-            isEnabled: false,
-            isPressTriggered: false,
-            isLongPressTriggered: true
-        });
-        addPawn(x, y);
-    }
-
-    const onPress = (key: string, x: number, y: number) => {
-        gestureHandlers.current[key].next({
-            ...gestureHandlers.current[key].value,
-            isHeld: false,
-            isPressTriggered: true,
-            isLongPressTriggered: false
-        });
-        peek(x, y);
-    }
-
-    const onPressIn = (key: string) => {
-        gestureHandlers.current[key].next({
-            ...gestureHandlers.current[key].value,
-            isHeld: true,
-            isLongPressTriggered: false,
-            isPressTriggered: false
-        });
-    }
-
-    const onPressOut = (key: string) => {
-        if (!gestureHandlers.current[key].value.isHeld) return;
-        gestureHandlers.current[key].next({
-            ...gestureHandlers.current[key].value,
-            isHeld: false,
-        });
-    }
-
     const grid = Array(rows).fill(undefined).map((_, rowIdx) => {
         const columns = Array(cols).fill(undefined).map((_, colIdx) => {
-            let pawn = pawns[rowIdx][colIdx];
-            let isPreview = false;
-            if (pawn.name === '' && state.previewPawn) {
-                const previewPos = state.previewPawn.position;
-                if (previewPos.x === colIdx && previewPos.y === rowIdx) {
-                    isPreview = true;
-                    pawn = state.previewPawn;
-                }
-            }
-
-            const key = `cell_${rowIdx}_${colIdx}`;
-            if (!gestureHandlers.current[key]) {
-                gestureHandlers.current[key] = new BehaviorSubject<GestureState>({
-                    isEnabled: true,
-                    isHeld: false,
-                    isLongPressTriggered: false,
-                    isPressTriggered: false,
-                });
-            }
-
-            const canPress = pawn.name === '';
-            const canLongPress = pawn.name === '' || isPreview;
-
-            return <View key={key} style={{
-                borderColor: theme.colors.text,
-                borderTopWidth: rowIdx === 0 ? gridBorder * 2 : gridBorder,
-                borderLeftWidth: colIdx === 0 ? gridBorder * 2 : gridBorder,
-                borderBottomWidth: rowIdx === rows - 1 ? gridBorder * 2 : gridBorder,
-                borderRightWidth: colIdx === cols - 1 ? gridBorder * 2 : gridBorder,
-                flex: 1
-            }}>
-                <Pressable
-                    style={{ width: '100%', height: '100%' }}
-                    delayLongPress={LONG_PRESS_DELAY}
-                    onPress={canPress ? (() => onPress(key, colIdx, rowIdx)) : undefined}
-                    onLongPress={canLongPress ? (() => onLongPress(key, colIdx, rowIdx)) : undefined}
-                    onPressIn={() => onPressIn(key)}
-                    onPressOut={() => onPressOut(key)}
-                >
-                    <PressIndicator gestureStateObservable={gestureHandlers.current[key]} bounceAnim={bounceAnim} />
-                    <View style={{ opacity: isPreview ? 0.4 : 1 }}>
-                        <PawnVisual durability={pawn.durability} variant={pawn.name}></PawnVisual>
-                    </View>
-                </Pressable>
-            </View>
+            return <GridCell key={`cell_${rowIdx}_${colIdx}`} colIdx={colIdx} rowIdx={rowIdx} bounceAnim={bounceAnim} />
         });
 
         return <View key={`grid_${rowIdx}`} style={{ display: 'flex', flexDirection: 'row', flex: 1, width: '100%', height: '100%' }}>
             {columns}
         </View>
     });
-
-    useEffect(() => {
-        pawns.forEach((pawnRow, rowIdx) => pawnRow.forEach((pawn, colIdx) => {
-            const key = `cell_${rowIdx}_${colIdx}`;
-
-            if (pawn.name === '' && playerTurn === player?.id) {
-                gestureHandlers.current[key].next({
-                    ...gestureHandlers.current[key].value,
-                    isEnabled: true
-                });
-            } else {
-                gestureHandlers.current[key].next({
-                    ...gestureHandlers.current[key].value,
-                    isEnabled: false
-                });
-            }
-        }))
-    }, [playerTurn])
 
     const ballDiameter = 30;
     return (
