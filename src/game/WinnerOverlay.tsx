@@ -1,5 +1,5 @@
 import { useNavigation, useTheme } from '@react-navigation/native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
     Button,
@@ -9,14 +9,31 @@ import {
 } from 'react-native';
 import { usePlayer } from '../main_providers/player_provider';
 import { AppNavigation } from '../types/uiTypes';
+import { shouldUpdate } from './diffWatcher';
 import { useGameState } from './game_state_provider';
 
 const WinnerOverlay = () => {
     const theme = useTheme();
     const player = usePlayer();
-    const { state: { winner } } = useGameState();
+    const { stateSubject } = useGameState();
     const nav = useNavigation<AppNavigation>();
 
+    const [state, setState] = useState({
+        winner: stateSubject.value.winner
+    });
+
+    useEffect(() => {
+        const sub = stateSubject.subscribe(({ winner }) => {
+            const newState = { winner };
+            if (shouldUpdate(newState, state)) {
+                setState(newState);
+            }
+        });
+
+        return () => sub.unsubscribe();
+    }, [state]);
+
+    const winner = state.winner;
     if (!winner) {
         return <View></View>
     }

@@ -1,11 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Easing,
     View,
 } from 'react-native';
+import { shouldUpdate } from './diffWatcher';
 import { useGameState } from './game_state_provider';
-import { Direction } from './types';
+import { Direction, GameState } from './types';
 
 interface LineProps {
     width: number
@@ -77,13 +78,31 @@ interface Props {
 }
 
 const BallPathPreview = ({ cellSize }: Props) => {
-    const { state: { deflectionProcessing, allDeflections, deflectionPreview, currentTurnDeflections, game: { deflections } } } = useGameState();
+    const { stateSubject } = useGameState();
 
-    let deflectionPath = deflectionPreview || currentTurnDeflections || deflections;
+    const getDeflections = (gameState: GameState) => {
+        let deflectionPath = gameState.deflectionPreview || gameState.currentTurnDeflections || gameState.game.deflections;
 
-    if (deflectionProcessing.isActive && allDeflections[deflectionProcessing.allDeflectionsIndex]) {
-        deflectionPath = allDeflections[deflectionProcessing.allDeflectionsIndex];
+        if (gameState.deflectionProcessing.isActive && gameState.allDeflections[gameState.deflectionProcessing.allDeflectionsIndex]) {
+            deflectionPath = gameState.allDeflections[gameState.deflectionProcessing.allDeflectionsIndex];
+        }
+        return deflectionPath;
     }
+
+    const [state, setState] = useState({
+        deflections: getDeflections(stateSubject.value)
+    });
+
+    useEffect(() => {
+        const sub = stateSubject.subscribe(gameState => {
+            const deflections = getDeflections(gameState);
+            if (shouldUpdate({ deflections }, state)) {
+                setState({ deflections });
+            }
+        });
+
+        return () => sub.unsubscribe();
+    }, [state]);
 
     const getRotationDegrees = (direction: Direction) => {
         if (direction === 'UP') return '90deg';
@@ -93,6 +112,7 @@ const BallPathPreview = ({ cellSize }: Props) => {
         return '0deg';
     }
 
+    const deflectionPath = state.deflections;
     const lines = deflectionPath.map((deflection, i) => {
         if (i === deflectionPath.length - 1) return undefined;
 

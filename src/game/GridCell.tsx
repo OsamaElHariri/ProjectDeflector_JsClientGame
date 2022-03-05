@@ -1,5 +1,5 @@
 import { useTheme } from '@react-navigation/native';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Pressable,
@@ -10,9 +10,11 @@ import { LONG_PRESS_DELAY } from '../constants';
 import PressIndicator from '../gesture_feedback/PressIndicator';
 import { usePlayer } from '../main_providers/player_provider';
 import { GestureState } from '../types/uiTypes';
+import { shouldUpdate } from './diffWatcher';
 import GameService from './gameService';
 import { useGameState } from './game_state_provider';
 import PawnVisual from './PawnVisual';
+import { GameState } from './types';
 
 interface Props {
     rowIdx: number
@@ -24,11 +26,6 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim }: Props) => {
     const theme = useTheme();
     const player = usePlayer();
 
-    const gridBorder = 2;
-
-    const { state, updateState } = useGameState();
-    const rows = state.game.gameBoard.xMax + 1;
-    const cols = state.game.gameBoard.yMax + 1;
     const gestureHandler = useRef<BehaviorSubject<GestureState>>(new BehaviorSubject<GestureState>({
         isEnabled: true,
         isHeld: false,
@@ -36,8 +33,50 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim }: Props) => {
         isPressTriggered: false,
     }));
 
+    const gridBorder = 2;
+
+    const { stateSubject, updateState } = useGameState();
+
+    const getCellPawn = ({ game: { playerTurn, gameBoard: { pawns } } }: GameState) => {
+        let pawn = pawns[rowIdx][colIdx];
+        let isPreview = false;
+        if (pawn.name === '' && stateSubject.value.previewPawn) {
+            const previewPos = stateSubject.value.previewPawn.position;
+            if (previewPos.x === colIdx && previewPos.y === rowIdx) {
+                isPreview = true;
+                pawn = stateSubject.value.previewPawn;
+            }
+        }
+        return { isPreview, pawn };
+    }
+    const { pawn, isPreview } = getCellPawn(stateSubject.value);
+
+
+    const [state, setState] = useState({
+        playerTurn: stateSubject.value.game.playerTurn,
+        isPreview: isPreview,
+        durability: pawn.durability,
+        variant: pawn.name
+    });
+
+    const rows = stateSubject.value.game.gameBoard.xMax + 1;
+    const cols = stateSubject.value.game.gameBoard.yMax + 1;
+
     useEffect(() => {
-        if (pawn.name === '' && state.game.playerTurn === player?.id) {
+        const sub = stateSubject.subscribe(gameState => {
+            const { pawn, isPreview } = getCellPawn(gameState);
+            const newState = { isPreview, playerTurn: gameState.game.playerTurn, durability: pawn.durability, variant: pawn.name };
+            if (shouldUpdate(newState, state)) {
+                setState(newState);
+            }
+        });
+
+        return () => sub.unsubscribe();
+    }, [state]);
+
+
+    useEffect(() => {
+        if (pawn.name === '' && state.playerTurn === player?.id) {
             gestureHandler.current.next({
                 ...gestureHandler.current.value,
                 isEnabled: true
@@ -49,22 +88,12 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim }: Props) => {
             });
 
         }
-    }, [state.game.playerTurn])
-
-    let pawn = state.game.gameBoard.pawns[rowIdx][colIdx];
-    let isPreview = false;
-    if (pawn.name === '' && state.previewPawn) {
-        const previewPos = state.previewPawn.position;
-        if (previewPos.x === colIdx && previewPos.y === rowIdx) {
-            isPreview = true;
-            pawn = state.previewPawn;
-        }
-    }
+    }, [state.playerTurn])
 
     const addPawn = async () => {
         const res = await (new GameService).addPawn({
-            gameId: state.game.gameId,
-            playerSide: state.game.playerTurn,
+            gameId: stateSubject.value.game.gameId,
+            playerSide: stateSubject.value.game.playerTurn,
             x: colIdx,
             y: rowIdx,
         });
@@ -73,8 +102,8 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim }: Props) => {
 
     const peek = async () => {
         const res = await (new GameService).peek({
-            gameId: state.game.gameId,
-            playerSide: state.game.playerTurn,
+            gameId: stateSubject.value.game.gameId,
+            playerSide: stateSubject.value.game.playerTurn,
             x: colIdx,
             y: rowIdx,
         });
@@ -121,7 +150,6 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim }: Props) => {
 
     const canPress = pawn.name === '';
     const canLongPress = pawn.name === '' || isPreview;
-
 
     return <View style={{
         borderColor: theme.colors.text,

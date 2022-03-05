@@ -6,8 +6,10 @@ import {
 } from 'react-native';
 import { Pawn } from '../types/types';
 import BallPathPreview from './BallPathPreview';
+import { shouldUpdate } from './diffWatcher';
 import { useGameState } from './game_state_provider';
 import GridCell from './GridCell';
+import { pause } from './pause';
 import { Deflection } from './types';
 
 interface Props {
@@ -35,8 +37,11 @@ const startAnimation = async (animation: { start: Function }) => {
 }
 
 const GameGrid = ({ gridSize }: Props) => {
-    const { state, updateState } = useGameState();
-    const { deflectionProcessing, game: { playerTurn, gameBoard: { pawns, xMax, yMax } }, allDeflections } = state;
+    const { stateSubject, updateState } = useGameState();
+    const watchValues = useRef({
+        allDeflections: stateSubject.value.allDeflections,
+        ...stateSubject.value.deflectionProcessing,
+    });
 
     const bounceAnim = useRef(new Animated.Value(0.5)).current;
     useEffect(() => {
@@ -89,52 +94,68 @@ const GameGrid = ({ gridSize }: Props) => {
     );
 
     useEffect(() => {
-        if (
-            !deflectionProcessing.isActive
-            || deflectionProcessing.allDeflectionsIndex >= allDeflections.length
-            || allDeflections[deflectionProcessing.allDeflectionsIndex].length === 0
-        ) return;
-
-        const deflections = allDeflections[deflectionProcessing.allDeflectionsIndex];
-
-        if (deflections.length > 0) {
-            posAnim.setValue(deflections[0].position)
-        }
-        (async () => {
-            for (let i = 0; i < deflections.length; i++) {
-                const deflection = deflections[i];
-
-                let anim = Animated.timing(
-                    posAnim,
-                    {
-                        toValue: deflection.position,
-                        duration: 200,
-                        useNativeDriver: true
-                    }
-                );
-
-                if (i === 0) {
-                    anim = Animated.parallel([anim, expandBall]);
-                } else if (i === deflections.length - 1) {
-                    anim = Animated.parallel([anim, shrinkBall]);
-                }
-
-                await startAnimation(anim);
-                const updatedPawns = updatePawns(deflection, pawns);
-                updateState.updatePawns(updatedPawns);
+        const sub = stateSubject.subscribe(({ allDeflections, deflectionProcessing, game: { gameBoard: { pawns } } }) => {
+            if (!shouldUpdate(watchValues.current, { allDeflections, ...deflectionProcessing })) {
+                return;
             }
 
-            const nextIndex = deflectionProcessing.allDeflectionsIndex + 1;
-            updateState.updateDeflectionProcessing({
-                isActive: nextIndex < allDeflections.length,
-                allDeflectionsIndex: Math.min(nextIndex, allDeflections.length)
-            });
-        })();
-    }, [deflectionProcessing.isActive, deflectionProcessing.allDeflectionsIndex]);
+            watchValues.current = { allDeflections, ...deflectionProcessing };
 
-    const rows = xMax + 1;
+            if (
+                !deflectionProcessing.isActive
+                || deflectionProcessing.allDeflectionsIndex >= allDeflections.length
+                || allDeflections[deflectionProcessing.allDeflectionsIndex].length === 0
+            ) return;
+
+            const deflections = allDeflections[deflectionProcessing.allDeflectionsIndex];
+
+            if (deflections.length > 0) {
+                posAnim.setValue(deflections[0].position)
+            }
+            (async () => {
+
+                const anims = deflections.map((deflection, i) => {
+                    let anim = Animated.timing(
+                        posAnim,
+                        {
+                            toValue: deflection.position,
+                            duration: 200,
+                            useNativeDriver: true
+                        }
+                    );
+
+                    if (i === 0) {
+                        anim = Animated.parallel([anim, expandBall]);
+                    } else if (i === deflections.length - 1) {
+                        anim = Animated.parallel([anim, shrinkBall]);
+                    }
+                    return anim;
+                });
+                const visuallyUpdatePawns = async () => {
+                    for (let i = 0; i < deflections.length; i++) {
+                        await pause(200);
+                        const updatedPawns = updatePawns(deflections[i], pawns);
+                        updateState.updatePawns(updatedPawns);
+                    }
+                }
+                await Promise.all([
+                    startAnimation(Animated.sequence(anims)),
+                    visuallyUpdatePawns()
+                ]);
+                const nextIndex = deflectionProcessing.allDeflectionsIndex + 1;
+                updateState.updateDeflectionProcessing({
+                    isActive: nextIndex < allDeflections.length,
+                    allDeflectionsIndex: Math.min(nextIndex, allDeflections.length)
+                });
+            })();
+        });
+
+        return () => sub.unsubscribe();
+    }, []);
+
+    const rows = stateSubject.value.game.gameBoard.xMax + 1;
     const rowsWithPadding = rows + 1;
-    const cols = yMax + 1;
+    const cols = stateSubject.value.game.gameBoard.yMax + 1;
 
     const cellSize = Math.min(gridSize / rowsWithPadding, gridSize / cols);
 

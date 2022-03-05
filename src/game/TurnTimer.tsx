@@ -1,5 +1,5 @@
 import { useTheme } from '@react-navigation/native';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Easing,
@@ -8,9 +8,11 @@ import {
     View,
 } from 'react-native';
 import { usePlayer } from '../main_providers/player_provider';
+import { shouldUpdate } from './diffWatcher';
 import GameService from './gameService';
 import { useGameState } from './game_state_provider';
-import TurnTimerIcon from "./TurnTimerIcons";
+import TurnTimerIcon, { TurnTimerIconOption } from "./TurnTimerIcons";
+import { GameState } from './types';
 
 interface Props {
     playerId: string
@@ -20,13 +22,46 @@ const TurnTimer = ({ playerId }: Props) => {
     const theme = useTheme();
     const player = usePlayer();
 
-    const { state, updateState } = useGameState();
-    const { playerTurn, gameId } = state.game;
+    const { stateSubject, updateState } = useGameState();
+
+    const isCurrentPlayerTimer = playerId === player?.id;
+
+    const getTimerIcon = (gameState: GameState) => {
+        if (!isCurrentPlayerTimer) {
+            if (playerId === gameState.game.playerTurn) return 'CLOCK';
+            else return 'WAITING';
+        } else {
+            if (gameState.previewPawn) return 'CANCEL';
+            else if (playerId === gameState.game.playerTurn) return 'END';
+            else return 'WAITING';
+        }
+    }
+
+    const [state, setState] = useState({
+        playerTurn: stateSubject.value.game.playerTurn,
+        icon: getTimerIcon(stateSubject.value)
+    });
+
+    useEffect(() => {
+        const sub = stateSubject.subscribe(gameState => {
+            const newState = {
+                playerTurn: gameState.game.playerTurn,
+                icon: getTimerIcon(gameState)
+            }
+
+
+            if (shouldUpdate(newState, state)) {
+                setState(newState);
+            }
+        });
+
+        return () => sub.unsubscribe();
+    }, [state]);
 
     const scaleAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        scaleAnim.setValue(playerTurn === playerId ? 2 : 0)
+        scaleAnim.setValue(state.playerTurn === playerId ? 2 : 0)
         Animated.timing(
             scaleAnim,
             {
@@ -36,11 +71,11 @@ const TurnTimer = ({ playerId }: Props) => {
                 useNativeDriver: true
             }
         ).start();
-    }, [scaleAnim, playerTurn]);
+    }, [scaleAnim, state.playerTurn]);
 
     const endTurn = async () => {
         const res = await (new GameService).endTurn({
-            gameId: gameId,
+            gameId: stateSubject.value.game.gameId,
             playerSide: playerId,
         });
 
@@ -52,26 +87,14 @@ const TurnTimer = ({ playerId }: Props) => {
     }
 
     const onPress = () => {
-        if (state.previewPawn) {
+        if (stateSubject.value.previewPawn) {
             cancelPawn();
         } else {
             endTurn();
         }
     }
 
-    const isCurrentPlayerTimer = playerId === player?.id;
-
-    const getTimerIcon = () => {
-        if (!isCurrentPlayerTimer) {
-            if (playerId === playerTurn) return 'CLOCK';
-            else return 'WAITING';
-        } else {
-            if (state.previewPawn) return 'CANCEL';
-            else if (playerId === playerTurn) return 'END';
-            else return 'WAITING';
-        }
-    }
-    const timerIcon = getTimerIcon();
+    const timerIcon = state.icon as TurnTimerIconOption;
 
     const colorAnim = useRef(new Animated.Value(0)).current;
 
@@ -87,7 +110,7 @@ const TurnTimer = ({ playerId }: Props) => {
     }, [colorAnim, timerIcon]);
 
     return (
-        <Pressable onPress={playerTurn === playerId ? onPress : undefined}>
+        <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
             <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
                 <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
                     <Animated.View style={{ width: '100%', height: '100%', backgroundColor: theme.colors.text, transform: [{ scaleY: scaleAnim }] }}></Animated.View>

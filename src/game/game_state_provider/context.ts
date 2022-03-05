@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react'
+import { BehaviorSubject } from 'rxjs'
 import { AddPawnResponse, EndTurnResponse, PeekResponse, ShuffleResponse } from '../../network/types'
 import { Pawn } from '../../types/types'
 import { DeflectionProcessing, GameState } from '../types'
@@ -13,7 +14,7 @@ export interface GameStateUpdate {
     onCancelPeek: () => void
 }
 
-export const GameStateContext = createContext<{ state: GameState, updateState: GameStateUpdate }>({} as any)
+export const GameStateContext = createContext<{ stateSubject: BehaviorSubject<GameState>, updateState: GameStateUpdate }>({} as any)
 
 export function useGameState() {
     return useContext(GameStateContext)

@@ -5,6 +5,7 @@ import {
     StyleSheet,
     View,
 } from 'react-native';
+import { shouldUpdate } from './diffWatcher';
 import { useGameState } from './game_state_provider';
 
 
@@ -72,10 +73,27 @@ interface Props {
 
 const ScoreBar = ({ playerId, maxScore }: Props) => {
     const [currentLayout, setCurrentLayout] = useState<{ width: number, height: number }>();
-    const { state: { game: { matchPointPlayers, gameBoard: { scoreBoard } } } } = useGameState();
+    const { stateSubject } = useGameState();
 
-    const score = scoreBoard[playerId];
-    const isMatchPoint = matchPointPlayers[playerId];
+    const [state, setState] = useState({
+        score: stateSubject.value.game.gameBoard.scoreBoard[playerId],
+        isMatchPoint: stateSubject.value.game.matchPointPlayers[playerId]
+    });
+
+    useEffect(() => {
+        const sub = stateSubject.subscribe(({ game: { matchPointPlayers, gameBoard: { scoreBoard } } }) => {
+            const newState = {
+                score: scoreBoard[playerId],
+                isMatchPoint: matchPointPlayers[playerId]
+            }
+            if (shouldUpdate(newState, state)) {
+                setState(newState);
+            }
+        });
+
+        return () => sub.unsubscribe();
+
+    }, [state]);
 
     const onLayout = (evt: any) => {
         setCurrentLayout(evt.nativeEvent.layout)
@@ -92,9 +110,9 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
         }
 
         nodes = Array(maxScore).fill(undefined).map((_, idx) => {
-            const isPoint = idx < score;
+            const isPoint = idx < state.score;
             return <View key={`score_${idx}`} style={{ marginBottom: width * ratioMargin, marginTop: idx === maxScore - 1 ? width * ratioMargin : 0 }}>
-                <ScoreBox index={idx} isMatchPoint={isMatchPoint} width={width}>
+                <ScoreBox index={idx} isMatchPoint={state.isMatchPoint} width={width}>
                     <View style={{ ...styles.expanded, position: 'absolute', top: -width * 0.5, left: -width * 0.5, transform: [{ translateX: width * 0.5 }, { translateY: width * 0.5 }] }}>
                         <ScoreDot isPoint={isPoint} />
                     </View>

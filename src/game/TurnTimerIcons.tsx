@@ -84,7 +84,7 @@ const WaitingDots = ({ color }: { color: string }) => {
     </View>
 }
 
-type TurnTimerIconOption = 'CLOCK' | 'END' | 'CANCEL' | 'WAITING'
+export type TurnTimerIconOption = 'CLOCK' | 'END' | 'CANCEL' | 'WAITING'
 const TurnTimerIcon = ({ icon, dotColor }: { icon: TurnTimerIconOption, dotColor: string }) => {
     const theme = useTheme();
 

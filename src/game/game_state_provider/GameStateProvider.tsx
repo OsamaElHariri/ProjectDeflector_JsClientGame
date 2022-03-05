@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react"
-import { Subscription } from "rxjs";
+import { BehaviorSubject, Subscription } from "rxjs";
 import { GameStateUpdate } from ".";
 import { useWsClient } from "../../main_providers/ws_provider";
 import GameService from "../gameService";
@@ -14,7 +14,8 @@ interface Props {
 export function GameStateProvider({ children, game }: Props) {
     const clientState = useWsClient();
     const clientSub = useRef<Subscription>();
-    const [currentState, setCurrentState] = useState<GameState>({
+
+    const gameStateSubject = useRef(new BehaviorSubject<GameState>({
         game,
         allDeflections: [],
         winner: '',
@@ -22,25 +23,25 @@ export function GameStateProvider({ children, game }: Props) {
             isActive: false,
             allDeflectionsIndex: 0,
         }
-    });
+    }));
 
     const gameStateUpdate: GameStateUpdate = {
         onEndTurn: (res) => {
             const { allDeflections, winner, ...gameUpdates } = res;
             const { scoreBoard, ...remainingUpdates } = gameUpdates;
 
-            setCurrentState({
-                ...currentState,
+            gameStateSubject.current.next({
+                ...gameStateSubject.current.value,
                 winner,
                 allDeflections,
                 previewPawn: undefined,
                 deflectionPreview: undefined,
                 currentTurnDeflections: res.deflections,
                 game: {
-                    ...currentState.game,
+                    ...gameStateSubject.current.value.game,
                     ...remainingUpdates,
                     gameBoard: {
-                        ...currentState.game.gameBoard,
+                        ...gameStateSubject.current.value.game.gameBoard,
                         scoreBoard
                     }
                 },
@@ -54,64 +55,64 @@ export function GameStateProvider({ children, game }: Props) {
         onAddPawn: (res) => {
             const x = res.newPawn.position.x;
             const y = res.newPawn.position.y;
-            currentState.game.gameBoard.pawns[y][x] = res.newPawn;
-            setCurrentState({
-                ...currentState,
+            gameStateSubject.current.value.game.gameBoard.pawns[y][x] = res.newPawn;
+            gameStateSubject.current.next({
+                ...gameStateSubject.current.value,
                 previewPawn: undefined,
                 deflectionPreview: undefined,
                 currentTurnDeflections: res.deflections,
                 game: {
-                    ...currentState.game,
+                    ...gameStateSubject.current.value.game,
                     variants: res.variants,
                     gameBoard: {
-                        ...currentState.game.gameBoard,
+                        ...gameStateSubject.current.value.game.gameBoard,
                         scoreBoard: res.scoreBoard,
-                        pawns: [...currentState.game.gameBoard.pawns]
+                        pawns: [...gameStateSubject.current.value.game.gameBoard.pawns]
                     }
                 },
             });
         },
 
         onShuffle: (res) => {
-            setCurrentState({
-                ...currentState,
+            gameStateSubject.current.next({
+                ...gameStateSubject.current.value,
                 game: {
-                    ...currentState.game,
+                    ...gameStateSubject.current.value.game,
                     variants: res.variants
                 }
             });
         },
 
         onPeek: (res) => {
-            setCurrentState({
-                ...currentState,
+            gameStateSubject.current.next({
+                ...gameStateSubject.current.value,
                 deflectionPreview: res.deflections,
                 previewPawn: res.newPawn
             });
         },
 
         updatePawns: (pawns) => {
-            setCurrentState({
-                ...currentState,
+            gameStateSubject.current.next({
+                ...gameStateSubject.current.value,
                 game: {
-                    ...currentState.game,
+                    ...gameStateSubject.current.value.game,
                     gameBoard: {
-                        ...currentState.game.gameBoard,
+                        ...gameStateSubject.current.value.game.gameBoard,
                         pawns
                     }
                 }
             });
         },
         updateDeflectionProcessing: (deflectionProcessing) => {
-            setCurrentState({
-                ...currentState,
+            gameStateSubject.current.next({
+                ...gameStateSubject.current.value,
                 deflectionProcessing
             });
         },
 
         onCancelPeek: () => {
-            setCurrentState({
-                ...currentState,
+            gameStateSubject.current.next({
+                ...gameStateSubject.current.value,
                 previewPawn: undefined,
                 deflectionPreview: undefined,
             });
@@ -138,7 +139,7 @@ export function GameStateProvider({ children, game }: Props) {
     }, [clientState])
 
     const contextVal = {
-        state: currentState,
+        stateSubject: gameStateSubject.current,
         updateState: gameStateUpdate
     }
 

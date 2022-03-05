@@ -17,11 +17,11 @@ interface Props {
 
 const ShuffleButton = ({ width, playerId }: Props) => {
     const theme = useTheme();
-    const { state, updateState } = useGameState();
+    const { stateSubject, updateState } = useGameState();
 
     const shuffle = async () => {
         const res = await (new GameService).shuffle({
-            gameId: state.game.gameId,
+            gameId: stateSubject.value.game.gameId,
             hasPeek: false,
             playerSide: playerId,
             x: 0,
