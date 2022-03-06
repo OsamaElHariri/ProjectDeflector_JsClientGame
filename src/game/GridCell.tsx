@@ -55,6 +55,7 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim, durability }: Props) => {
 
     const [state, setState] = useState({
         playerTurn: stateSubject.value.game.playerTurn,
+        isProcessingDeflections: stateSubject.value.deflectionProcessing.isActive,
         isPreview: isPreview,
         durability: pawn.durability,
         variant: pawn.name
@@ -66,7 +67,14 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim, durability }: Props) => {
     useEffect(() => {
         const sub = stateSubject.subscribe(gameState => {
             const { pawn, isPreview } = getCellPawn(gameState);
-            const newState = { isPreview, playerTurn: gameState.game.playerTurn, durability: pawn.durability, variant: pawn.name };
+            const newState = {
+                isPreview,
+                playerTurn: gameState.game.playerTurn,
+                isProcessingDeflections: gameState.deflectionProcessing.isActive,
+                durability: pawn.durability,
+                variant: pawn.name,
+
+            };
             if (shouldUpdate(newState, state)) {
                 durability.setValue(pawn.durability);
                 setState(newState);
@@ -78,6 +86,8 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim, durability }: Props) => {
 
 
     useEffect(() => {
+        if (state.isProcessingDeflections) return;
+
         if (pawn.name === '' && state.playerTurn === player?.id) {
             gestureHandler.current.next({
                 ...gestureHandler.current.value,
@@ -90,7 +100,7 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim, durability }: Props) => {
             });
 
         }
-    }, [state.playerTurn])
+    }, [state.playerTurn, state.isProcessingDeflections])
 
     const addPawn = async () => {
         const res = await (new GameService).addPawn({

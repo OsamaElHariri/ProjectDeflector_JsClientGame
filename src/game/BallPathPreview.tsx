@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { shouldUpdate } from './diffWatcher';
 import { useGameState } from './game_state_provider';
-import { Direction, GameState } from './types';
+import { Deflection, Direction, GameState } from './types';
 
 interface LineProps {
     width: number
@@ -81,10 +81,10 @@ const BallPathPreview = ({ cellSize }: Props) => {
     const { stateSubject } = useGameState();
 
     const getDeflections = (gameState: GameState) => {
-        let deflectionPath = gameState.deflectionPreview || gameState.currentTurnDeflections || gameState.game.deflections;
+        let deflectionPath: Deflection[] | undefined = gameState.deflectionPreview || gameState.currentTurnDeflections || gameState.game.deflections;
 
         if (gameState.deflectionProcessing.isActive && gameState.allDeflections[gameState.deflectionProcessing.allDeflectionsIndex]) {
-            deflectionPath = gameState.allDeflections[gameState.deflectionProcessing.allDeflectionsIndex];
+            deflectionPath = undefined;
         }
         return deflectionPath;
     }
@@ -103,6 +103,10 @@ const BallPathPreview = ({ cellSize }: Props) => {
 
         return () => sub.unsubscribe();
     }, [state]);
+
+    if (!state.deflections) {
+        return <></>
+    }
 
     const getRotationDegrees = (direction: Direction) => {
         if (direction === 'UP') return '90deg';

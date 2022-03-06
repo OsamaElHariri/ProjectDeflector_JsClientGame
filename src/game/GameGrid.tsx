@@ -79,7 +79,7 @@ const GameGrid = ({ gridSize }: Props) => {
         {
             toValue: 1,
             easing: Easing.elastic(1),
-            duration: 300,
+            duration: 50,
             useNativeDriver: true,
         }
     );
@@ -116,35 +116,45 @@ const GameGrid = ({ gridSize }: Props) => {
             (async () => {
 
                 const anims = deflections.map((deflection, i) => {
+                    if (i === 0 && deflectionProcessing.allDeflectionsIndex === 0) {
+                        return expandBall;
+                    } else if (i === 0) {
+                        return Animated.delay(50);
+                    }
+                    const previousDeflection = deflections[i - 1];
+
+                    const distance = Math.abs(previousDeflection.position.x - deflection.position.x)
+                        + Math.abs(previousDeflection.position.y - deflection.position.y);
+
+                    const timePerCell = 100 - (5 * i)
+                    const time = distance * Math.max(timePerCell, 50);
 
                     const anims = [
                         Animated.timing(
                             posAnim,
                             {
                                 toValue: deflection.position,
-                                duration: 200,
+                                duration: time,
                                 useNativeDriver: true
                             }
                         )
                     ];
-                    if (i > 0) {
-                        const deflection = deflections[i - 1];
-                        const key = `cell_${deflection.position.y}_${deflection.position.x}`;
-                        const setDurability = deflection.events.find(evt => evt.name === 'SET_DURABILITY');
-                        if (animatedDurabilities.current[key] && setDurability) {
-                            const durabilityAnim = Animated.timing(
-                                animatedDurabilities.current[key],
-                                {
-                                    toValue: setDurability.durability,
-                                    duration: 100,
-                                    useNativeDriver: true
-                                }
-                            );
-                            anims.push(durabilityAnim);
-                        }
+
+                    const key = `cell_${previousDeflection.position.y}_${previousDeflection.position.x}`;
+                    const setDurability = previousDeflection.events.find(evt => evt.name === 'SET_DURABILITY');
+                    if (animatedDurabilities.current[key] && setDurability) {
+                        const durabilityAnim = Animated.timing(
+                            animatedDurabilities.current[key],
+                            {
+                                toValue: setDurability.durability,
+                                duration: 10,
+                                useNativeDriver: true
+                            }
+                        );
+                        anims.push(durabilityAnim);
                     }
 
-                    if (i === 0) {
+                    if (i === 1) {
                         anims.push(expandBall);
                     } else if (i === deflections.length - 1) {
                         anims.push(shrinkBall);
