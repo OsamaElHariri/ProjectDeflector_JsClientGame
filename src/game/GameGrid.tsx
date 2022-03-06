@@ -9,7 +9,6 @@ import BallPathPreview from './BallPathPreview';
 import { shouldUpdate } from './diffWatcher';
 import { useGameState } from './game_state_provider';
 import GridCell from './GridCell';
-import { pause } from './pause';
 import { Deflection } from './types';
 
 interface Props {
@@ -19,13 +18,14 @@ interface Props {
 const updatePawns = (deflection: Deflection, pawns: Pawn[][]): Pawn[][] => {
     if (!pawns[deflection.position.y] || !pawns[deflection.position.y][deflection.position.x]) return pawns;
 
-    pawns[deflection.position.y][deflection.position.x].durability -= 1;
     deflection.events.forEach(event => {
         if (event.name === 'DESTROY_PAWN') {
             pawns[event.position.y][event.position.x].name = '';
+        } else if (event.name === 'SET_DURABILITY') {
+            pawns[deflection.position.y][deflection.position.x].durability = event.durability;
         }
     });
-    return [...pawns];
+    return pawns;
 }
 
 const startAnimation = async (animation: { start: Function }) => {
@@ -38,6 +38,7 @@ const startAnimation = async (animation: { start: Function }) => {
 
 const GameGrid = ({ gridSize }: Props) => {
     const { stateSubject, updateState } = useGameState();
+    const animatedDurabilities = useRef<{ [key: string]: Animated.Value }>({});
     const watchValues = useRef({
         allDeflections: stateSubject.value.allDeflections,
         ...stateSubject.value.deflectionProcessing,
@@ -115,33 +116,49 @@ const GameGrid = ({ gridSize }: Props) => {
             (async () => {
 
                 const anims = deflections.map((deflection, i) => {
-                    let anim = Animated.timing(
-                        posAnim,
-                        {
-                            toValue: deflection.position,
-                            duration: 200,
-                            useNativeDriver: true
+
+                    const anims = [
+                        Animated.timing(
+                            posAnim,
+                            {
+                                toValue: deflection.position,
+                                duration: 200,
+                                useNativeDriver: true
+                            }
+                        )
+                    ];
+                    if (i > 0) {
+                        const deflection = deflections[i - 1];
+                        const key = `cell_${deflection.position.y}_${deflection.position.x}`;
+                        const setDurability = deflection.events.find(evt => evt.name === 'SET_DURABILITY');
+                        if (animatedDurabilities.current[key] && setDurability) {
+                            const durabilityAnim = Animated.timing(
+                                animatedDurabilities.current[key],
+                                {
+                                    toValue: setDurability.durability,
+                                    duration: 100,
+                                    useNativeDriver: true
+                                }
+                            );
+                            anims.push(durabilityAnim);
                         }
-                    );
+                    }
 
                     if (i === 0) {
-                        anim = Animated.parallel([anim, expandBall]);
+                        anims.push(expandBall);
                     } else if (i === deflections.length - 1) {
-                        anim = Animated.parallel([anim, shrinkBall]);
+                        anims.push(shrinkBall);
                     }
-                    return anim;
+                    return Animated.parallel(anims);
                 });
-                const visuallyUpdatePawns = async () => {
-                    for (let i = 0; i < deflections.length; i++) {
-                        await pause(200);
-                        const updatedPawns = updatePawns(deflections[i], pawns);
-                        updateState.updatePawns(updatedPawns);
-                    }
+                await startAnimation(Animated.sequence(anims));
+
+                let newPawns = pawns;
+                for (let i = 0; i < deflections.length; i++) {
+                    newPawns = updatePawns(deflections[i], pawns);
                 }
-                await Promise.all([
-                    startAnimation(Animated.sequence(anims)),
-                    visuallyUpdatePawns()
-                ]);
+                updateState.updatePawns(newPawns);
+
                 const nextIndex = deflectionProcessing.allDeflectionsIndex + 1;
                 updateState.updateDeflectionProcessing({
                     isActive: nextIndex < allDeflections.length,
@@ -161,7 +178,11 @@ const GameGrid = ({ gridSize }: Props) => {
 
     const grid = Array(rows).fill(undefined).map((_, rowIdx) => {
         const columns = Array(cols).fill(undefined).map((_, colIdx) => {
-            return <GridCell key={`cell_${rowIdx}_${colIdx}`} colIdx={colIdx} rowIdx={rowIdx} bounceAnim={bounceAnim} />
+            const key = `cell_${rowIdx}_${colIdx}`;
+            if (!animatedDurabilities.current[key]) {
+                animatedDurabilities.current[key] = new Animated.Value(0)
+            }
+            return <GridCell key={key} durability={animatedDurabilities.current[key]} colIdx={colIdx} rowIdx={rowIdx} bounceAnim={bounceAnim} />
         });
 
         return <View key={`grid_${rowIdx}`} style={{ display: 'flex', flexDirection: 'row', flex: 1, width: '100%', height: '100%' }}>

@@ -20,9 +20,10 @@ interface Props {
     rowIdx: number
     colIdx: number
     bounceAnim: Animated.Value
+    durability: Animated.Value
 }
 
-const GridCell = ({ rowIdx, colIdx, bounceAnim }: Props) => {
+const GridCell = ({ rowIdx, colIdx, bounceAnim, durability }: Props) => {
     const theme = useTheme();
     const player = usePlayer();
 
@@ -37,7 +38,7 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim }: Props) => {
 
     const { stateSubject, updateState } = useGameState();
 
-    const getCellPawn = ({ game: { playerTurn, gameBoard: { pawns } } }: GameState) => {
+    const getCellPawn = ({ game: { gameBoard: { pawns } } }: GameState) => {
         let pawn = pawns[rowIdx][colIdx];
         let isPreview = false;
         if (pawn.name === '' && stateSubject.value.previewPawn) {
@@ -67,6 +68,7 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim }: Props) => {
             const { pawn, isPreview } = getCellPawn(gameState);
             const newState = { isPreview, playerTurn: gameState.game.playerTurn, durability: pawn.durability, variant: pawn.name };
             if (shouldUpdate(newState, state)) {
+                durability.setValue(pawn.durability);
                 setState(newState);
             }
         });
@@ -169,7 +171,7 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim }: Props) => {
         >
             <PressIndicator gestureStateObservable={gestureHandler.current} bounceAnim={bounceAnim} />
             <View style={{ opacity: isPreview ? 0.4 : 1 }}>
-                <PawnVisual durability={pawn.durability} variant={pawn.name}></PawnVisual>
+                <PawnVisual durability={durability} variant={pawn.name}></PawnVisual>
             </View>
         </Pressable>
     </View>

@@ -2,6 +2,7 @@ import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 
 import {
+    Animated,
     StyleSheet,
     View,
 } from 'react-native';
@@ -35,7 +36,7 @@ const PawnPreviewContainer = ({ width, playerId }: PawnPreviewContainerProps) =>
 
     return <View style={{ marginTop: 8, padding: 8, height: width * 0.8, width: width * 0.8 }}>
         <View style={{ ...styles.pawnPreviewContainer, borderColor: theme.colors.text }}>
-            <PawnVisual durability={5} variant={state.variant}></PawnVisual>
+            <PawnVisual durability={new Animated.Value(5)} variant={state.variant}></PawnVisual>
         </View>
     </View>
 }

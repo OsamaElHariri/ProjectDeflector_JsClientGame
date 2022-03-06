@@ -21,6 +21,7 @@ export interface Game {
 export interface DeflectionEvent {
     name: string
     position: Position
+    durability: number
 }
 
 export interface Deflection {

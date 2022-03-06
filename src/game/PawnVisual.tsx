@@ -4,24 +4,26 @@ import {
     Animated,
     Easing,
     Image,
-    ImageSourcePropType,
     StyleSheet,
     View,
 } from 'react-native';
 import { PawnVariant } from '../types/types';
 
 const baseImage = require('./assets/pawn_base.png');
-const durabilityImageMap: { [key: number]: ImageSourcePropType } = {
-    1: require('./assets/pawn_1.png'),
-    2: require('./assets/pawn_2.png'),
-    3: require('./assets/pawn_3.png'),
-    4: require('./assets/pawn_4.png'),
-    5: require('./assets/pawn_5.png'),
-};
 
+const durabilityImages = [
+    require('./assets/pawn_1.png'),
+    require('./assets/pawn_2.png'),
+    require('./assets/pawn_3.png'),
+    require('./assets/pawn_4.png'),
+    require('./assets/pawn_5.png'),
+];
+
+// The durability is an animated value so that it can be changed exactly when the ball hits it (in the animation chain of in the GameGrid).
+// Otherwise, the visual update of the pawn and the time when the ball hits it will not be in sync
 interface Props {
     variant: PawnVariant
-    durability: number
+    durability: Animated.Value
 }
 
 const PawnVisual = ({ variant, durability }: Props) => {
@@ -39,7 +41,20 @@ const PawnVisual = ({ variant, durability }: Props) => {
             }
         ).start();
     }, [rotateAnim, variant]);
-    const displayedDurability = Math.min(5, Math.max(1, durability));
+
+    const images = durabilityImages.map((img, i) => {
+        const animatedDurability = durability.interpolate({
+            inputRange: [i + 0.99, i + 1, i + 1.01],
+            outputRange: [0, 1, 0],
+            extrapolate: 'clamp'
+        })
+
+        return <Animated.Image key={`img_${i}`} source={img} style={{
+            ...styles.imageBasics,
+            opacity: animatedDurability,
+            tintColor: '#73956F'
+        }} />
+    })
 
     if (variant === '') {
         return <View></View>;
@@ -56,14 +71,16 @@ const PawnVisual = ({ variant, durability }: Props) => {
                 })
             }]
         }}>
-            <Image source={baseImage} style={{
+            <Animated.Image source={baseImage} style={{
                 ...styles.imageBasics,
                 tintColor: theme.colors.text,
+                opacity: durability.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 1],
+                    extrapolate: 'clamp'
+                })
             }} />
-            <Image source={durabilityImageMap[displayedDurability]} style={{
-                ...styles.imageBasics,
-                tintColor: '#73956F'
-            }} />
+            {images}
         </Animated.View>
     );
 };
