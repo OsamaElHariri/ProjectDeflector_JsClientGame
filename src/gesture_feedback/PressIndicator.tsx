@@ -91,7 +91,7 @@ const PressIndicator = ({ gestureStateObservable, bounceAnim }: Props) => {
 
     return (
         <>
-            <Animated.View style={{
+            <Animated.View pointerEvents={'none'} style={{
                 position: 'absolute',
                 width: '100%',
                 height: '100%',
@@ -108,7 +108,7 @@ const PressIndicator = ({ gestureStateObservable, bounceAnim }: Props) => {
                 </Animated.View>
             </Animated.View>
 
-            <Animated.View style={{
+            <Animated.View pointerEvents={'none'} style={{
                 position: 'absolute',
                 width: '100%',
                 height: '100%',
