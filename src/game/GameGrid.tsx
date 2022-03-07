@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import {
     Animated,
-    Easing,
     View,
 } from 'react-native';
 import { Pawn } from '../types/types';
@@ -9,6 +8,7 @@ import BallPathPreview from './BallPathPreview';
 import { shouldUpdate } from './diffWatcher';
 import { useGameState } from './game_state_provider';
 import GridCell from './GridCell';
+import { getDeflectionAnimations } from './gridDeflectionAnimations';
 import { Deflection } from './types';
 
 interface Props {
@@ -39,6 +39,7 @@ const startAnimation = async (animation: { start: Function }) => {
 const GameGrid = ({ gridSize }: Props) => {
     const { stateSubject, updateState } = useGameState();
     const animatedDurabilities = useRef<{ [key: string]: Animated.Value }>({});
+    const pawnScaleAnim = useRef<{ [key: string]: Animated.Value }>({});
     const watchValues = useRef({
         allDeflections: stateSubject.value.allDeflections,
         ...stateSubject.value.deflectionProcessing,
@@ -72,27 +73,7 @@ const GameGrid = ({ gridSize }: Props) => {
 
 
     const posAnim = useRef(new Animated.ValueXY()).current;
-    const ballScaleAnim = useRef(new Animated.Value(0)).current;
-
-    const expandBall = Animated.timing(
-        ballScaleAnim,
-        {
-            toValue: 1,
-            easing: Easing.elastic(1),
-            duration: 50,
-            useNativeDriver: true,
-        }
-    );
-
-    const shrinkBall = Animated.timing(
-        ballScaleAnim,
-        {
-            toValue: 0,
-            easing: Easing.back(1),
-            duration: 200,
-            useNativeDriver: true,
-        }
-    );
+    const ballScaleAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
 
     useEffect(() => {
         const sub = stateSubject.subscribe(({ allDeflections, deflectionProcessing, game: { gameBoard: { pawns } } }) => {
@@ -114,54 +95,13 @@ const GameGrid = ({ gridSize }: Props) => {
                 posAnim.setValue(deflections[0].position)
             }
             (async () => {
-
-                const anims = deflections.map((deflection, i) => {
-                    if (i === 0 && deflectionProcessing.allDeflectionsIndex === 0) {
-                        return expandBall;
-                    } else if (i === 0) {
-                        return Animated.delay(50);
-                    }
-                    const previousDeflection = deflections[i - 1];
-
-                    const distance = Math.abs(previousDeflection.position.x - deflection.position.x)
-                        + Math.abs(previousDeflection.position.y - deflection.position.y);
-
-                    const timePerCell = 100 - (5 * i)
-                    const time = distance * Math.max(timePerCell, 50);
-
-                    const anims = [
-                        Animated.timing(
-                            posAnim,
-                            {
-                                toValue: deflection.position,
-                                duration: time,
-                                useNativeDriver: true
-                            }
-                        )
-                    ];
-
-                    const key = `cell_${previousDeflection.position.y}_${previousDeflection.position.x}`;
-                    const setDurability = previousDeflection.events.find(evt => evt.name === 'SET_DURABILITY');
-                    if (animatedDurabilities.current[key] && setDurability) {
-                        const durabilityAnim = Animated.timing(
-                            animatedDurabilities.current[key],
-                            {
-                                toValue: setDurability.durability,
-                                duration: 10,
-                                useNativeDriver: true
-                            }
-                        );
-                        anims.push(durabilityAnim);
-                    }
-
-                    if (i === 1) {
-                        anims.push(expandBall);
-                    } else if (i === deflections.length - 1) {
-                        anims.push(shrinkBall);
-                    }
-                    return Animated.parallel(anims);
-                });
-                await startAnimation(Animated.sequence(anims));
+                await startAnimation(getDeflectionAnimations({
+                    animatedDurabilities: animatedDurabilities.current,
+                    ballPosAnim: posAnim,
+                    ballScaleAnim: ballScaleAnim,
+                    deflections: deflections,
+                    pawnScaleAnim: pawnScaleAnim.current
+                }));
 
                 let newPawns = pawns;
                 for (let i = 0; i < deflections.length; i++) {
@@ -190,9 +130,18 @@ const GameGrid = ({ gridSize }: Props) => {
         const columns = Array(cols).fill(undefined).map((_, colIdx) => {
             const key = `cell_${rowIdx}_${colIdx}`;
             if (!animatedDurabilities.current[key]) {
-                animatedDurabilities.current[key] = new Animated.Value(0)
+                animatedDurabilities.current[key] = new Animated.Value(0);
             }
-            return <GridCell key={key} durability={animatedDurabilities.current[key]} colIdx={colIdx} rowIdx={rowIdx} bounceAnim={bounceAnim} />
+            if (!pawnScaleAnim.current[key]) {
+                pawnScaleAnim.current[key] = new Animated.Value(1);
+            }
+            return <View key={key} style={{ flex: 1 }}>
+                <GridCell durability={animatedDurabilities.current[key]}
+                    colIdx={colIdx}
+                    rowIdx={rowIdx}
+                    bounceAnim={bounceAnim}
+                    scaleAnim={pawnScaleAnim.current[key]} />
+            </View>
         });
 
         return <View key={`grid_${rowIdx}`} style={{ display: 'flex', flexDirection: 'row', flex: 1, width: '100%', height: '100%' }}>
@@ -220,7 +169,8 @@ const GameGrid = ({ gridSize }: Props) => {
                     transform: [
                         { translateX: Animated.multiply(posAnim.x, cellSize) },
                         { translateY: Animated.multiply(posAnim.y, cellSize) },
-                        { scale: ballScaleAnim }
+                        { scaleX: ballScaleAnim.x },
+                        { scaleY: ballScaleAnim.y }
                     ]
                 }}></Animated.View>
             </View>

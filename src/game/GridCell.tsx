@@ -21,9 +21,10 @@ interface Props {
     colIdx: number
     bounceAnim: Animated.Value
     durability: Animated.Value
+    scaleAnim: Animated.Value
 }
 
-const GridCell = ({ rowIdx, colIdx, bounceAnim, durability }: Props) => {
+const GridCell = ({ rowIdx, colIdx, bounceAnim, durability, scaleAnim }: Props) => {
     const theme = useTheme();
     const player = usePlayer();
 
@@ -86,9 +87,7 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim, durability }: Props) => {
 
 
     useEffect(() => {
-        if (state.isProcessingDeflections) return;
-
-        if (pawn.name === '' && state.playerTurn === player?.id) {
+        if (pawn.name === '' && state.playerTurn === player?.id && !state.isProcessingDeflections) {
             gestureHandler.current.next({
                 ...gestureHandler.current.value,
                 isEnabled: true
@@ -169,7 +168,6 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim, durability }: Props) => {
         borderLeftWidth: colIdx === 0 ? gridBorder * 2 : gridBorder,
         borderBottomWidth: rowIdx === rows - 1 ? gridBorder * 2 : gridBorder,
         borderRightWidth: colIdx === cols - 1 ? gridBorder * 2 : gridBorder,
-        flex: 1
     }}>
         <Pressable
             style={{ width: '100%', height: '100%' }}
@@ -180,9 +178,9 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim, durability }: Props) => {
             onPressOut={() => onPressOut()}
         >
             <PressIndicator gestureStateObservable={gestureHandler.current} bounceAnim={bounceAnim} />
-            <View style={{ opacity: isPreview ? 0.4 : 1 }}>
+            <Animated.View style={{ opacity: isPreview ? 0.4 : 1, transform: [{ scale: scaleAnim }] }}>
                 <PawnVisual durability={durability} variant={pawn.name}></PawnVisual>
-            </View>
+            </Animated.View>
         </Pressable>
     </View>
 }
