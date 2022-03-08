@@ -19,12 +19,11 @@ import { GameState } from './types';
 interface Props {
     rowIdx: number
     colIdx: number
-    bounceAnim: Animated.Value
     durability: Animated.Value
     scaleAnim: Animated.Value
 }
 
-const GridCell = ({ rowIdx, colIdx, bounceAnim, durability, scaleAnim }: Props) => {
+const GridCell = ({ rowIdx, colIdx, durability, scaleAnim }: Props) => {
     const theme = useTheme();
     const player = usePlayer();
 
@@ -177,7 +176,9 @@ const GridCell = ({ rowIdx, colIdx, bounceAnim, durability, scaleAnim }: Props) 
             onPressIn={() => onPressIn()}
             onPressOut={() => onPressOut()}
         >
-            <PressIndicator gestureStateObservable={gestureHandler.current} bounceAnim={bounceAnim} />
+            <View pointerEvents='none' style={{ position: 'absolute', width: '100%', height: '100%', transform: [{ scale: 0.7 }] }}>
+                <PressIndicator gestureStateObservable={gestureHandler.current} />
+            </View>
             <Animated.View style={{ opacity: isPreview ? 0.4 : 1, transform: [{ scale: scaleAnim }] }}>
                 <PawnVisual durability={durability} variant={pawn.name}></PawnVisual>
             </Animated.View>

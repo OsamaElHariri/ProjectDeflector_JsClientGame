@@ -45,33 +45,6 @@ const GameGrid = ({ gridSize }: Props) => {
         ...stateSubject.value.deflectionProcessing,
     });
 
-    const bounceAnim = useRef(new Animated.Value(0.5)).current;
-    useEffect(() => {
-        Animated.loop(
-            Animated.sequence([
-                Animated.spring(
-                    bounceAnim,
-                    {
-                        toValue: 0.7,
-                        speed: 2,
-                        bounciness: 20,
-                        useNativeDriver: true
-                    }
-                ),
-                Animated.spring(
-                    bounceAnim,
-                    {
-                        toValue: 0.5,
-                        speed: 10,
-                        bounciness: 5,
-                        useNativeDriver: true
-                    }
-                ),
-            ])
-        ).start();
-    }, [bounceAnim]);
-
-
     const posAnim = useRef(new Animated.ValueXY()).current;
     const ballScaleAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
 
@@ -139,7 +112,6 @@ const GameGrid = ({ gridSize }: Props) => {
                 <GridCell durability={animatedDurabilities.current[key]}
                     colIdx={colIdx}
                     rowIdx={rowIdx}
-                    bounceAnim={bounceAnim}
                     scaleAnim={pawnScaleAnim.current[key]} />
             </View>
         });

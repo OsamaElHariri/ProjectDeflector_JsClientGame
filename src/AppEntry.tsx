@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LobbyScreen from './lobby/LobbyScreen';
 import GameScreen from './game/GameScreen';
 import AwaitingGameScreen from './game/AwaitingGameScreen';
+import { SyncedAnimationProvider } from './main_providers/synced_animation';
 
 const GameTheme = {
     ...DefaultTheme,
@@ -21,30 +22,32 @@ const Stack = createNativeStackNavigator();
 
 const AppEntry = () => {
     return (
-        <PlayerProvider>
-            <WsClientProvider>
+        <SyncedAnimationProvider>
+            <PlayerProvider>
+                <WsClientProvider>
 
-                <NavigationContainer theme={GameTheme}>
-                    <Stack.Navigator screenOptions={{ headerShown: false }}>
+                    <NavigationContainer theme={GameTheme}>
+                        <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-                        <Stack.Screen
-                            name="Lobby"
-                            component={LobbyScreen} />
+                            <Stack.Screen
+                                name="Lobby"
+                                component={LobbyScreen} />
 
-                        <Stack.Screen
-                            name="AwaitingGame"
-                            component={AwaitingGameScreen} />
+                            <Stack.Screen
+                                name="AwaitingGame"
+                                component={AwaitingGameScreen} />
 
-                        <Stack.Screen
-                            name="Game"
-                            component={GameScreen} />
+                            <Stack.Screen
+                                name="Game"
+                                component={GameScreen} />
 
-                    </Stack.Navigator>
+                        </Stack.Navigator>
 
-                </NavigationContainer>
+                    </NavigationContainer>
 
-            </WsClientProvider>
-        </PlayerProvider>
+                </WsClientProvider>
+            </PlayerProvider>
+        </SyncedAnimationProvider>
     );
 };
 

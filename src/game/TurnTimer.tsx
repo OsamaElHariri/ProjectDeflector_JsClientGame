@@ -8,6 +8,7 @@ import {
     View,
 } from 'react-native';
 import { usePlayer } from '../main_providers/player_provider';
+import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { shouldUpdate } from './diffWatcher';
 import GameService from './gameService';
 import { useGameState } from './game_state_provider';
@@ -21,6 +22,7 @@ interface Props {
 const TurnTimer = ({ playerId }: Props) => {
     const theme = useTheme();
     const player = usePlayer();
+    const bounceAnim = useSyncedAnimation();
 
     const { stateSubject, updateState } = useGameState();
 
@@ -109,6 +111,10 @@ const TurnTimer = ({ playerId }: Props) => {
         ).start();
     }, [colorAnim, timerIcon]);
 
+    const iconScaleAnim = state.icon === 'END' || state.icon === 'CANCEL'
+        ? Animated.add(0.5, Animated.multiply(0.5, bounceAnim))
+        : new Animated.Value(1);
+
     return (
         <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
             <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
@@ -118,9 +124,9 @@ const TurnTimer = ({ playerId }: Props) => {
                 <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
                     <Animated.View style={{ width: '100%', height: '100%', backgroundColor: '#73956F', opacity: colorAnim, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
                 </View>
-                <View style={styles.iconContainer}>
+                <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
                     <TurnTimerIcon key={'timer_icon'} icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} />
-                </View>
+                </Animated.View>
                 <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
             </View>
         </Pressable>

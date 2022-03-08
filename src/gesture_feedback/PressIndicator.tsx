@@ -2,16 +2,17 @@ import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing } from 'react-native';
 import { BehaviorSubject } from 'rxjs';
+import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { GestureState } from '../types/uiTypes';
 
 
 interface Props {
     gestureStateObservable: BehaviorSubject<GestureState>
-    bounceAnim: Animated.Value
 }
 
-const PressIndicator = ({ gestureStateObservable, bounceAnim }: Props) => {
+const PressIndicator = ({ gestureStateObservable }: Props) => {
     const theme = useTheme();
+    const bounceAnim = useSyncedAnimation();
 
     const [currentState, setCurrentState] = useState<GestureState>(gestureStateObservable.value);
     useEffect(() => {
