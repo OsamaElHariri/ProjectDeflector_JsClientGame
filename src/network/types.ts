@@ -1,6 +1,8 @@
 import { Deflection, MatchPointPlayers, PlayerVariants } from "../game/types"
 import { Pawn, ScoreBoard } from "../types/types"
 
+export type NetworkRequestStatus = 'NONE' | 'LOADING' | 'ERROR'
+
 interface WsMatchFound {
     event: 'match_found'
     payload: {

@@ -12,6 +12,7 @@ import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { shouldUpdate } from './diffWatcher';
 import GameService from './gameService';
 import { useGameState } from './game_state_provider';
+import Spinner from './Spinner';
 import TurnTimerIcon, { TurnTimerIconOption } from "./TurnTimerIcons";
 import { GameState } from './types';
 
@@ -23,8 +24,9 @@ const TurnTimer = ({ playerId }: Props) => {
     const theme = useTheme();
     const player = usePlayer();
     const bounceAnim = useSyncedAnimation();
+    const networkKey = `turn_timer_${playerId}`;
 
-    const { stateSubject, updateState } = useGameState();
+    const { stateSubject, networkRequestStatus, updateState } = useGameState();
 
     const isCurrentPlayerTimer = playerId === player?.id;
 
@@ -40,6 +42,7 @@ const TurnTimer = ({ playerId }: Props) => {
     }
 
     const [state, setState] = useState({
+        networkState: networkRequestStatus.subject.value[networkKey],
         playerTurn: stateSubject.value.game.playerTurn,
         icon: getTimerIcon(stateSubject.value)
     });
@@ -47,6 +50,7 @@ const TurnTimer = ({ playerId }: Props) => {
     useEffect(() => {
         const sub = stateSubject.subscribe(gameState => {
             const newState = {
+                ...state,
                 playerTurn: gameState.game.playerTurn,
                 icon: getTimerIcon(gameState)
             }
@@ -59,6 +63,19 @@ const TurnTimer = ({ playerId }: Props) => {
 
         return () => sub.unsubscribe();
     }, [state]);
+
+
+    useEffect(() => {
+        const sub = networkRequestStatus.subject.subscribe(statuses => {
+            if (statuses[networkKey] !== state.networkState) {
+                setState({
+                    ...state,
+                    networkState: statuses[networkKey]
+                });
+            }
+        });
+        return () => sub.unsubscribe();
+    }, [state.networkState]);
 
     const scaleAnim = useRef(new Animated.Value(0)).current;
 
@@ -76,10 +93,17 @@ const TurnTimer = ({ playerId }: Props) => {
     }, [scaleAnim, state.playerTurn]);
 
     const endTurn = async () => {
+        if (state.networkState === 'LOADING') return;
+        networkRequestStatus.update(networkKey, 'LOADING');
+
         const res = await (new GameService).endTurn({
             gameId: stateSubject.value.game.gameId,
             playerSide: playerId,
+        }).catch(err => {
+            networkRequestStatus.update(networkKey, 'ERROR');
         });
+        if (!res) return;
+        networkRequestStatus.update(networkKey, 'NONE');
 
         updateState.onEndTurn(res);
     }
@@ -116,27 +140,32 @@ const TurnTimer = ({ playerId }: Props) => {
         : new Animated.Value(1);
 
     return (
-        <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
-            <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
-                <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
-                    <Animated.View style={{ width: '100%', height: '100%', backgroundColor: theme.colors.text, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+        <View style={{ marginTop: 16 }}>
+            <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
+                <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
+                    <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
+                        <Animated.View style={{ width: '100%', height: '100%', backgroundColor: theme.colors.text, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+                    </View>
+                    <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
+                        <Animated.View style={{ width: '100%', height: '100%', backgroundColor: '#73956F', opacity: colorAnim, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+                    </View>
+                    <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
+                        <TurnTimerIcon key={'timer_icon'} icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} />
+                    </Animated.View>
+                    <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
                 </View>
-                <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
-                    <Animated.View style={{ width: '100%', height: '100%', backgroundColor: '#73956F', opacity: colorAnim, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
-                </View>
-                <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
-                    <TurnTimerIcon key={'timer_icon'} icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} />
-                </Animated.View>
-                <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
+            </Pressable>
+
+            <View style={{ position: 'absolute', width: 18, height: 18, right: 10, top: 10 }}>
+                {state.networkState === 'LOADING' ? <Spinner /> : null}
             </View>
-        </Pressable>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     turnTimerContainer: {
         overflow: 'hidden',
-        marginTop: 16,
         width: '100%',
     },
     timerBorder: {

@@ -2,6 +2,7 @@ import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { BehaviorSubject, Subscription } from "rxjs";
 import { GameStateUpdate } from ".";
 import { useWsClient } from "../../main_providers/ws_provider";
+import { NetworkRequestStatus } from "../../network/types";
 import GameService from "../gameService";
 import { Game, GameState } from "../types";
 import { GameStateContext } from "./context"
@@ -24,6 +25,7 @@ export function GameStateProvider({ children, game }: Props) {
             allDeflectionsIndex: 0,
         }
     }));
+    const statusesSubject = useRef(new BehaviorSubject<{ [key: string]: NetworkRequestStatus }>({}));
 
     const gameStateUpdate: GameStateUpdate = {
         onEndTurn: (res) => {
@@ -138,9 +140,20 @@ export function GameStateProvider({ children, game }: Props) {
         return () => clientSub.current?.unsubscribe();
     }, [clientState])
 
+    const updateNetworkStatus = (networkKey: string, status: NetworkRequestStatus) => {
+        statusesSubject.current.next({
+            ...statusesSubject.current.value,
+            [networkKey]: status
+        });
+    }
+
     const contextVal = {
         stateSubject: gameStateSubject.current,
-        updateState: gameStateUpdate
+        updateState: gameStateUpdate,
+        networkRequestStatus: {
+            subject: statusesSubject.current,
+            update: updateNetworkStatus
+        }
     }
 
     return <GameStateContext.Provider value={contextVal} children={children} />
