@@ -55,7 +55,6 @@ const Line = ({ width }: LineProps) => {
         left: -width / 2,
         transform: [
             { translateX: width / 2 },
-            { translateY: dashHeight / 2 }
         ]
     }}>
         <Animated.View style={{

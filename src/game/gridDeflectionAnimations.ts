@@ -8,6 +8,8 @@ interface deflectionAnimParams {
     ballPosAnim: Animated.ValueXY
     animatedDurabilities: { [key: string]: Animated.Value }
     pawnScaleAnim: { [key: string]: Animated.Value }
+    gridCellWidth: number
+    ballDiameter: number
 }
 
 export function getDeflectionAnimations({
@@ -16,6 +18,8 @@ export function getDeflectionAnimations({
     ballPosAnim,
     animatedDurabilities,
     pawnScaleAnim,
+    gridCellWidth,
+    ballDiameter,
 }: deflectionAnimParams): Animated.CompositeAnimation {
     const fixedTimePerCell = 150;
 
@@ -41,11 +45,37 @@ export function getDeflectionAnimations({
         const timePerCell = fixedTimePerCell - (5 * i)
         const time = distance * Math.max(timePerCell, 50);
 
+        const toPosition = { ...deflection.position };
+        const ballGridPercent = ballDiameter / gridCellWidth;
+
+        // These checks slightly shift the end position of the ball so that it does not
+        // appear to pass through the pawns
+        const visualOffset = ballGridPercent * 0.2;
+        if (deflection.toDirection === 'UP') {
+            toPosition.y += visualOffset;
+        } else if (deflection.toDirection === 'DOWN') {
+            toPosition.y -= visualOffset;
+        } else if (deflection.toDirection === 'LEFT') {
+            toPosition.x -= visualOffset;
+        } else if (deflection.toDirection === 'RIGHT') {
+            toPosition.x += visualOffset;
+        }
+
+        if (previousDeflection.toDirection === 'UP') {
+            toPosition.y -= visualOffset;
+        } else if (previousDeflection.toDirection === 'DOWN') {
+            toPosition.y += visualOffset;
+        } else if (previousDeflection.toDirection === 'LEFT') {
+            toPosition.x += visualOffset;
+        } else if (previousDeflection.toDirection === 'RIGHT') {
+            toPosition.x -= visualOffset;
+        }
+
         const anims = [
             Animated.timing(
                 ballPosAnim,
                 {
-                    toValue: deflection.position,
+                    toValue: toPosition,
                     duration: time,
                     easing: Easing.in(Easing.linear),
                     useNativeDriver: true
@@ -71,7 +101,7 @@ export function getDeflectionAnimations({
             Animated.timing(
                 ballScaleAnim,
                 {
-                    toValue: xDistance > yDistance ? { x: 1.15, y: 0.55 } : { x: 0.55, y: 1.15 },
+                    toValue: xDistance > yDistance ? { x: 1.2, y: 0.5 } : { x: 0.5, y: 1.2 },
                     duration: time * 0.8,
                     easing: Easing.bounce,
                     useNativeDriver: true,

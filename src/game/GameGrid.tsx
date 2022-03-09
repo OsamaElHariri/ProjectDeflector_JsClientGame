@@ -47,6 +47,7 @@ const GameGrid = ({ gridSize }: Props) => {
 
     const posAnim = useRef(new Animated.ValueXY()).current;
     const ballScaleAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+    const ballDiameter = 30;
 
     useEffect(() => {
         const sub = stateSubject.subscribe(({ allDeflections, deflectionProcessing, game: { gameBoard: { pawns } } }) => {
@@ -73,7 +74,9 @@ const GameGrid = ({ gridSize }: Props) => {
                     ballPosAnim: posAnim,
                     ballScaleAnim: ballScaleAnim,
                     deflections: deflections,
-                    pawnScaleAnim: pawnScaleAnim.current
+                    pawnScaleAnim: pawnScaleAnim.current,
+                    ballDiameter,
+                    gridCellWidth: cellSize
                 }));
 
                 let newPawns = pawns;
@@ -121,7 +124,6 @@ const GameGrid = ({ gridSize }: Props) => {
         </View>
     });
 
-    const ballDiameter = 30;
     return (
         <View style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column' }}>
             <View style={{ height: cellSize / 2 }}></View>
