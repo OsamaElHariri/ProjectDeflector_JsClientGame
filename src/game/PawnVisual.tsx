@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from 'react';
 import {
     Animated,
     Easing,
-    Image,
     StyleSheet,
     View,
 } from 'react-native';
@@ -24,9 +23,10 @@ const durabilityImages = [
 interface Props {
     variant: PawnVariant
     durability: Animated.Value
+    color: string
 }
 
-const PawnVisual = ({ variant, durability }: Props) => {
+const PawnVisual = ({ variant, durability, color }: Props) => {
     const theme = useTheme();
     const rotateAnim = useRef(new Animated.Value(0)).current;
 
@@ -52,7 +52,7 @@ const PawnVisual = ({ variant, durability }: Props) => {
         return <Animated.Image key={`img_${i}`} source={img} style={{
             ...styles.imageBasics,
             opacity: animatedDurability,
-            tintColor: '#73956F'
+            tintColor: color
         }} />
     })
 

@@ -1,6 +1,5 @@
 export interface Player {
     id: string
-    color: string
 }
 
 export interface Position {

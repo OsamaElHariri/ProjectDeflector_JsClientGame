@@ -191,6 +191,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim }: Props) => {
 
     const canPress = pawn.name === '';
     const canLongPress = pawn.name === '' || isPreview;
+    let color = stateSubject.value.game.colors[pawn.playerOwner];
 
     return <View style={{
         borderColor: theme.colors.text,
@@ -214,7 +215,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim }: Props) => {
                 <PressIndicator gestureStateObservable={gestureHandler.current} />
             </View>
             <Animated.View style={{ opacity: isPreview ? 0.4 : 1, transform: [{ scale: scaleAnim }] }}>
-                <PawnVisual durability={durability} variant={pawn.name}></PawnVisual>
+                <PawnVisual durability={durability} variant={pawn.name} color={color}></PawnVisual>
             </Animated.View>
         </Pressable>
     </View>

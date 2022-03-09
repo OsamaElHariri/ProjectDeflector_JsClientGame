@@ -9,8 +9,7 @@ interface Props {
 export function PlayerProvider({ children }: Props) {
 
     const player = {
-        id: 'abc123',
-        color: 'blue'
+        id: '12abc12',
     } as Player;
 
     return <PlayerContext.Provider value={player} children={children} />

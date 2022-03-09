@@ -46,9 +46,10 @@ const ScoreBox = ({ width, children, index, isMatchPoint }: ScoreBoxProps) => {
 
 interface ScoreDotProps {
     isPoint: boolean
+    color: string
 }
 
-const ScoreDot = ({ isPoint }: ScoreDotProps) => {
+const ScoreDot = ({ isPoint, color }: ScoreDotProps) => {
     const expandAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -63,7 +64,7 @@ const ScoreDot = ({ isPoint }: ScoreDotProps) => {
         ).start();
     }, [expandAnim, isPoint]);
 
-    return <Animated.View style={{ ...styles.expanded, backgroundColor: '#73956F', borderRadius: 100, transform: [{ scale: expandAnim }] }}></Animated.View>
+    return <Animated.View style={{ ...styles.expanded, backgroundColor: color, borderRadius: 100, transform: [{ scale: expandAnim }] }}></Animated.View>
 }
 
 interface Props {
@@ -109,14 +110,16 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
             width = (currentLayout.height - width * ratioMargin) / (maxScore * (1 + ratioMargin));
         }
 
+        let color = stateSubject.value.game.colors[playerId];
+
         nodes = Array(maxScore).fill(undefined).map((_, idx) => {
             const isPoint = idx < state.score;
             return <View key={`score_${idx}`} style={{ marginBottom: width * ratioMargin, marginTop: idx === maxScore - 1 ? width * ratioMargin : 0 }}>
                 <ScoreBox index={idx} isMatchPoint={state.isMatchPoint} width={width}>
                     <View style={{ ...styles.expanded, position: 'absolute', top: -width * 0.5, left: -width * 0.5, transform: [{ translateX: width * 0.5 }, { translateY: width * 0.5 }] }}>
-                        <ScoreDot isPoint={isPoint} />
+                        <ScoreDot isPoint={isPoint} color={color} />
                     </View>
-                    <View style={{ ...styles.expanded, borderColor: '#73956F', borderWidth: width * 0.25 }}></View>
+                    <View style={{ ...styles.expanded, borderColor: color, borderWidth: width * 0.25 }}></View>
                 </ScoreBox>
             </View>
         });

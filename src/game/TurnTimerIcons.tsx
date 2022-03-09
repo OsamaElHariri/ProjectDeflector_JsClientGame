@@ -85,7 +85,7 @@ const WaitingDots = ({ color }: { color: string }) => {
 }
 
 export type TurnTimerIconOption = 'CLOCK' | 'END' | 'CANCEL' | 'WAITING'
-const TurnTimerIcon = ({ icon, dotColor }: { icon: TurnTimerIconOption, dotColor: string }) => {
+const TurnTimerIcon = ({ icon, dotColor, playerColor }: { icon: TurnTimerIconOption, dotColor: string, playerColor: string }) => {
     const theme = useTheme();
 
     const clockAnim = useRef(new Animated.Value(0)).current;
@@ -130,7 +130,7 @@ const TurnTimerIcon = ({ icon, dotColor }: { icon: TurnTimerIconOption, dotColor
             <Clock color={theme.colors.background} />
         </Animated.View>
         <Animated.View style={{ ...styles.iconPosition, transform: [{ scale: endAnim }] }}>
-            <EndTurn fillColor={theme.colors.background} borderColor={'#73956F'} />
+            <EndTurn fillColor={theme.colors.background} borderColor={playerColor} />
         </Animated.View>
         <Animated.View style={{ ...styles.iconPosition, transform: [{ scale: cancelAnim }] }}>
             <Cancel textBorderColor={theme.colors.text} textFillColor={theme.colors.background} />

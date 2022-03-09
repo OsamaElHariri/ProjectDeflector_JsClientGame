@@ -139,6 +139,9 @@ const TurnTimer = ({ playerId }: Props) => {
         ? Animated.add(0.5, Animated.multiply(0.5, bounceAnim))
         : new Animated.Value(1);
 
+    let color = stateSubject.value.game.colors[playerId];
+
+
     return (
         <View style={{ marginTop: 16 }}>
             <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
@@ -147,10 +150,10 @@ const TurnTimer = ({ playerId }: Props) => {
                         <Animated.View style={{ width: '100%', height: '100%', backgroundColor: theme.colors.text, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
                     </View>
                     <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
-                        <Animated.View style={{ width: '100%', height: '100%', backgroundColor: '#73956F', opacity: colorAnim, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+                        <Animated.View style={{ width: '100%', height: '100%', backgroundColor: color, opacity: colorAnim, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
                     </View>
                     <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
-                        <TurnTimerIcon key={'timer_icon'} icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} />
+                        <TurnTimerIcon key={'timer_icon'} icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} playerColor={color} />
                     </Animated.View>
                     <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
                 </View>
