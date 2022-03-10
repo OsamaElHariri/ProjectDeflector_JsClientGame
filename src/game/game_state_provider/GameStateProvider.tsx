@@ -42,6 +42,7 @@ export function GameStateProvider({ children, game }: Props) {
                 game: {
                     ...gameStateSubject.current.value.game,
                     ...remainingUpdates,
+                    availableShuffles: res.availableShuffles,
                     gameBoard: {
                         ...gameStateSubject.current.value.game.gameBoard,
                         scoreBoard
@@ -80,6 +81,7 @@ export function GameStateProvider({ children, game }: Props) {
                 ...gameStateSubject.current.value,
                 game: {
                     ...gameStateSubject.current.value.game,
+                    availableShuffles: res.availableShuffles,
                     variants: res.variants
                 }
             });

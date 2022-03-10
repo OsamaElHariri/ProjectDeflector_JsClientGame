@@ -1,4 +1,4 @@
-import { Deflection, MatchPointPlayers, PlayerVariants } from "../game/types"
+import { AvailableShuffles, Deflection, MatchPointPlayers, PlayerVariants } from "../game/types"
 import { Pawn, ScoreBoard } from "../types/types"
 
 export type NetworkRequestStatus = 'NONE' | 'LOADING' | 'ERROR'
@@ -23,13 +23,14 @@ interface WsAddPawn {
 }
 
 export interface EndTurnResponse {
-    scoreBoard: ScoreBoard,
-    variants: PlayerVariants,
-    playerTurn: string,
-    allDeflections: Deflection[][],
-    winner: string,
-    matchPointPlayers: MatchPointPlayers,
-    deflections: Deflection[],
+    scoreBoard: ScoreBoard
+    variants: PlayerVariants
+    playerTurn: string
+    allDeflections: Deflection[][]
+    winner: string
+    matchPointPlayers: MatchPointPlayers
+    availableShuffles: AvailableShuffles
+    deflections: Deflection[]
 }
 
 interface WsEndTurn {
@@ -38,10 +39,11 @@ interface WsEndTurn {
 }
 
 export interface ShuffleResponse {
-    hasPeek: boolean,
-    variants: PlayerVariants,
+    hasPeek: boolean
+    variants: PlayerVariants
     newPawn: Pawn
     deflections: Deflection[]
+    availableShuffles: AvailableShuffles
 }
 
 interface WsShuffle {

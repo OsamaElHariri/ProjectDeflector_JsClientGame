@@ -3,6 +3,7 @@ import { GameBoard, Pawn, PawnVariant, Position } from "../types/types";
 export interface PlayerVariants { [playerId: string]: PawnVariant[] }
 
 export interface MatchPointPlayers { [playerId: string]: boolean }
+export interface AvailableShuffles { [playerId: string]: number }
 
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
 
@@ -14,6 +15,7 @@ export interface Game {
     variants: PlayerVariants
     targetScore: number
     matchPointPlayers: MatchPointPlayers
+    availableShuffles: AvailableShuffles
     colors: { [playerId: string]: string }
     deflections: Deflection[]
 }
