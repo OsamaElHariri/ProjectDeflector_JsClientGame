@@ -3,6 +3,7 @@ import {
     Animated,
     View,
 } from 'react-native';
+import { BALL_DIAMETER } from '../constants';
 import { Pawn } from '../types/types';
 import BallPathPreview from './BallPathPreview';
 import { shouldUpdate } from './diffWatcher';
@@ -38,8 +39,9 @@ const startAnimation = async (animation: { start: Function }) => {
 
 const GameGrid = ({ gridSize }: Props) => {
     const { stateSubject, updateState } = useGameState();
-    const animatedDurabilities = useRef<{ [key: string]: Animated.Value }>({});
+    const durabilityAnims = useRef<{ [key: string]: Animated.Value }>({});
     const pawnScaleAnim = useRef<{ [key: string]: Animated.Value }>({});
+    const pawnPosAnims = useRef<{ [key: string]: Animated.ValueXY }>({});
     const watchValues = useRef({
         allDeflections: stateSubject.value.allDeflections,
         ...stateSubject.value.deflectionProcessing,
@@ -47,7 +49,6 @@ const GameGrid = ({ gridSize }: Props) => {
 
     const posAnim = useRef(new Animated.ValueXY()).current;
     const ballScaleAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
-    const ballDiameter = 30;
 
     useEffect(() => {
         const sub = stateSubject.subscribe(({ allDeflections, deflectionProcessing, game: { gameBoard: { pawns } } }) => {
@@ -70,13 +71,12 @@ const GameGrid = ({ gridSize }: Props) => {
             }
             (async () => {
                 await startAnimation(getDeflectionAnimations({
-                    animatedDurabilities: animatedDurabilities.current,
+                    durabilityAnims: durabilityAnims.current,
                     ballPosAnim: posAnim,
                     ballScaleAnim: ballScaleAnim,
                     deflections: deflections,
                     pawnScaleAnim: pawnScaleAnim.current,
-                    ballDiameter,
-                    gridCellWidth: cellSize
+                    pawnPosAnims: pawnPosAnims.current,
                 }));
 
                 let newPawns = pawns;
@@ -105,16 +105,20 @@ const GameGrid = ({ gridSize }: Props) => {
     const grid = Array(rows).fill(undefined).map((_, rowIdx) => {
         const columns = Array(cols).fill(undefined).map((_, colIdx) => {
             const key = `cell_${rowIdx}_${colIdx}`;
-            if (!animatedDurabilities.current[key]) {
-                animatedDurabilities.current[key] = new Animated.Value(0);
+            if (!durabilityAnims.current[key]) {
+                durabilityAnims.current[key] = new Animated.Value(0);
             }
             if (!pawnScaleAnim.current[key]) {
                 pawnScaleAnim.current[key] = new Animated.Value(1);
             }
+            if (!pawnPosAnims.current[key]) {
+                pawnPosAnims.current[key] = new Animated.ValueXY({ x: 0, y: 0 });
+            }
             return <View key={key} style={{ flex: 1 }}>
-                <GridCell durability={animatedDurabilities.current[key]}
+                <GridCell durability={durabilityAnims.current[key]}
                     colIdx={colIdx}
                     rowIdx={rowIdx}
+                    posAnim={pawnPosAnims.current[key]}
                     scaleAnim={pawnScaleAnim.current[key]} />
             </View>
         });
@@ -133,10 +137,10 @@ const GameGrid = ({ gridSize }: Props) => {
             <View style={{ position: 'absolute', width: cellSize * rows, height: cellSize * cols }}>
                 <BallPathPreview cellSize={cellSize} />
             </View>
-            <View style={{ width: '100%', top: -ballDiameter / 2 - cellSize * (rows - 0.5), left: -ballDiameter / 2 + cellSize / 2 }}>
+            <View style={{ width: '100%', top: -BALL_DIAMETER / 2 - cellSize * (rows - 0.5), left: -BALL_DIAMETER / 2 + cellSize / 2 }}>
                 <Animated.View style={{
-                    width: ballDiameter,
-                    height: ballDiameter,
+                    width: BALL_DIAMETER,
+                    height: BALL_DIAMETER,
                     borderRadius: 100,
                     position: 'absolute',
                     backgroundColor: 'black',

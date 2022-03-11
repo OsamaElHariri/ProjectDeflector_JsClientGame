@@ -1,4 +1,5 @@
 import { Animated, Easing } from "react-native";
+import { BALL_DIAMETER } from "../constants";
 import { Deflection } from "./types";
 
 
@@ -6,20 +7,18 @@ interface deflectionAnimParams {
     deflections: Deflection[]
     ballScaleAnim: Animated.ValueXY
     ballPosAnim: Animated.ValueXY
-    animatedDurabilities: { [key: string]: Animated.Value }
+    durabilityAnims: { [key: string]: Animated.Value }
+    pawnPosAnims: { [key: string]: Animated.ValueXY }
     pawnScaleAnim: { [key: string]: Animated.Value }
-    gridCellWidth: number
-    ballDiameter: number
 }
 
 export function getDeflectionAnimations({
     deflections,
     ballScaleAnim,
     ballPosAnim,
-    animatedDurabilities,
+    durabilityAnims,
+    pawnPosAnims,
     pawnScaleAnim,
-    gridCellWidth,
-    ballDiameter,
 }: deflectionAnimParams): Animated.CompositeAnimation {
     const fixedTimePerCell = 150;
 
@@ -45,37 +44,11 @@ export function getDeflectionAnimations({
         const timePerCell = fixedTimePerCell - (5 * i)
         const time = distance * Math.max(timePerCell, 50);
 
-        const toPosition = { ...deflection.position };
-        const ballGridPercent = ballDiameter / gridCellWidth;
-
-        // These checks slightly shift the end position of the ball so that it does not
-        // appear to pass through the pawns
-        const visualOffset = ballGridPercent * 0.2;
-        if (deflection.toDirection === 'UP') {
-            toPosition.y += visualOffset;
-        } else if (deflection.toDirection === 'DOWN') {
-            toPosition.y -= visualOffset;
-        } else if (deflection.toDirection === 'LEFT') {
-            toPosition.x -= visualOffset;
-        } else if (deflection.toDirection === 'RIGHT') {
-            toPosition.x += visualOffset;
-        }
-
-        if (previousDeflection.toDirection === 'UP') {
-            toPosition.y -= visualOffset;
-        } else if (previousDeflection.toDirection === 'DOWN') {
-            toPosition.y += visualOffset;
-        } else if (previousDeflection.toDirection === 'LEFT') {
-            toPosition.x += visualOffset;
-        } else if (previousDeflection.toDirection === 'RIGHT') {
-            toPosition.x -= visualOffset;
-        }
-
         const anims = [
             Animated.timing(
                 ballPosAnim,
                 {
-                    toValue: toPosition,
+                    toValue: deflection.position,
                     duration: time,
                     easing: Easing.in(Easing.linear),
                     useNativeDriver: true
@@ -83,11 +56,11 @@ export function getDeflectionAnimations({
             )
         ];
 
-        const key = `cell_${previousDeflection.position.y}_${previousDeflection.position.x}`;
+        const previousKey = `cell_${previousDeflection.position.y}_${previousDeflection.position.x}`;
         const setDurability = previousDeflection.events.find(evt => evt.name === 'SET_DURABILITY');
-        if (animatedDurabilities[key] && setDurability) {
+        if (durabilityAnims[previousKey] && setDurability) {
             const durabilityAnim = Animated.timing(
-                animatedDurabilities[key],
+                durabilityAnims[previousKey],
                 {
                     toValue: setDurability.durability,
                     duration: 5,
@@ -133,10 +106,10 @@ export function getDeflectionAnimations({
             ));
         }
 
-        if (pawnScaleAnim[key]) {
+        if (pawnScaleAnim[previousKey]) {
             const pawnHitAnim = Animated.sequence([
                 Animated.timing(
-                    pawnScaleAnim[key],
+                    pawnScaleAnim[previousKey],
                     {
                         toValue: 1.2,
                         duration: timePerCell / 2,
@@ -145,7 +118,7 @@ export function getDeflectionAnimations({
                     }
                 ),
                 Animated.timing(
-                    pawnScaleAnim[key],
+                    pawnScaleAnim[previousKey],
                     {
                         toValue: 1,
                         duration: timePerCell / 2,
@@ -156,6 +129,48 @@ export function getDeflectionAnimations({
             ]);
             anims.push(pawnHitAnim);
         }
+
+        const key = `cell_${deflection.position.y}_${deflection.position.x}`;
+        const toPosition = { x: 0, y: 0 };
+
+        const visualOffset = BALL_DIAMETER * 0.6;
+        if (previousDeflection.toDirection === 'UP') {
+            toPosition.y += visualOffset;
+        } else if (previousDeflection.toDirection === 'DOWN') {
+            toPosition.y -= visualOffset;
+        } else if (previousDeflection.toDirection === 'LEFT') {
+            toPosition.x -= visualOffset;
+        } else if (previousDeflection.toDirection === 'RIGHT') {
+            toPosition.x += visualOffset;
+        }
+
+        if (pawnPosAnims[key]) {
+            const pawnOffsetAnim = Animated.timing(
+                pawnPosAnims[key],
+                {
+                    toValue: toPosition,
+                    duration: timePerCell * 0.25,
+                    delay: time - timePerCell * 0.25,
+                    easing: Easing.out(Easing.linear),
+                    useNativeDriver: true
+                }
+            );
+            anims.push(pawnOffsetAnim);
+        }
+
+        if (pawnPosAnims[previousKey]) {
+            const pawnToOriginalAnim = Animated.timing(
+                pawnPosAnims[previousKey],
+                {
+                    toValue: 0,
+                    duration: timePerCell,
+                    easing: Easing.elastic(1),
+                    useNativeDriver: true
+                }
+            );
+            anims.push(pawnToOriginalAnim);
+        }
+
 
         return Animated.parallel(anims, { stopTogether: false });
     });

@@ -22,9 +22,10 @@ interface Props {
     colIdx: number
     durability: Animated.Value
     scaleAnim: Animated.Value
+    posAnim: Animated.ValueXY
 }
 
-const GridCell = ({ rowIdx, colIdx, durability, scaleAnim }: Props) => {
+const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => {
     const theme = useTheme();
     const player = usePlayer();
     const networkKey = `grid_cell_${rowIdx}_${colIdx}`;
@@ -214,7 +215,12 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim }: Props) => {
             <View pointerEvents='none' style={{ position: 'absolute', width: '100%', height: '100%', transform: [{ scale: 0.7 }] }}>
                 <PressIndicator gestureStateObservable={gestureHandler.current} />
             </View>
-            <Animated.View style={{ opacity: isPreview ? 0.4 : 1, transform: [{ scale: scaleAnim }] }}>
+            <Animated.View style={{
+                opacity: isPreview ? 0.4 : 1, transform: [
+                    { scale: scaleAnim },
+                    { translateX: posAnim.x },
+                    { translateY: posAnim.y }]
+            }}>
                 <PawnVisual durability={durability} variant={pawn.name} color={color}></PawnVisual>
             </Animated.View>
         </Pressable>
