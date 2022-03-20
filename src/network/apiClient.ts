@@ -1,8 +1,10 @@
 export default class ApiClient {
 
-    private baseUrl = 'http://192.168.2.141:8080';
+    private static baseUrl = 'http://192.168.2.141:8080';
 
-    get(urlPath: string, params: { [key: string]: any } = {}) {
+    static accessToken = "";
+
+    static get(urlPath: string, params: { [key: string]: any } = {}) {
         let urlEncoded = urlPath;
 
         Object.keys(params).forEach((key, idx) => {
@@ -10,14 +12,21 @@ export default class ApiClient {
             urlEncoded += `${key}=${params[key]}`;
         })
 
-        return fetch(this.baseUrl + urlEncoded)
+        return fetch(this.baseUrl + urlEncoded, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.accessToken}`,
+            }
+        })
     }
 
-    post(urlPath: string, body: { [key: string]: any } = {}) {
+    static post(urlPath: string, body: { [key: string]: any } = {}) {
         return fetch(this.baseUrl + urlPath, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.accessToken}`,
             },
             body: JSON.stringify(body)
         })

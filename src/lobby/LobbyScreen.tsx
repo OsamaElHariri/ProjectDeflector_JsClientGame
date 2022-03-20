@@ -20,7 +20,7 @@ const LobbyScreen = () => {
             <Button
                 onPress={() => {
                     if (!player) return;
-                    (new GameService).findSolo(player.id)
+                    GameService.findSolo()
                     nav.replace('AwaitingGame')
                 }}
                 title="Practice Game"

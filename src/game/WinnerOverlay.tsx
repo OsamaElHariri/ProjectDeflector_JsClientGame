@@ -7,6 +7,7 @@ import {
     Text,
     View,
 } from 'react-native';
+import PlainOverlay from '../lobby/PlainOverlay';
 import { usePlayer } from '../main_providers/player_provider';
 import { AppNavigation } from '../types/uiTypes';
 import { shouldUpdate } from './diffWatcher';
@@ -45,7 +46,7 @@ const WinnerOverlay = () => {
     const text = winner === player?.id ? 'YOU WON' : 'YOU LOST...';
     const subtitleText = winner === player?.id ? 'That was amazing!' : 'But you sure had fun, am I right?';
 
-    return <View style={{ ...styles.overlay, backgroundColor: theme.colors.background }}>
+    return <PlainOverlay>
         <Text style={{ fontWeight: 'bold', color: theme.colors.text, fontSize: 32 }}>{text}</Text>
         <Text style={{ fontWeight: 'bold', color: theme.colors.text, fontSize: 24 }}>{subtitleText}</Text>
         <View style={styles.button}>
@@ -54,19 +55,10 @@ const WinnerOverlay = () => {
                 onPress={backToMenu}
             />
         </View>
-    </View>
+    </PlainOverlay>
 }
 
 const styles = StyleSheet.create({
-    overlay: {
-        paddingTop: '10%',
-        display: 'flex',
-        alignItems: 'center',
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        textAlign: 'center',
-    },
     button: {
         marginTop: 24,
     },

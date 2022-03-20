@@ -118,9 +118,8 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
         if (state.networkState === 'LOADING') return;
         networkRequestStatus.update(networkKey, 'LOADING');
 
-        const res = await (new GameService).addPawn({
+        const res = await GameService.addPawn({
             gameId: stateSubject.value.game.gameId,
-            playerSide: stateSubject.value.game.playerTurn,
             x: colIdx,
             y: rowIdx,
         }).catch(err => {
@@ -136,9 +135,8 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
         if (state.networkState === 'LOADING') return;
         networkRequestStatus.update(networkKey, 'LOADING');
 
-        const res = await (new GameService).peek({
+        const res = await GameService.peek({
             gameId: stateSubject.value.game.gameId,
-            playerSide: stateSubject.value.game.playerTurn,
             x: colIdx,
             y: rowIdx,
         }).catch(err => {

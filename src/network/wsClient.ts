@@ -1,4 +1,5 @@
 import { Subject, Subscription } from 'rxjs';
+import ApiClient from './apiClient';
 import { GameWsEvent } from './types';
 
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
@@ -24,14 +25,18 @@ export default class WsClient {
         this.connectionStatusSubject = new Subject();
     }
 
-    connect(playerId: string) {
-        const client = new WebSocket(this.baseUrl + '/realtime/ws/' + playerId);
+    connect() {
+        const client = new WebSocket(this.baseUrl + '/realtime/ws', undefined, {
+            headers: {
+                'Authorization': `Bearer ${ApiClient.accessToken}`,
+            }
+        });
 
         let shouldAttemptToReconnect = true;
         const attemptReconnect = () => {
             if (!shouldAttemptToReconnect) return;
             shouldAttemptToReconnect = false;
-            setTimeout(() => this.connect(playerId), this.reconnectionTimeout);
+            setTimeout(() => this.connect(), this.reconnectionTimeout);
         };
 
         this.client = client;
@@ -78,7 +83,7 @@ export default class WsClient {
                 client.removeEventListener('open', onOpen);
                 client.removeEventListener('message', onMessage);
                 client.removeEventListener('close', onClose);
-                
+
                 sendSubscription?.unsubscribe();
                 client.close();
                 attemptReconnect();

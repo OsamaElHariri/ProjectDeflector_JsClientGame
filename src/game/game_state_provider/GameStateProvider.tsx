@@ -129,13 +129,13 @@ export function GameStateProvider({ children, game }: Props) {
             // TODO enable these after fixing WS connection issues
             // and after disabling sending WS event to current player
             /* if (event.event === 'turn') {
-                gameStateUpdate.onEndTurn(new GameService().parseEndTurnResponse(event.payload));
+                gameStateUpdate.onEndTurn(GameService.parseEndTurnResponse(event.payload));
             } else if (event.event === 'pawn') {
-                gameStateUpdate.onAddPawn(new GameService().parseAddPawnResponse(event.payload));
+                gameStateUpdate.onAddPawn(GameService.parseAddPawnResponse(event.payload));
             } else if (event.event === 'shuffle') {
-                gameStateUpdate.onShuffle(new GameService().parseShuffleResponse(event.payload));
+                gameStateUpdate.onShuffle(GameService.parseShuffleResponse(event.payload));
             } else if (event.event === 'peek') {
-                gameStateUpdate.onPeek(new GameService().parsePeekResponse(event.payload));
+                gameStateUpdate.onPeek(GameService.parsePeekResponse(event.payload));
             } */
         });
 

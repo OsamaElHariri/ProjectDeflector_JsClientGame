@@ -96,9 +96,8 @@ const TurnTimer = ({ playerId }: Props) => {
         if (state.networkState === 'LOADING') return;
         networkRequestStatus.update(networkKey, 'LOADING');
 
-        const res = await (new GameService).endTurn({
+        const res = await GameService.endTurn({
             gameId: stateSubject.value.game.gameId,
-            playerSide: playerId,
         }).catch(err => {
             networkRequestStatus.update(networkKey, 'ERROR');
         });

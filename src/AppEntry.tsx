@@ -9,7 +9,7 @@ import GameScreen from './game/GameScreen';
 import AwaitingGameScreen from './game/AwaitingGameScreen';
 import { SyncedAnimationProvider } from './main_providers/synced_animation';
 
-const GameTheme = {
+export const GameTheme = {
     ...DefaultTheme,
     colors: {
         ...DefaultTheme.colors,

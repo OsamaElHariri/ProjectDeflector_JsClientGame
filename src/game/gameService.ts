@@ -5,38 +5,15 @@ import { Deflection, Game } from "./types";
 
 export default class GameService {
 
-    async getColors(playerId: string) {
-        const res = await (new ApiClient).get(`/game/colors/${playerId}`);
-        const json = await res.json();
-
-        return {
-            colors: json.colors
-        };
-    }
-
-    async postColor(playerId: string, color: string) {
-        const res = await (new ApiClient).post(`/game/color`, {
-            playerId,
-            color
-        });
-        const json = await res.json();
-
-        return {
-            color: json.color
-        };
-    }
-
-    async findSolo(playerId: string) {
-        const res = await (new ApiClient).post(`/match/solo`, {
-            playerId
-        });
+    static async findSolo() {
+        const res = await ApiClient.post(`/match/solo`);
         const json = await res.json();
 
         return json;
     }
 
-    async getGame(gameId: string): Promise<Game> {
-        const res = await (new ApiClient).get(`/game/game/${gameId}`);
+    static async getGame(gameId: string): Promise<Game> {
+        const res = await ApiClient.get(`/game/game/${gameId}`);
         const json: Game = await res.json();
         Object.keys(json.variants).forEach(playerId => {
             json.variants[playerId] = json.variants[playerId].map(v => v.toUpperCase() as PawnVariant);
@@ -51,13 +28,13 @@ export default class GameService {
         };
     }
 
-    async addPawn(req: { gameId: string, x: number, y: number, playerSide: string }): Promise<AddPawnResponse> {
-        const res = await (new ApiClient).post(`/game/pawn`, req);
+    static async addPawn(req: { gameId: string, x: number, y: number }): Promise<AddPawnResponse> {
+        const res = await ApiClient.post(`/game/pawn`, req);
         const json = await res.json();
         return this.parseAddPawnResponse(json);
     }
 
-    parseAddPawnResponse(json: any): AddPawnResponse {
+    static parseAddPawnResponse(json: any): AddPawnResponse {
         Object.keys(json.variants).forEach(playerId => {
             json.variants[playerId] = json.variants[playerId].map((v: string) => v.toUpperCase() as PawnVariant);
         });
@@ -68,13 +45,13 @@ export default class GameService {
         };
     }
 
-    async endTurn(req: { gameId: string, playerSide: string }): Promise<EndTurnResponse> {
-        const res = await (new ApiClient).post(`/game/turn`, req);
+    static async endTurn(req: { gameId: string }): Promise<EndTurnResponse> {
+        const res = await ApiClient.post(`/game/turn`, req);
         const json = await res.json();
         return this.parseEndTurnResponse(json);
     }
 
-    parseEndTurnResponse(json: any): EndTurnResponse {
+    static parseEndTurnResponse(json: any): EndTurnResponse {
         Object.keys(json.variants).forEach(playerId => {
             json.variants[playerId] = json.variants[playerId].map((v: string) => v.toUpperCase() as PawnVariant);
         });
@@ -87,13 +64,13 @@ export default class GameService {
         };
     }
 
-    async shuffle(req: { gameId: string, x: number, y: number, hasPeek: boolean, playerSide: string }): Promise<ShuffleResponse> {
-        const res = await (new ApiClient).post(`/game/shuffle`, req);
+    static async shuffle(req: { gameId: string, x: number, y: number, hasPeek: boolean }): Promise<ShuffleResponse> {
+        const res = await ApiClient.post(`/game/shuffle`, req);
         const json = await res.json();
         return this.parseShuffleResponse(json);
     }
 
-    parseShuffleResponse(json: any): ShuffleResponse {
+    static parseShuffleResponse(json: any): ShuffleResponse {
         Object.keys(json.variants).forEach(playerId => {
             json.variants[playerId] = json.variants[playerId].map((v: string) => v.toUpperCase() as PawnVariant);
         });
@@ -104,13 +81,13 @@ export default class GameService {
         };
     }
 
-    async peek(req: { gameId: string, x: number, y: number, playerSide: string }): Promise<PeekResponse> {
-        const res = await (new ApiClient).post(`/game/peek`, req);
+    static async peek(req: { gameId: string, x: number, y: number }): Promise<PeekResponse> {
+        const res = await ApiClient.post(`/game/peek`, req);
         const json = await res.json();
         return this.parsePeekResponse(json);
     }
 
-    parsePeekResponse(json: any): PeekResponse {
+    static parsePeekResponse(json: any): PeekResponse {
         return {
             ...json,
             newPawn: this.parsePawn(json.newPawn),
@@ -118,14 +95,14 @@ export default class GameService {
         };
     }
 
-    parsePawn(pawn: any): Pawn {
+    static parsePawn(pawn: any): Pawn {
         return {
             ...pawn,
             name: pawn.name.toUpperCase()
         }
     }
 
-    parseDeflection(deflection: any): Deflection {
+    static parseDeflection(deflection: any): Deflection {
         const directionMap: { [key: number]: string } = {
             0: 'UP',
             1: 'DOWN',

@@ -74,10 +74,9 @@ const ShuffleButton = ({ width, playerId }: Props) => {
     const shuffle = async () => {
         if (state.networkState === 'LOADING') return;
         networkRequestStatus.update(networkKey, 'LOADING');
-        const res = await (new GameService).shuffle({
+        const res = await GameService.shuffle({
             gameId: stateSubject.value.game.gameId,
             hasPeek: false,
-            playerSide: playerId,
             x: 0,
             y: 0
         }).catch(err => {

@@ -25,7 +25,7 @@ export function WsClientProvider({ children }: Props) {
             });
         });
 
-        client.connect(player.id);
+        client.connect();
     }, [player]);
 
     return <WsClientContext.Provider value={connection} children={children} />
