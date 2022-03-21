@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import {
     Animated,
+    Easing,
     View,
 } from 'react-native';
 import { BALL_DIAMETER } from '../constants';
@@ -47,8 +48,34 @@ const GameGrid = ({ gridSize }: Props) => {
         ...stateSubject.value.deflectionProcessing,
     });
 
-    const posAnim = useRef(new Animated.ValueXY()).current;
-    const ballScaleAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+    const initialBallPos = stateSubject.value.currentTurnDeflections?.[0].position || { x: 0, y: 0 }
+    const posAnim = useRef(new Animated.ValueXY(initialBallPos)).current;
+    const ballScaleAnim = useRef(new Animated.ValueXY({ x: 1, y: 1 })).current;
+
+    const ballIdleAnim = () => Animated.loop(Animated.sequence([
+        Animated.timing(
+            ballScaleAnim,
+            {
+                toValue: 1.1,
+                duration: 1000,
+                easing: Easing.elastic(5),
+                useNativeDriver: true
+            }
+        ),
+        Animated.timing(
+            ballScaleAnim,
+            {
+                toValue: 1,
+                duration: 1000,
+                easing: Easing.elastic(2),
+                useNativeDriver: true
+            }
+        )
+    ])).start();
+
+    useEffect(() => {
+        ballIdleAnim()
+    }, [])
 
     useEffect(() => {
         const sub = stateSubject.subscribe(({ allDeflections, deflectionProcessing, game: { gameBoard: { pawns } } }) => {
@@ -86,8 +113,15 @@ const GameGrid = ({ gridSize }: Props) => {
                 updateState.updatePawns(newPawns);
 
                 const nextIndex = deflectionProcessing.allDeflectionsIndex + 1;
+                const isActive = nextIndex < allDeflections.length
+
+                if (!isActive && stateSubject.value.currentTurnDeflections?.[0]) {
+                    posAnim.setValue(stateSubject.value.currentTurnDeflections[0].position);
+                    ballIdleAnim();
+                }
+
                 updateState.updateDeflectionProcessing({
-                    isActive: nextIndex < allDeflections.length,
+                    isActive,
                     allDeflectionsIndex: Math.min(nextIndex, allDeflections.length)
                 });
             })();

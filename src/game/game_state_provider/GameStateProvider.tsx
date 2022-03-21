@@ -18,6 +18,7 @@ export function GameStateProvider({ children, game }: Props) {
 
     const gameStateSubject = useRef(new BehaviorSubject<GameState>({
         game,
+        currentTurnDeflections: game.deflections,
         allDeflections: [],
         winner: '',
         deflectionProcessing: {

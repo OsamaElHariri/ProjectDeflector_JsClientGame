@@ -10,9 +10,10 @@ import { Deflection, Direction, GameState } from './types';
 
 interface LineProps {
     width: number
+    color: string
 }
 
-const Line = ({ width }: LineProps) => {
+const Line = ({ width,color }: LineProps) => {
     const offseteAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
         Animated.loop(
@@ -40,7 +41,7 @@ const Line = ({ width }: LineProps) => {
                 width: dashWidth,
                 height: dashHeight,
                 marginRight: dashSpace,
-                backgroundColor: 'red',
+                backgroundColor: color,
                 borderRadius: dashHeight
             }}>
         </View>
@@ -78,6 +79,7 @@ interface Props {
 
 const BallPathPreview = ({ cellSize }: Props) => {
     const { stateSubject } = useGameState();
+    const color = stateSubject.value.game.colors[stateSubject.value.game.playerTurn];
 
     const getDeflections = (gameState: GameState) => {
         let deflectionPath: Deflection[] | undefined = gameState.deflectionPreview || gameState.currentTurnDeflections || gameState.game.deflections;
@@ -139,7 +141,7 @@ const BallPathPreview = ({ cellSize }: Props) => {
                     { rotateZ: getRotationDegrees(deflection.toDirection) },
                 ],
             }}>
-            <Line width={width} />
+            <Line width={width} color={color} />
         </View>
     });
 
