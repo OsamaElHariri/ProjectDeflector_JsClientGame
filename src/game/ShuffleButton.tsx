@@ -9,6 +9,7 @@ import {
     Text,
     View,
 } from 'react-native';
+import { usePlayer } from '../main_providers/player_provider';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { shouldUpdate } from './diffWatcher';
 import GameService from './gameService';
@@ -22,7 +23,9 @@ interface Props {
 
 const ShuffleButton = ({ width, playerId }: Props) => {
     const theme = useTheme();
+    const player = usePlayer();
     const { stateSubject, networkRequestStatus, updateState } = useGameState();
+    const leftSide = stateSubject.value.game.playerIds[0] === playerId;
     const bounceAnim = useSyncedAnimation();
     const scaleAnim = useRef(new Animated.Value(0)).current
     const networkKey = `loading_${playerId}`;
@@ -49,7 +52,7 @@ const ShuffleButton = ({ width, playerId }: Props) => {
         const sub = stateSubject.subscribe(({ game: { availableShuffles, playerTurn } }) => {
             const newState = {
                 ...state,
-                canShuffle: playerTurn === playerId && availableShuffles[playerTurn] > 0,
+                canShuffle: playerId === player?.id && playerTurn === playerId && availableShuffles[playerTurn] > 0,
                 playerTurn,
             }
             if (shouldUpdate(newState, state)) {
@@ -89,7 +92,7 @@ const ShuffleButton = ({ width, playerId }: Props) => {
     }
 
     return <View>
-        <View style={{ position: 'absolute', width: 18, height: 18, right: 5 }}>
+        <View style={{ position: 'absolute', width: 18, height: 18, right: leftSide ? 5 : undefined, left: leftSide ? undefined : 5 }}>
             {state.networkState === 'LOADING' ? <Spinner /> : null}
         </View>
         <Pressable onPress={state.canShuffle ? shuffle : undefined}>

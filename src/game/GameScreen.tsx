@@ -12,6 +12,7 @@ import { GameStateProvider } from './game_state_provider';
 import ShuffleButton from './ShuffleButton';
 import PawnPreviewContainer from './PawnPreviewContainer';
 import WinnerOverlay from './WinnerOverlay';
+import PlayerHud from './PlayerHud';
 
 interface Props {
     route: RouteProp<{ params: { game: Game } }, 'params'>
@@ -29,13 +30,13 @@ const GameScreen = ({ route }: Props) => {
     return (
         <GameStateProvider game={initialGame}>
             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'stretch', position: 'relative', height: '100%' }}>
-                <View style={{ display: 'flex', height: '100%', alignItems: 'center' }}>
+                <PlayerHud playerId={initialGame.playerIds[0]} hudWidth={hudWidth} >
                     <View style={{ width: '100%', flex: 1 }}>
                         <TurnTimer playerId={initialGame.playerIds[0]} />
                     </View>
                     <PawnPreviewContainer width={hudWidth} playerId={initialGame.playerIds[0]}></PawnPreviewContainer>
                     <ShuffleButton width={hudWidth} playerId={initialGame.playerIds[0]} />
-                </View>
+                </PlayerHud>
 
                 <View style={{ position: 'relative' }}>
                     <View style={{ width: scoreBarWidth }}>
@@ -45,19 +46,19 @@ const GameScreen = ({ route }: Props) => {
 
                 <GameGrid gridSize={gridSize} />
 
-                <View style={{ position: 'relative' }}>
+                <View style={{ position: 'relative', transform: [{ scaleX: -1 }] }}>
                     <View style={{ width: scoreBarWidth }}>
                         <ScoreBar playerId={initialGame.playerIds[1]} maxScore={7} />
                     </View>
                 </View>
 
-                <View style={{ display: 'flex', height: '100%', alignItems: 'center' }}>
+                <PlayerHud playerId={initialGame.playerIds[1]} hudWidth={hudWidth}>
                     <View style={{ width: '100%', flex: 1 }}>
                         <TurnTimer playerId={initialGame.playerIds[1]} />
                     </View>
                     <PawnPreviewContainer width={hudWidth} playerId={initialGame.playerIds[1]}></PawnPreviewContainer>
                     <ShuffleButton width={hudWidth} playerId={initialGame.playerIds[1]} />
-                </View>
+                </PlayerHud>
             </View>
             <WinnerOverlay />
         </GameStateProvider>

@@ -27,6 +27,7 @@ const TurnTimer = ({ playerId }: Props) => {
     const networkKey = `turn_timer_${playerId}`;
 
     const { stateSubject, networkRequestStatus, updateState } = useGameState();
+    const leftSide = stateSubject.value.game.playerIds[0] === playerId;
 
     const isCurrentPlayerTimer = playerId === player?.id;
 
@@ -35,8 +36,7 @@ const TurnTimer = ({ playerId }: Props) => {
             if (playerId === gameState.game.playerTurn) return 'CLOCK';
             else return 'WAITING';
         } else {
-            if (gameState.previewPawn) return 'CANCEL';
-            else if (playerId === gameState.game.playerTurn) return 'END';
+            if (playerId === gameState.game.playerTurn) return 'END';
             else return 'WAITING';
         }
     }
@@ -107,34 +107,15 @@ const TurnTimer = ({ playerId }: Props) => {
         updateState.onEndTurn(res);
     }
 
-    const cancelPawn = () => {
-        updateState.onCancelPeek();
-    }
-
     const onPress = () => {
-        if (stateSubject.value.previewPawn) {
-            cancelPawn();
-        } else {
+        if (!stateSubject.value.previewPawn) {
             endTurn();
         }
     }
 
     const timerIcon = state.icon as TurnTimerIconOption;
 
-    const colorAnim = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-        Animated.timing(
-            colorAnim,
-            {
-                toValue: timerIcon === 'CANCEL' ? 0 : 1,
-                duration: 100,
-                useNativeDriver: true
-            }
-        ).start();
-    }, [colorAnim, timerIcon]);
-
-    const iconScaleAnim = state.icon === 'END' || state.icon === 'CANCEL'
+    const iconScaleAnim = state.icon === 'END'
         ? Animated.add(0.5, Animated.multiply(0.5, bounceAnim))
         : new Animated.Value(1);
 
@@ -146,10 +127,7 @@ const TurnTimer = ({ playerId }: Props) => {
             <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
                 <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
                     <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
-                        <Animated.View style={{ width: '100%', height: '100%', backgroundColor: theme.colors.text, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
-                    </View>
-                    <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
-                        <Animated.View style={{ width: '100%', height: '100%', backgroundColor: color, opacity: colorAnim, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+                        <Animated.View style={{ width: '100%', height: '100%', backgroundColor: color, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
                     </View>
                     <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
                         <TurnTimerIcon key={'timer_icon'} icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} playerColor={color} />
@@ -158,7 +136,7 @@ const TurnTimer = ({ playerId }: Props) => {
                 </View>
             </Pressable>
 
-            <View style={{ position: 'absolute', width: 18, height: 18, right: 10, top: 10 }}>
+            <View style={{ position: 'absolute', width: 18, height: 18, right: leftSide ? 10 : undefined, top: 10, left: leftSide ? undefined : 10 }}>
                 {state.networkState === 'LOADING' ? <Spinner /> : null}
             </View>
         </View>

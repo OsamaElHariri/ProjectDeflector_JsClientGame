@@ -114,22 +114,20 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
         }
     }, [state.playerTurn, state.isProcessingDeflections])
 
-    const addPawn = async () => {
-        if (state.networkState === 'LOADING') return;
-        networkRequestStatus.update(networkKey, 'LOADING');
+    useEffect(() => {
+        if (state.isPreview || state.variant === '') {
+            gestureHandler.current.next({
+                ...gestureHandler.current.value,
+                isEnabled: true
+            });
+        } else {
+            gestureHandler.current.next({
+                ...gestureHandler.current.value,
+                isEnabled: false
+            });
 
-        const res = await GameService.addPawn({
-            gameId: stateSubject.value.game.gameId,
-            x: colIdx,
-            y: rowIdx,
-        }).catch(err => {
-            networkRequestStatus.update(networkKey, 'ERROR');
-        });
-        if (!res) return;
-        networkRequestStatus.update(networkKey, 'NONE');
-
-        updateState.onAddPawn(res);
-    }
+        }
+    }, [state.variant, state.isPreview])
 
     const peek = async () => {
         if (state.networkState === 'LOADING') return;
@@ -146,17 +144,6 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
         networkRequestStatus.update(networkKey, 'NONE');
 
         updateState.onPeek(res);
-    }
-
-    const onLongPress = () => {
-        gestureHandler.current.next({
-            ...gestureHandler.current.value,
-            isHeld: false,
-            isEnabled: false,
-            isPressTriggered: false,
-            isLongPressTriggered: true
-        });
-        addPawn();
     }
 
     const onPress = () => {
@@ -189,7 +176,6 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
     const gridBorder = 2;
 
     const canPress = pawn.name === '';
-    const canLongPress = pawn.name === '' || isPreview;
     let color = stateSubject.value.game.colors[pawn.playerOwner];
 
     return <View style={{
@@ -206,11 +192,10 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
             style={{ width: '100%', height: '100%' }}
             delayLongPress={LONG_PRESS_DELAY}
             onPress={canPress ? (() => onPress()) : undefined}
-            onLongPress={canLongPress ? (() => onLongPress()) : undefined}
             onPressIn={() => onPressIn()}
             onPressOut={() => onPressOut()}
         >
-            <View pointerEvents='none' style={{ position: 'absolute', width: '100%', height: '100%', transform: [{ scale: 0.7 }] }}>
+            <View pointerEvents='none' style={{ position: 'absolute', opacity: isPreview ? 0.4 : 1, width: '100%', height: '100%', transform: [{ scale: 0.7 }] }}>
                 <PressIndicator gestureStateObservable={gestureHandler.current} />
             </View>
             <Animated.View style={{
