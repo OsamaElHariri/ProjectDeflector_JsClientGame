@@ -119,7 +119,7 @@ const TurnTimer = ({ playerId }: Props) => {
         ? Animated.add(0.5, Animated.multiply(0.5, bounceAnim))
         : new Animated.Value(1);
 
-    let color = stateSubject.value.game.colors[playerId];
+    let color = stateSubject.value.players[playerId].color;
 
 
     return (

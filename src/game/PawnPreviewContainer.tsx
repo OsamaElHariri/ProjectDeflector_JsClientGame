@@ -33,7 +33,7 @@ const PawnPreviewContainer = ({ width, playerId }: PawnPreviewContainerProps) =>
 
         return () => sub.unsubscribe();
     }, [state])
-    let color = stateSubject.value.game.colors[playerId];
+    let color = stateSubject.value.players[playerId].color;
 
     return <View style={{ marginTop: 8, padding: 8, height: width * 0.8, width: width * 0.8 }}>
         <View style={{ ...styles.pawnPreviewContainer, borderColor: theme.colors.text }}>

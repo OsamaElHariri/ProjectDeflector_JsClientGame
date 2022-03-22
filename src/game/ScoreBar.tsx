@@ -110,7 +110,7 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
             width = (currentLayout.height - width * ratioMargin) / (maxScore * (1 + ratioMargin));
         }
 
-        let color = stateSubject.value.game.colors[playerId];
+        let color = stateSubject.value.players[playerId].color;
 
         nodes = Array(maxScore).fill(undefined).map((_, idx) => {
             const isPoint = idx < state.score;

@@ -1,4 +1,4 @@
-import { GameBoard, Pawn, PawnVariant, Position } from "../types/types";
+import { GameBoard, Pawn, PawnVariant, Player, Position } from "../types/types";
 
 export interface PlayerVariants { [playerId: string]: PawnVariant[] }
 
@@ -8,6 +8,7 @@ export interface AvailableShuffles { [playerId: string]: number }
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
 
 export interface Game {
+    eventCount: number
     gameId: string
     playerIds: string[]
     gameBoard: GameBoard
@@ -16,7 +17,6 @@ export interface Game {
     targetScore: number
     matchPointPlayers: MatchPointPlayers
     availableShuffles: AvailableShuffles
-    colors: { [playerId: string]: string }
     deflections: Deflection[]
 }
 
@@ -39,6 +39,7 @@ export interface DeflectionProcessing {
 
 export interface GameState {
     game: Game
+    players: { [playerId: string]: Player }
     winner: string
     allDeflections: Deflection[][]
     currentTurnDeflections?: Deflection[]

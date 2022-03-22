@@ -13,9 +13,10 @@ import ShuffleButton from './ShuffleButton';
 import PawnPreviewContainer from './PawnPreviewContainer';
 import WinnerOverlay from './WinnerOverlay';
 import PlayerHud from './PlayerHud';
+import { Player } from '../types/types';
 
 interface Props {
-    route: RouteProp<{ params: { game: Game } }, 'params'>
+    route: RouteProp<{ params: { game: Game, players: { [playerId: string]: Player } } }, 'params'>
 }
 
 const GameScreen = ({ route }: Props) => {
@@ -28,7 +29,7 @@ const GameScreen = ({ route }: Props) => {
     const gridSize = Math.min(dimensions.width - hudWidth * 2 - scoreBarWidth * 2, dimensions.height);
 
     return (
-        <GameStateProvider game={initialGame}>
+        <GameStateProvider game={initialGame} players={route.params.players}>
             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'stretch', position: 'relative', height: '100%' }}>
                 <PlayerHud playerId={initialGame.playerIds[0]} hudWidth={hudWidth} >
                     <View style={{ width: '100%', flex: 1 }}>

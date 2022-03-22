@@ -15,6 +15,8 @@ export interface AddPawnResponse {
     variants: PlayerVariants,
     newPawn: Pawn
     deflections: Deflection[]
+    eventCount: number
+    previousEventCount: number
 }
 
 interface WsAddPawn {
@@ -31,6 +33,8 @@ export interface EndTurnResponse {
     matchPointPlayers: MatchPointPlayers
     availableShuffles: AvailableShuffles
     deflections: Deflection[]
+    eventCount: number
+    previousEventCount: number
 }
 
 interface WsEndTurn {
@@ -44,6 +48,8 @@ export interface ShuffleResponse {
     newPawn: Pawn
     deflections: Deflection[]
     availableShuffles: AvailableShuffles
+    eventCount: number
+    previousEventCount: number
 }
 
 interface WsShuffle {
@@ -54,6 +60,8 @@ interface WsShuffle {
 export interface PeekResponse {
     newPawn: Pawn
     deflections: Deflection[]
+    eventCount: number
+    previousEventCount: number
 }
 
 interface WsPeek {

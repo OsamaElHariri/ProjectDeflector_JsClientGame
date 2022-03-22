@@ -79,7 +79,7 @@ interface Props {
 
 const BallPathPreview = ({ cellSize }: Props) => {
     const { stateSubject } = useGameState();
-    const color = stateSubject.value.game.colors[stateSubject.value.game.playerTurn];
+    const color = stateSubject.value.players[stateSubject.value.game.playerTurn].color;
 
     const getDeflections = (gameState: GameState) => {
         let deflectionPath: Deflection[] | undefined = gameState.deflectionPreview || gameState.currentTurnDeflections || gameState.game.deflections;

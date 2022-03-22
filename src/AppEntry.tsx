@@ -8,6 +8,7 @@ import LobbyScreen from './lobby/LobbyScreen';
 import GameScreen from './game/GameScreen';
 import AwaitingGameScreen from './game/AwaitingGameScreen';
 import { SyncedAnimationProvider } from './main_providers/synced_animation';
+import LoadingGameScreen from './game/LoadingGameScreen';
 
 export const GameTheme = {
     ...DefaultTheme,
@@ -36,6 +37,10 @@ const AppEntry = () => {
                             <Stack.Screen
                                 name="AwaitingGame"
                                 component={AwaitingGameScreen} />
+
+                            <Stack.Screen
+                                name="LoadingGame"
+                                component={LoadingGameScreen} />
 
                             <Stack.Screen
                                 name="Game"

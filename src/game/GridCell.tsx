@@ -176,7 +176,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
     const gridBorder = 2;
 
     const canPress = pawn.name === '';
-    let color = stateSubject.value.game.colors[pawn.playerOwner];
+    let color = stateSubject.value.players[pawn.playerOwner]?.color;
 
     return <View style={{
         borderColor: theme.colors.text,

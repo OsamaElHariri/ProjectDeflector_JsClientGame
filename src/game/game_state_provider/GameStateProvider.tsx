@@ -1,8 +1,12 @@
+import { useNavigation } from "@react-navigation/native";
 import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { BehaviorSubject, Subscription } from "rxjs";
 import { GameStateUpdate } from ".";
+import { usePlayer } from "../../main_providers/player_provider";
 import { useWsClient } from "../../main_providers/ws_provider";
 import { NetworkRequestStatus } from "../../network/types";
+import { Player } from "../../types/types";
+import { AppNavigation } from "../../types/uiTypes";
 import GameService from "../gameService";
 import { Game, GameState } from "../types";
 import { GameStateContext } from "./context"
@@ -10,14 +14,51 @@ import { GameStateContext } from "./context"
 interface Props {
     children: ReactNode
     game: Game
+    players: { [playerId: string]: Player }
 }
 
-export function GameStateProvider({ children, game }: Props) {
+interface EventCount {
+    eventCount: number
+    previousEventCount: number
+}
+
+export function GameStateProvider({ children, game, players }: Props) {
     const clientState = useWsClient();
+    const player = usePlayer();
     const clientSub = useRef<Subscription>();
+    const nav = useNavigation<AppNavigation>();
+    const eventCount = useRef<EventCount>({
+        eventCount: game.eventCount,
+        previousEventCount: game.eventCount
+    });
+    const shouldReconnect = useRef(false);
+
+    const reloadGame = () => {
+        const otherPlayer = Object.values(players).find(p => p.id !== player?.id);
+        nav.replace('LoadingGame', { gameId: game.gameId, otherPlayer: otherPlayer });
+    }
+
+    const checkEventCount = (counts: EventCount) => {
+        // if this is a future event, it means some events were missed
+        // reload the game
+        if (counts.previousEventCount > eventCount.current.eventCount) {
+            reloadGame();
+            return false;
+        }
+
+        // if this is a past event, the game must have already been reloaded
+        // skip this event
+        if (counts.previousEventCount < eventCount.current.eventCount) {
+            return true;
+        }
+
+        eventCount.current = { eventCount: counts.eventCount, previousEventCount: counts.previousEventCount };
+        return true;
+    }
 
     const gameStateSubject = useRef(new BehaviorSubject<GameState>({
         game,
+        players,
         currentTurnDeflections: game.deflections,
         allDeflections: [],
         winner: '',
@@ -30,6 +71,9 @@ export function GameStateProvider({ children, game }: Props) {
 
     const gameStateUpdate: GameStateUpdate = {
         onEndTurn: (res) => {
+            const valid = checkEventCount(res);
+            if (!valid) return;
+
             const { allDeflections, winner, ...gameUpdates } = res;
             const { scoreBoard, ...remainingUpdates } = gameUpdates;
 
@@ -57,6 +101,9 @@ export function GameStateProvider({ children, game }: Props) {
         },
 
         onAddPawn: (res) => {
+            const valid = checkEventCount(res);
+            if (!valid) return;
+
             const x = res.newPawn.position.x;
             const y = res.newPawn.position.y;
             gameStateSubject.current.value.game.gameBoard.pawns[y][x] = res.newPawn;
@@ -78,6 +125,9 @@ export function GameStateProvider({ children, game }: Props) {
         },
 
         onShuffle: (res) => {
+            const valid = checkEventCount(res);
+            if (!valid) return;
+
             gameStateSubject.current.next({
                 ...gameStateSubject.current.value,
                 game: {
@@ -89,6 +139,9 @@ export function GameStateProvider({ children, game }: Props) {
         },
 
         onPeek: (res) => {
+            const valid = checkEventCount(res);
+            if (!valid) return;
+
             gameStateSubject.current.next({
                 ...gameStateSubject.current.value,
                 deflectionPreview: res.deflections,
@@ -142,6 +195,14 @@ export function GameStateProvider({ children, game }: Props) {
 
         return () => clientSub.current?.unsubscribe();
     }, [clientState])
+
+    useEffect(() => {
+        if (!clientState) return;
+        if (clientState.state.connectionStatus !== 'connected') shouldReconnect.current = true;
+        if (clientState.state.connectionStatus === 'connected' && shouldReconnect.current) {
+            reloadGame();
+        }
+    }, [clientState?.state.connectionStatus])
 
     const updateNetworkStatus = (networkKey: string, status: NetworkRequestStatus) => {
         statusesSubject.current.next({
