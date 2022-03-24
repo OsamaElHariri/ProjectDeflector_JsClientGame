@@ -60,13 +60,16 @@ export function GameStateProvider({ children, game, players }: Props) {
         game,
         players,
         currentTurnDeflections: game.deflections,
+        nextTurnPartialGameBoard: game.postDeflectionPartialGameBoard,
         allDeflections: [],
+        allPostDeflectionPartialGameBoards: [],
         winner: '',
         deflectionProcessing: {
             isActive: false,
             allDeflectionsIndex: 0,
         }
     }));
+
     const statusesSubject = useRef(new BehaviorSubject<{ [key: string]: NetworkRequestStatus }>({}));
 
     const gameStateUpdate: GameStateUpdate = {
@@ -74,16 +77,19 @@ export function GameStateProvider({ children, game, players }: Props) {
             const valid = checkEventCount(res);
             if (!valid) return;
 
-            const { allDeflections, winner, ...gameUpdates } = res;
+            const { allDeflections, allPostDeflectionPartialGameBoards, postDeflectionPartialGameBoard, winner, ...gameUpdates } = res;
             const { scoreBoard, ...remainingUpdates } = gameUpdates;
 
             gameStateSubject.current.next({
                 ...gameStateSubject.current.value,
                 winner,
                 allDeflections,
+                allPostDeflectionPartialGameBoards,
                 previewPawn: undefined,
                 deflectionPreview: undefined,
+                postDeflectionPartialGameBoardPreview: undefined,
                 currentTurnDeflections: res.deflections,
+                nextTurnPartialGameBoard: res.postDeflectionPartialGameBoard,
                 game: {
                     ...gameStateSubject.current.value.game,
                     ...remainingUpdates,
@@ -111,7 +117,9 @@ export function GameStateProvider({ children, game, players }: Props) {
                 ...gameStateSubject.current.value,
                 previewPawn: undefined,
                 deflectionPreview: undefined,
+                postDeflectionPartialGameBoardPreview: undefined,
                 currentTurnDeflections: res.deflections,
+                nextTurnPartialGameBoard: res.postDeflectionPartialGameBoard,
                 game: {
                     ...gameStateSubject.current.value.game,
                     variants: res.variants,
@@ -145,7 +153,8 @@ export function GameStateProvider({ children, game, players }: Props) {
             gameStateSubject.current.next({
                 ...gameStateSubject.current.value,
                 deflectionPreview: res.deflections,
-                previewPawn: res.newPawn
+                previewPawn: res.newPawn,
+                postDeflectionPartialGameBoardPreview: res.postDeflectionPartialGameBoard
             });
         },
 
@@ -173,6 +182,7 @@ export function GameStateProvider({ children, game, players }: Props) {
                 ...gameStateSubject.current.value,
                 previewPawn: undefined,
                 deflectionPreview: undefined,
+                postDeflectionPartialGameBoardPreview: undefined,
             });
         },
     }

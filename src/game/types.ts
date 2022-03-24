@@ -1,4 +1,4 @@
-import { GameBoard, Pawn, PawnVariant, Player, Position } from "../types/types";
+import { GameBoard, Pawn, PawnVariant, Player, Position, ScoreBoard } from "../types/types";
 
 export interface PlayerVariants { [playerId: string]: PawnVariant[] }
 
@@ -18,6 +18,7 @@ export interface Game {
     matchPointPlayers: MatchPointPlayers
     availableShuffles: AvailableShuffles
     deflections: Deflection[]
+    postDeflectionPartialGameBoard: PostDeflectionPartialGameBoard
 }
 
 export interface DeflectionEvent {
@@ -37,13 +38,20 @@ export interface DeflectionProcessing {
     allDeflectionsIndex: number
 }
 
+export interface PostDeflectionPartialGameBoard {
+    previousScoreBoard: ScoreBoard
+    scoreBoard: ScoreBoard
+}
 export interface GameState {
     game: Game
     players: { [playerId: string]: Player }
     winner: string
     allDeflections: Deflection[][]
+    allPostDeflectionPartialGameBoards: PostDeflectionPartialGameBoard[]
     currentTurnDeflections?: Deflection[]
+    nextTurnPartialGameBoard?: PostDeflectionPartialGameBoard
     deflectionPreview?: Deflection[]
     previewPawn?: Pawn
+    postDeflectionPartialGameBoardPreview?: PostDeflectionPartialGameBoard
     deflectionProcessing: DeflectionProcessing
 }

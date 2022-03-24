@@ -1,12 +1,14 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import {
     Animated,
     Easing,
     StyleSheet,
     View,
 } from 'react-native';
+import { usePlayer } from '../main_providers/player_provider';
 import { shouldUpdate } from './diffWatcher';
 import { useGameState } from './game_state_provider';
+import { GameState } from './types';
 
 
 interface ScoreBoxProps {
@@ -73,19 +75,41 @@ interface Props {
 }
 
 const ScoreBar = ({ playerId, maxScore }: Props) => {
+    const player = usePlayer();
     const [currentLayout, setCurrentLayout] = useState<{ width: number, height: number }>();
     const { stateSubject } = useGameState();
 
+    const initScaleAnims = useMemo(
+        () => Array(maxScore)
+            .fill(undefined)
+            .map((_, idx) => new Animated.Value(1)), []);
+    const scaleAnims = useRef(initScaleAnims).current;
+    const turnStartAnim = useRef(new Animated.Value(1)).current;
+
+    const getIsCurrentlyScoring = (gameState: GameState) => {
+        if (stateSubject.value.deflectionProcessing.isActive) return false;
+        if (stateSubject.value.game.playerTurn !== playerId) return false;
+        const partial = stateSubject.value.postDeflectionPartialGameBoardPreview || stateSubject.value.nextTurnPartialGameBoard || stateSubject.value.game.postDeflectionPartialGameBoard;
+
+        return partial.scoreBoard[playerId] > partial.previousScoreBoard[playerId];
+    }
+
     const [state, setState] = useState({
         score: stateSubject.value.game.gameBoard.scoreBoard[playerId],
-        isMatchPoint: stateSubject.value.game.matchPointPlayers[playerId]
+        isMatchPoint: stateSubject.value.game.matchPointPlayers[playerId],
+        playerTurn: stateSubject.value.game.playerTurn,
+        isCurrentlyScoring: getIsCurrentlyScoring(stateSubject.value),
     });
 
     useEffect(() => {
-        const sub = stateSubject.subscribe(({ game: { matchPointPlayers, gameBoard: { scoreBoard } } }) => {
+        const sub = stateSubject.subscribe((gameState) => {
+            const { game: { matchPointPlayers, playerTurn, gameBoard: { scoreBoard } } } = gameState;
+
             const newState = {
                 score: scoreBoard[playerId],
-                isMatchPoint: matchPointPlayers[playerId]
+                isMatchPoint: matchPointPlayers[playerId],
+                playerTurn,
+                isCurrentlyScoring: getIsCurrentlyScoring(gameState),
             }
             if (shouldUpdate(newState, state)) {
                 setState(newState);
@@ -95,6 +119,61 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
         return () => sub.unsubscribe();
 
     }, [state]);
+
+    const getScaleSequence = (anim: Animated.Value) =>
+        Animated.sequence([
+            Animated.timing(
+                anim,
+                {
+                    toValue: 0.85,
+                    duration: 300,
+                    easing: Easing.out(Easing.linear),
+                    useNativeDriver: true,
+                }
+            ),
+            Animated.timing(
+                anim,
+                {
+                    toValue: 1.1,
+                    duration: 350,
+                    useNativeDriver: true,
+                }
+            ),
+            Animated.timing(
+                anim,
+                {
+                    toValue: 1,
+                    duration: 300,
+                    easing: Easing.in(Easing.linear),
+                    useNativeDriver: true,
+                }
+            )
+        ]);
+
+    useEffect(() => {
+        if (playerId !== player?.id) return;
+        if (state.playerTurn !== playerId) {
+            turnStartAnim.setValue(1);
+            return;
+        }
+        getScaleSequence(turnStartAnim).start();
+    }, [state.playerTurn]);
+
+    useEffect(() => {
+        if (playerId !== player?.id) return;
+        if (!state.isCurrentlyScoring) {
+            scaleAnims.forEach(anim => {
+                anim.stopAnimation();
+                anim.setValue(1);
+            });
+            return;
+        }
+
+        const anims = scaleAnims.map(anim =>
+            Animated.loop(getScaleSequence(anim))
+        );
+        Animated.stagger(150, anims).start();
+    }, [state.isCurrentlyScoring]);
 
     const onLayout = (evt: any) => {
         setCurrentLayout(evt.nativeEvent.layout)
@@ -113,15 +192,21 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
         let color = stateSubject.value.players[playerId].color;
 
         nodes = Array(maxScore).fill(undefined).map((_, idx) => {
+            const scaleAnim = scaleAnims[idx];
+
             const isPoint = idx < state.score;
-            return <View key={`score_${idx}`} style={{ marginBottom: width * ratioMargin, marginTop: idx === maxScore - 1 ? width * ratioMargin : 0 }}>
+            return <Animated.View key={`score_${idx}`} style={{
+                marginBottom: width * ratioMargin,
+                marginTop: idx === maxScore - 1 ? width * ratioMargin : 0,
+                transform: [{ scale: Animated.multiply(turnStartAnim, scaleAnim) }]
+            }}>
                 <ScoreBox index={idx} isMatchPoint={state.isMatchPoint} width={width}>
                     <View style={{ ...styles.expanded, position: 'absolute', top: -width * 0.5, left: -width * 0.5, transform: [{ translateX: width * 0.5 }, { translateY: width * 0.5 }] }}>
                         <ScoreDot isPoint={isPoint} color={color} />
                     </View>
                     <View style={{ ...styles.expanded, borderColor: color, borderWidth: width * 0.25 }}></View>
                 </ScoreBox>
-            </View>
+            </Animated.View>
         });
     }
 

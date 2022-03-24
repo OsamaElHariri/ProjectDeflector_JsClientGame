@@ -48,7 +48,7 @@ const GameGrid = ({ gridSize }: Props) => {
         ...stateSubject.value.deflectionProcessing,
     });
 
-    const initialBallPos = stateSubject.value.currentTurnDeflections?.[0].position || { x: 0, y: 0 }
+    const initialBallPos = stateSubject.value.currentTurnDeflections?.[0]?.position || { x: 0, y: 0 }
     const posAnim = useRef(new Animated.ValueXY(initialBallPos)).current;
     const ballScaleAnim = useRef(new Animated.ValueXY({ x: 1, y: 1 })).current;
 

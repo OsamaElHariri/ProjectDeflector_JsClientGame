@@ -1,4 +1,4 @@
-import { AvailableShuffles, Deflection, MatchPointPlayers, PlayerVariants } from "../game/types"
+import { AvailableShuffles, Deflection, MatchPointPlayers, PlayerVariants, PostDeflectionPartialGameBoard } from "../game/types"
 import { Pawn, ScoreBoard } from "../types/types"
 
 export type NetworkRequestStatus = 'NONE' | 'LOADING' | 'ERROR'
@@ -15,6 +15,7 @@ export interface AddPawnResponse {
     variants: PlayerVariants,
     newPawn: Pawn
     deflections: Deflection[]
+    postDeflectionPartialGameBoard: PostDeflectionPartialGameBoard
     eventCount: number
     previousEventCount: number
 }
@@ -29,10 +30,12 @@ export interface EndTurnResponse {
     variants: PlayerVariants
     playerTurn: string
     allDeflections: Deflection[][]
+    allPostDeflectionPartialGameBoards: PostDeflectionPartialGameBoard[]
     winner: string
     matchPointPlayers: MatchPointPlayers
     availableShuffles: AvailableShuffles
     deflections: Deflection[]
+    postDeflectionPartialGameBoard: PostDeflectionPartialGameBoard
     eventCount: number
     previousEventCount: number
 }
@@ -60,6 +63,7 @@ interface WsShuffle {
 export interface PeekResponse {
     newPawn: Pawn
     deflections: Deflection[]
+    postDeflectionPartialGameBoard: PostDeflectionPartialGameBoard
     eventCount: number
     previousEventCount: number
 }
