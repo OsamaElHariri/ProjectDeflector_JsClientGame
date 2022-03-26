@@ -60,7 +60,8 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
         isProcessingDeflections: stateSubject.value.deflectionProcessing.isActive,
         isPreview: isPreview,
         durability: pawn.durability,
-        variant: pawn.name
+        variant: pawn.name,
+        playerScore: stateSubject.value.game.gameBoard.scoreBoard[stateSubject.value.game.playerTurn]
     });
 
     const rows = stateSubject.value.game.gameBoard.xMax + 1;
@@ -76,7 +77,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
                 isProcessingDeflections: gameState.deflectionProcessing.isActive,
                 durability: pawn.durability,
                 variant: pawn.name,
-
+                playerScore: gameState.game.gameBoard.scoreBoard[gameState.game.playerTurn]
             };
             if (shouldUpdate(newState, state)) {
                 durability.setValue(pawn.durability);
@@ -100,7 +101,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
     }, [state.networkState]);
 
     useEffect(() => {
-        if (pawn.name === '' && state.playerTurn === player?.id && !state.isProcessingDeflections) {
+        if (pawn.name === '' && state.playerTurn === player?.id && !state.isProcessingDeflections && state.playerScore > 0) {
             gestureHandler.current.next({
                 ...gestureHandler.current.value,
                 isEnabled: true
@@ -112,7 +113,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
             });
 
         }
-    }, [state.playerTurn, state.isProcessingDeflections])
+    }, [state.playerTurn, state.isProcessingDeflections, state.playerScore])
 
     useEffect(() => {
         if (state.isPreview || state.variant === '') {
