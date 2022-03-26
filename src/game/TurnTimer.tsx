@@ -44,6 +44,7 @@ const TurnTimer = ({ playerId }: Props) => {
     const [state, setState] = useState({
         networkState: networkRequestStatus.subject.value[networkKey],
         playerTurn: stateSubject.value.game.playerTurn,
+        lastTurnEndTime: stateSubject.value.game.lastTurnEndTime,
         icon: getTimerIcon(stateSubject.value)
     });
 
@@ -52,6 +53,7 @@ const TurnTimer = ({ playerId }: Props) => {
             const newState = {
                 ...state,
                 playerTurn: gameState.game.playerTurn,
+                lastTurnEndTime: gameState.game.lastTurnEndTime,
                 icon: getTimerIcon(gameState)
             }
 
@@ -85,14 +87,16 @@ const TurnTimer = ({ playerId }: Props) => {
             scaleAnim,
             {
                 toValue: 0,
-                duration: 1000 * 10,
+                duration: Math.max(0, state.lastTurnEndTime + stateSubject.value.game.timePerTurn - Date.now()),
                 easing: Easing.linear,
                 useNativeDriver: true
             }
         ).start();
-    }, [scaleAnim, state.playerTurn]);
+    }, [scaleAnim, state.playerTurn, state.lastTurnEndTime]);
 
     const endTurn = async () => {
+        if (playerId !== player?.id) return;
+
         if (state.networkState === 'LOADING') return;
         networkRequestStatus.update(networkKey, 'LOADING');
 

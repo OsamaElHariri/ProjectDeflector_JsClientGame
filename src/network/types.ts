@@ -36,6 +36,7 @@ export interface EndTurnResponse {
     availableShuffles: AvailableShuffles
     deflections: Deflection[]
     postDeflectionPartialGameBoard: PostDeflectionPartialGameBoard
+    lastTurnEndTime: number
     eventCount: number
     previousEventCount: number
 }

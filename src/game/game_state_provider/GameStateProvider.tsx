@@ -68,9 +68,23 @@ export function GameStateProvider({ children, game, players }: Props) {
             isActive: false,
             allDeflectionsIndex: 0,
         }
-    }));
+    })).current;
 
-    const statusesSubject = useRef(new BehaviorSubject<{ [key: string]: NetworkRequestStatus }>({}));
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const turnEnd = gameStateSubject.value.game.lastTurnEndTime + gameStateSubject.value.game.timePerTurn;
+            const hasEnded = Date.now() > turnEnd;
+            if (hasEnded) {
+                GameService.expireTurn({
+                    gameId: game.gameId,
+                    eventCount: eventCount.current.eventCount,
+                }).catch(err => undefined);
+            }
+        }, 4000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const statusesSubject = useRef(new BehaviorSubject<{ [key: string]: NetworkRequestStatus }>({})).current;
 
     const gameStateUpdate: GameStateUpdate = {
         onEndTurn: (res) => {
@@ -80,8 +94,8 @@ export function GameStateProvider({ children, game, players }: Props) {
             const { allDeflections, allPostDeflectionPartialGameBoards, postDeflectionPartialGameBoard, winner, ...gameUpdates } = res;
             const { scoreBoard, ...remainingUpdates } = gameUpdates;
 
-            gameStateSubject.current.next({
-                ...gameStateSubject.current.value,
+            gameStateSubject.next({
+                ...gameStateSubject.value,
                 winner,
                 allDeflections,
                 allPostDeflectionPartialGameBoards,
@@ -91,11 +105,12 @@ export function GameStateProvider({ children, game, players }: Props) {
                 currentTurnDeflections: res.deflections,
                 nextTurnPartialGameBoard: res.postDeflectionPartialGameBoard,
                 game: {
-                    ...gameStateSubject.current.value.game,
+                    ...gameStateSubject.value.game,
                     ...remainingUpdates,
+                    lastTurnEndTime: res.lastTurnEndTime,
                     availableShuffles: res.availableShuffles,
                     gameBoard: {
-                        ...gameStateSubject.current.value.game.gameBoard,
+                        ...gameStateSubject.value.game.gameBoard,
                         scoreBoard
                     }
                 },
@@ -112,21 +127,21 @@ export function GameStateProvider({ children, game, players }: Props) {
 
             const x = res.newPawn.position.x;
             const y = res.newPawn.position.y;
-            gameStateSubject.current.value.game.gameBoard.pawns[y][x] = res.newPawn;
-            gameStateSubject.current.next({
-                ...gameStateSubject.current.value,
+            gameStateSubject.value.game.gameBoard.pawns[y][x] = res.newPawn;
+            gameStateSubject.next({
+                ...gameStateSubject.value,
                 previewPawn: undefined,
                 deflectionPreview: undefined,
                 postDeflectionPartialGameBoardPreview: undefined,
                 currentTurnDeflections: res.deflections,
                 nextTurnPartialGameBoard: res.postDeflectionPartialGameBoard,
                 game: {
-                    ...gameStateSubject.current.value.game,
+                    ...gameStateSubject.value.game,
                     variants: res.variants,
                     gameBoard: {
-                        ...gameStateSubject.current.value.game.gameBoard,
+                        ...gameStateSubject.value.game.gameBoard,
                         scoreBoard: res.scoreBoard,
-                        pawns: [...gameStateSubject.current.value.game.gameBoard.pawns]
+                        pawns: [...gameStateSubject.value.game.gameBoard.pawns]
                     }
                 },
             });
@@ -136,10 +151,10 @@ export function GameStateProvider({ children, game, players }: Props) {
             const valid = checkEventCount(res);
             if (!valid) return;
 
-            gameStateSubject.current.next({
-                ...gameStateSubject.current.value,
+            gameStateSubject.next({
+                ...gameStateSubject.value,
                 game: {
-                    ...gameStateSubject.current.value.game,
+                    ...gameStateSubject.value.game,
                     availableShuffles: res.availableShuffles,
                     variants: res.variants
                 }
@@ -150,8 +165,8 @@ export function GameStateProvider({ children, game, players }: Props) {
             const valid = checkEventCount(res);
             if (!valid) return;
 
-            gameStateSubject.current.next({
-                ...gameStateSubject.current.value,
+            gameStateSubject.next({
+                ...gameStateSubject.value,
                 deflectionPreview: res.deflections,
                 previewPawn: res.newPawn,
                 postDeflectionPartialGameBoardPreview: res.postDeflectionPartialGameBoard
@@ -159,27 +174,27 @@ export function GameStateProvider({ children, game, players }: Props) {
         },
 
         updatePawns: (pawns) => {
-            gameStateSubject.current.next({
-                ...gameStateSubject.current.value,
+            gameStateSubject.next({
+                ...gameStateSubject.value,
                 game: {
-                    ...gameStateSubject.current.value.game,
+                    ...gameStateSubject.value.game,
                     gameBoard: {
-                        ...gameStateSubject.current.value.game.gameBoard,
+                        ...gameStateSubject.value.game.gameBoard,
                         pawns
                     }
                 }
             });
         },
         updateDeflectionProcessing: (deflectionProcessing) => {
-            gameStateSubject.current.next({
-                ...gameStateSubject.current.value,
+            gameStateSubject.next({
+                ...gameStateSubject.value,
                 deflectionProcessing
             });
         },
 
         onCancelPeek: () => {
-            gameStateSubject.current.next({
-                ...gameStateSubject.current.value,
+            gameStateSubject.next({
+                ...gameStateSubject.value,
                 previewPawn: undefined,
                 deflectionPreview: undefined,
                 postDeflectionPartialGameBoardPreview: undefined,
@@ -190,9 +205,7 @@ export function GameStateProvider({ children, game, players }: Props) {
     useEffect(() => {
         if (!clientState || clientSub.current) return;
         clientSub.current = clientState.client.events().subscribe(event => {
-            // TODO enable these after fixing WS connection issues
-            // and after disabling sending WS event to current player
-            /* if (event.event === 'turn') {
+            if (event.event === 'turn') {
                 gameStateUpdate.onEndTurn(GameService.parseEndTurnResponse(event.payload));
             } else if (event.event === 'pawn') {
                 gameStateUpdate.onAddPawn(GameService.parseAddPawnResponse(event.payload));
@@ -200,7 +213,7 @@ export function GameStateProvider({ children, game, players }: Props) {
                 gameStateUpdate.onShuffle(GameService.parseShuffleResponse(event.payload));
             } else if (event.event === 'peek') {
                 gameStateUpdate.onPeek(GameService.parsePeekResponse(event.payload));
-            } */
+            }
         });
 
         return () => clientSub.current?.unsubscribe();
@@ -215,17 +228,17 @@ export function GameStateProvider({ children, game, players }: Props) {
     }, [clientState?.state.connectionStatus])
 
     const updateNetworkStatus = (networkKey: string, status: NetworkRequestStatus) => {
-        statusesSubject.current.next({
-            ...statusesSubject.current.value,
+        statusesSubject.next({
+            ...statusesSubject.value,
             [networkKey]: status
         });
     }
 
     const contextVal = {
-        stateSubject: gameStateSubject.current,
+        stateSubject: gameStateSubject,
         updateState: gameStateUpdate,
         networkRequestStatus: {
-            subject: statusesSubject.current,
+            subject: statusesSubject,
             update: updateNetworkStatus
         }
     }

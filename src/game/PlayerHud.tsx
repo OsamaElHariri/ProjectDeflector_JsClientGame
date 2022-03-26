@@ -80,16 +80,18 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
     const networkKey = `hud_actions_${playerId}`;
     const [state, setState] = useState({
         playerTurn: stateSubject.value.game.playerTurn,
+        lastTurnEndTime: stateSubject.value.game.lastTurnEndTime,
         previewPawn: stateSubject.value.previewPawn,
         networkState: networkRequestStatus.subject.value[networkKey],
     });
 
     useEffect(() => {
-        const sub = stateSubject.subscribe(({ game: { playerTurn }, previewPawn }) => {
+        const sub = stateSubject.subscribe(({ game: { playerTurn, lastTurnEndTime }, previewPawn }) => {
             const newState = {
                 ...state,
                 previewPawn,
                 playerTurn,
+                lastTurnEndTime,
             }
             if (shouldUpdate(newState, state)) {
                 setState(newState);
@@ -118,12 +120,12 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
             scaleAnim,
             {
                 toValue: 0,
-                duration: 1000 * 10,
+                duration: Math.max(0, state.lastTurnEndTime + stateSubject.value.game.timePerTurn - Date.now()),
                 easing: Easing.linear,
                 useNativeDriver: true
             }
         ).start();
-    }, [scaleAnim, state.playerTurn]);
+    }, [scaleAnim, state.playerTurn, state.lastTurnEndTime]);
 
     const mainPosAnim = useRef(new Animated.Value(0)).current
     const actionsPosAnim = useRef(new Animated.Value(1)).current

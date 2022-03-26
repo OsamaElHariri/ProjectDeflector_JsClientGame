@@ -52,6 +52,12 @@ export default class GameService {
         };
     }
 
+    static async expireTurn(req: { gameId: string, eventCount: number }): Promise<EndTurnResponse> {
+        const res = await ApiClient.post(`/game/turn/expire`, req);
+        const json = await res.json();
+        return this.parseEndTurnResponse(json);
+    }
+
     static async endTurn(req: { gameId: string }): Promise<EndTurnResponse> {
         const res = await ApiClient.post(`/game/turn`, req);
         const json = await res.json();

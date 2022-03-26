@@ -10,6 +10,8 @@ export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
 export interface Game {
     eventCount: number
     gameId: string
+    timePerTurn: number
+    lastTurnEndTime: number
     playerIds: string[]
     gameBoard: GameBoard
     playerTurn: string
