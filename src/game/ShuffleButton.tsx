@@ -23,7 +23,7 @@ interface Props {
 
 const ShuffleButton = ({ width, playerId }: Props) => {
     const theme = useTheme();
-    const player = usePlayer();
+    const { player } = usePlayer();
     const { stateSubject, networkRequestStatus, updateState } = useGameState();
     const leftSide = stateSubject.value.game.playerIds[0] === playerId;
     const bounceAnim = useSyncedAnimation();

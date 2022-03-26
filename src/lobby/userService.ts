@@ -43,4 +43,16 @@ export default class UserService {
         const json = await res.json();
         return json.user;
     }
+
+    static async updateUser(player: Player): Promise<Player> {
+        const res = await ApiClient.put(`/users/user`, player);
+        const json = await res.json();
+        return json.user;
+    }
+
+    static async getColorChoice(): Promise<{ colors: string[] }> {
+        const res = await ApiClient.get(`/users/colors`);
+        const json = await res.json();
+        return json;
+    }
 }

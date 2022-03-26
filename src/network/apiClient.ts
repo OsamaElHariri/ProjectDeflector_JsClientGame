@@ -21,6 +21,17 @@ export default class ApiClient {
         })
     }
 
+    static put(urlPath: string, body: { [key: string]: any } = {}) {
+        return fetch(this.baseUrl + urlPath, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.accessToken}`,
+            },
+            body: JSON.stringify(body)
+        })
+    }
+
     static post(urlPath: string, body: { [key: string]: any } = {}) {
         return fetch(this.baseUrl + urlPath, {
             method: 'POST',

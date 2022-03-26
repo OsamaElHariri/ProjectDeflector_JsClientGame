@@ -15,7 +15,7 @@ import { useGameState } from './game_state_provider';
 
 const WinnerOverlay = () => {
     const theme = useTheme();
-    const player = usePlayer();
+    const { player } = usePlayer();
     const { stateSubject } = useGameState();
     const nav = useNavigation<AppNavigation>();
 

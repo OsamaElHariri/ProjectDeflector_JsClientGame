@@ -27,7 +27,7 @@ interface Props {
 
 const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => {
     const theme = useTheme();
-    const player = usePlayer();
+    const { player } = usePlayer();
     const networkKey = `grid_cell_${rowIdx}_${colIdx}`;
 
     const gestureHandler = useRef<BehaviorSubject<GestureState>>(new BehaviorSubject<GestureState>({

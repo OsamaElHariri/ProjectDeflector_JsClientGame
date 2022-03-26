@@ -24,7 +24,7 @@ interface EventCount {
 
 export function GameStateProvider({ children, game, players }: Props) {
     const clientState = useWsClient();
-    const player = usePlayer();
+    const { player } = usePlayer();
     const clientSub = useRef<Subscription>();
     const nav = useNavigation<AppNavigation>();
     const eventCount = useRef<EventCount>({

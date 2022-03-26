@@ -16,7 +16,7 @@ interface Props {
 
 const LoadingGameScreen = ({ route: { params: { gameId, otherPlayer } } }: Props) => {
     const theme = useTheme();
-    const player = usePlayer();
+    const { player } = usePlayer();
     const nav = useNavigation<AppNavigation>();
 
     useEffect(() => {

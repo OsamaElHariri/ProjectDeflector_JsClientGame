@@ -5,6 +5,13 @@ import { Deflection, Game } from "./types";
 
 export default class GameService {
 
+    static async findGame() {
+        const res = await ApiClient.post(`/match/find`);
+        const json = await res.json();
+
+        return json;
+    }
+
     static async findSolo() {
         const res = await ApiClient.post(`/match/solo`);
         const json = await res.json();

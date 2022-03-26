@@ -75,7 +75,7 @@ interface Props {
 }
 
 const ScoreBar = ({ playerId, maxScore }: Props) => {
-    const player = usePlayer();
+    const { player } = usePlayer();
     const [currentLayout, setCurrentLayout] = useState<{ width: number, height: number }>();
     const { stateSubject } = useGameState();
 

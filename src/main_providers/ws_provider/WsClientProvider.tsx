@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function WsClientProvider({ children }: Props) {
-    const player = usePlayer();
+    const { player } = usePlayer();
     const [connection, setConnection] = useState<WsClientConnection>();
 
     useEffect(() => {

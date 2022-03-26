@@ -44,10 +44,16 @@ export function PlayerProvider({ children }: Props) {
                 });
             }
         })();
-    }, [])
+    }, []);
 
     if (playerState?.player) {
-        return <PlayerContext.Provider value={playerState.player} children={children} />
+        const contextValue = {
+            player: playerState?.player,
+            updatePlayer: (player: Player) => {
+                setPlayerState({ ...playerState, player });
+            },
+        };
+        return <PlayerContext.Provider value={contextValue} children={children} />
     } else {
         return <PlainOverlay>
             <Text style={{ fontWeight: 'bold', color: GameTheme.colors.text, fontSize: 32 }}>{playerState?.error || 'Setting things up'}</Text>
