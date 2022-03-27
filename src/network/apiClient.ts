@@ -1,6 +1,9 @@
 export default class ApiClient {
 
-    private static baseUrl = 'http://192.168.2.141:8080';
+    static BASE_DOMAIN = '192.168.2.141';
+    static BASE_PORT = '8080';
+
+    private static baseUrl = `http://${this.BASE_DOMAIN}:${this.BASE_PORT}`;
 
     static accessToken = "";
 

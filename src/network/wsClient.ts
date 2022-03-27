@@ -5,7 +5,7 @@ import { GameWsEvent } from './types';
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
 export default class WsClient {
-    private baseUrl = 'ws://192.168.2.141:8080';
+    private baseUrl = `ws://${ApiClient.BASE_DOMAIN}:${ApiClient.BASE_PORT}`;
 
     private client?: WebSocket;
     private eventSubject: Subject<GameWsEvent>;
