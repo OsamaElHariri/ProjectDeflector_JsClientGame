@@ -140,7 +140,8 @@ const GameGrid = ({ gridSize }: Props) => {
         const columns = Array(cols).fill(undefined).map((_, colIdx) => {
             const key = `cell_${rowIdx}_${colIdx}`;
             if (!durabilityAnims.current[key]) {
-                durabilityAnims.current[key] = new Animated.Value(0);
+                let pawn = stateSubject.value.game.gameBoard.pawns[rowIdx][colIdx];
+                durabilityAnims.current[key] = new Animated.Value(pawn.durability);
             }
             if (!pawnScaleAnim.current[key]) {
                 pawnScaleAnim.current[key] = new Animated.Value(1);
