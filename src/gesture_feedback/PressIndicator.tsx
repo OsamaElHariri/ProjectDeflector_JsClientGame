@@ -12,7 +12,7 @@ interface Props {
 
 const PressIndicator = ({ gestureStateObservable }: Props) => {
     const theme = useTheme();
-    const bounceAnim = useSyncedAnimation();
+    const { bounceAnim } = useSyncedAnimation();
 
     const [currentState, setCurrentState] = useState<GestureState>(gestureStateObservable.value);
     useEffect(() => {
@@ -22,7 +22,7 @@ const PressIndicator = ({ gestureStateObservable }: Props) => {
         }
     }, []);
 
-    const scaleEnabledAnim = useRef(new Animated.Value(1)).current;
+    const scaleEnabledAnim = useRef(new Animated.Value(currentState.isEnabled ? 1 : 0)).current;
     useEffect(() => {
         Animated.timing(
             scaleEnabledAnim,

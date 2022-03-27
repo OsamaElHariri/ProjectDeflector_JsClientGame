@@ -26,7 +26,7 @@ const ColorBox = ({ color }: ColorBoxProps) => {
     const { player, updatePlayer } = usePlayer();
     const [networkState, setNetworkState] = useState<NetworkRequestStatus>('NONE');
     const scaleAnim = useRef(new Animated.Value(1)).current;
-    const bounceAnim = useSyncedAnimation();
+    const { bounceAnim } = useSyncedAnimation();
 
     useEffect(() => {
         Animated.timing(
@@ -92,7 +92,7 @@ const LobbyScreen = () => {
     const theme = useTheme();
     const { player } = usePlayer();
     const nav = useNavigation<AppNavigation>()
-    const bounceAnim = useSyncedAnimation();
+    const { bounceAnim, restartAnim } = useSyncedAnimation();
 
     const [colors, setColors] = useState<string[]>([]);
 
@@ -104,6 +104,7 @@ const LobbyScreen = () => {
             setColors(colorResult.colors)
         }
         getColors();
+        restartAnim();
     }, []);
 
     const onPlayPress = () => {

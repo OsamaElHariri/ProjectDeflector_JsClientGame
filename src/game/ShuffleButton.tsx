@@ -26,7 +26,7 @@ const ShuffleButton = ({ width, playerId }: Props) => {
     const { player } = usePlayer();
     const { stateSubject, networkRequestStatus, updateState } = useGameState();
     const leftSide = stateSubject.value.game.playerIds[0] === playerId;
-    const bounceAnim = useSyncedAnimation();
+    const { bounceAnim } = useSyncedAnimation();
     const scaleAnim = useRef(new Animated.Value(0)).current
     const networkKey = `loading_${playerId}`;
 

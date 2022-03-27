@@ -23,7 +23,7 @@ interface Props {
 const TurnTimer = ({ playerId }: Props) => {
     const theme = useTheme();
     const { player } = usePlayer();
-    const bounceAnim = useSyncedAnimation();
+    const { bounceAnim } = useSyncedAnimation();
     const networkKey = `turn_timer_${playerId}`;
 
     const { stateSubject, networkRequestStatus, updateState } = useGameState();

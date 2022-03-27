@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     useWindowDimensions,
     View,
@@ -14,6 +14,7 @@ import PawnPreviewContainer from './PawnPreviewContainer';
 import WinnerOverlay from './WinnerOverlay';
 import PlayerHud from './PlayerHud';
 import { Player } from '../types/types';
+import { useSyncedAnimation } from '../main_providers/synced_animation';
 
 interface Props {
     route: RouteProp<{ params: { game: Game, players: { [playerId: string]: Player } } }, 'params'>
@@ -21,6 +22,8 @@ interface Props {
 
 const GameScreen = ({ route }: Props) => {
     const initialGame = route.params.game;
+    const { restartAnim } = useSyncedAnimation();
+    useEffect(() => restartAnim(), []);
 
     const dimensions = useWindowDimensions();
 

@@ -72,7 +72,7 @@ interface Props {
 const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
     const theme = useTheme();
     const { player } = usePlayer();
-    const bounceAnim = useSyncedAnimation();
+    const { bounceAnim } = useSyncedAnimation();
     const { stateSubject, networkRequestStatus, updateState } = useGameState();
     const leftSide = stateSubject.value.game.playerIds[0] === playerId;
     const direction = leftSide ? -1 : 1;
