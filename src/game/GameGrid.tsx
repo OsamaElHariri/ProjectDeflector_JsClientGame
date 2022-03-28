@@ -1,3 +1,4 @@
+import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useRef } from 'react';
 import {
     Animated,
@@ -40,6 +41,7 @@ const startAnimation = async (animation: { start: Function }) => {
 
 const GameGrid = ({ gridSize }: Props) => {
     const { stateSubject, updateState } = useGameState();
+    const theme = useTheme();
     const durabilityAnims = useRef<{ [key: string]: Animated.Value }>({});
     const pawnScaleAnim = useRef<{ [key: string]: Animated.Value }>({});
     const pawnPosAnims = useRef<{ [key: string]: Animated.ValueXY }>({});
@@ -178,7 +180,7 @@ const GameGrid = ({ gridSize }: Props) => {
                     height: BALL_DIAMETER,
                     borderRadius: 100,
                     position: 'absolute',
-                    backgroundColor: 'black',
+                    backgroundColor: theme.colors.text,
                     transform: [
                         { translateX: Animated.multiply(posAnim.x, cellSize) },
                         { translateY: Animated.multiply(posAnim.y, cellSize) },

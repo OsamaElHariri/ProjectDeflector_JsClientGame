@@ -40,6 +40,9 @@ const WinnerOverlay = () => {
     }
 
     const backToMenu = () => {
+        if (player) {
+            player.gameStats.games += 1;
+        }
         nav.replace('Lobby');
     }
 

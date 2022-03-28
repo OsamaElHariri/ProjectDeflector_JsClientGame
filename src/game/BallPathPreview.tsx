@@ -8,14 +8,17 @@ import { shouldUpdate } from './diffWatcher';
 import { useGameState } from './game_state_provider';
 import { Deflection, Direction, GameState } from './types';
 
-interface LineProps {
+interface PreviewLineProps {
     width: number
     color: string
+    isAnimated?: boolean
 }
 
-const Line = ({ width,color }: LineProps) => {
+export const PreviewLine = ({ width, color, isAnimated = true }: PreviewLineProps) => {
     const offseteAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
+        if (!isAnimated) return;
+
         Animated.loop(
             Animated.timing(
                 offseteAnim,
@@ -141,7 +144,7 @@ const BallPathPreview = ({ cellSize }: Props) => {
                     { rotateZ: getRotationDegrees(deflection.toDirection) },
                 ],
             }}>
-            <Line width={width} color={color} />
+            <PreviewLine width={width} color={color} />
         </View>
     });
 

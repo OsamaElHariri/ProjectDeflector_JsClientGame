@@ -1,7 +1,13 @@
+export interface PlayerGameStats {
+    games: number
+    wins: number
+}
+
 export interface Player {
     id: string
     nickname: string
     color: string
+    gameStats: PlayerGameStats
 }
 
 export interface Position {
@@ -9,7 +15,7 @@ export interface Position {
     y: number
 }
 
-export interface ScoreBoard  { [playerId: string]: number }
+export interface ScoreBoard { [playerId: string]: number }
 export type PawnVariant = 'SLASH' | 'BACKSLASH' | ''
 
 export interface Pawn {

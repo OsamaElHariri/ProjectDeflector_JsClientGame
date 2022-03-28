@@ -193,7 +193,7 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
     const iconScaleAnim = Animated.add(0.3, Animated.multiply(0.7, bounceAnim));
 
     return (
-        <View style={{ height: '100%' }}>
+        <View style={{ height: '100%', width: hudWidth }}>
 
             <Animated.View style={{ display: 'flex', height: '100%', alignItems: 'center', transform: [{ translateX: mainHudPos }] }}>
                 {children}

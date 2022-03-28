@@ -15,6 +15,7 @@ import { usePlayer } from '../main_providers/player_provider';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { NetworkRequestStatus } from '../network/types';
 import { AppNavigation } from '../types/uiTypes';
+import TutorialScreen from './TutorialScreen';
 import UserService from './userService';
 
 interface ColorBoxProps {
@@ -94,6 +95,12 @@ const LobbyScreen = () => {
     const nav = useNavigation<AppNavigation>()
     const { bounceAnim, restartAnim } = useSyncedAnimation();
 
+    const maxTutorialScreen = 2;
+    const [tutorialScreen, setTutorialScreen] = useState(0);
+    const setTutorialScreenClamped = (value: number) => {
+        setTutorialScreen(Math.min(maxTutorialScreen, Math.max(0, value)));
+    }
+
     const [colors, setColors] = useState<string[]>([]);
 
     useEffect(() => {
@@ -121,28 +128,68 @@ const LobbyScreen = () => {
 
     const dampenedBounceAnim = Animated.add(0.5, Animated.multiply(0.5, bounceAnim));
 
+    const MainLobbyScreen = () => <>
+        <Text style={{ fontWeight: 'bold', fontSize: 28, color: theme.colors.text }}>
+            Hello {player?.nickname}, what color would you like to go for today?
+        </Text>
+        <View style={{ paddingTop: 12 }}></View>
+        <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 16, color: theme.colors.text }}>
+                You are currently rocking this color
+            </Text>
+            <View style={{ paddingLeft: 8 }}></View>
+            <View style={{ width: 20, height: 20, borderWidth: 2, borderColor: theme.colors.text, backgroundColor: player?.color }} />
+        </View>
+        {
+            colors.length > 0 && player
+                ? <ColorChoice colors={colors} />
+                : <View style={{ flex: 1, width: 40, height: 40, justifyContent: 'center', alignSelf: 'center' }}>
+                    <Spinner />
+                </View>
+        }
+    </>
+
+    const SidePanel = () => {
+        if (player?.gameStats.games === 0) {
+            return <View style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', justifyContent: 'center' }}>
+                <Pressable
+                    style={{ ...styles.button, backgroundColor: theme.colors.background, borderColor: theme.colors.text, borderWidth: 2, opacity: tutorialScreen === maxTutorialScreen ? 0 : 1 }}
+                    onPress={() => setTutorialScreenClamped(tutorialScreen + 1)}>
+                    <Animated.Text style={{
+                        ...styles.buttonText,
+                        fontSize: 14,
+                        color: theme.colors.text,
+                        transform: [{ scale: dampenedBounceAnim }]
+                    }}>Next tip</Animated.Text>
+                </Pressable>
+                <View style={{ paddingTop: 24 }}></View>
+                <Pressable
+                    style={{ ...styles.button, backgroundColor: theme.colors.background, borderColor: theme.colors.text, borderWidth: 2, opacity: tutorialScreen === 0 ? 0 : 1 }}
+                    onPress={() => setTutorialScreenClamped(tutorialScreen - 1)}>
+                    <Animated.Text style={{
+                        ...styles.buttonText,
+                        fontSize: 14,
+                        color: theme.colors.text,
+                        transform: [{ scale: dampenedBounceAnim }]
+                    }}>Previous tip</Animated.Text>
+                </Pressable>
+            </View>
+        } else {
+            return <></>
+        }
+    }
+
     return (
         <View style={{ backgroundColor: theme.colors.background, ...styles.lobbyContainer }}>
             <View style={{ flex: 1, display: 'flex' }}>
-                <Text style={{ fontWeight: 'bold', fontSize: 28, color: theme.colors.text }}>
-                    Hello {player?.nickname}, what color would you like to go for today?
-                </Text>
-                <View style={{ paddingTop: 12 }}></View>
-                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ fontWeight: 'bold', fontSize: 16, color: theme.colors.text }}>
-                        You are currently rocking this color
-                    </Text>
-                    <View style={{ paddingLeft: 8 }}></View>
-                    <View style={{ width: 20, height: 20, borderWidth: 2, borderColor: theme.colors.text, backgroundColor: player?.color }} />
-                </View>
-                {colors.length > 0 && player
-                    ? <ColorChoice colors={colors} />
-                    : <View style={{ flex: 1, width: 40, height: 40, justifyContent: 'center', alignSelf: 'center' }}>
-                        <Spinner />
-                    </View>
-                }
+                {player?.gameStats.games === 0
+                    ? <TutorialScreen tutorialScreen={tutorialScreen} />
+                    : <MainLobbyScreen />}
             </View>
             <View style={styles.buttonPanel}>
+                <View style={{ flex: 1, width: '100%' }}>
+                    <SidePanel />
+                </View>
                 <Pressable
                     style={{ ...styles.button, backgroundColor: player?.color, borderColor: theme.colors.text }}
                     onPress={onPlayPress}>
@@ -186,7 +233,6 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-end'
     },
     button: {
         width: '100%',
