@@ -94,6 +94,7 @@ const LobbyScreen = () => {
     const { player } = usePlayer();
     const nav = useNavigation<AppNavigation>()
     const { bounceAnim, restartAnim } = useSyncedAnimation();
+    const isMounted = useRef(true);
 
     const maxTutorialScreen = 2;
     const [tutorialScreen, setTutorialScreen] = useState(0);
@@ -107,12 +108,16 @@ const LobbyScreen = () => {
         const getColors = async () => {
             const colorResult = await UserService.getColorChoice()
                 .catch(err => undefined);
-            if (!colorResult) return;
+            if (!colorResult || !isMounted.current) return;
             setColors(colorResult.colors)
         }
         getColors();
         restartAnim();
     }, []);
+
+    useEffect(() => () => {
+        isMounted.current = false
+    });
 
     const onPlayPress = () => {
         if (!player) return;
