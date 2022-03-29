@@ -37,7 +37,7 @@ export function PlayerProvider({ children }: Props) {
 
         (async () => {
             try {
-                await setup()
+                await setup();
             } catch (error) {
                 setPlayerState({
                     error: "An Error!?!? You can go ahead and panic."

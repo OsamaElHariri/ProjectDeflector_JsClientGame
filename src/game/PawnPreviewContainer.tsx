@@ -19,13 +19,17 @@ const PawnPreviewContainer = ({ width, playerId }: PawnPreviewContainerProps) =>
     const { stateSubject } = useGameState();
     const [variant] = stateSubject.value.game.variants[playerId].slice(-1);
     const [state, setState] = useState({
-        variant
+        variant,
+        variantLength: stateSubject.value.game.variants[playerId].length
     });
 
     useEffect(() => {
         const sub = stateSubject.subscribe(({ game: { variants } }) => {
             const [variant] = variants[playerId].slice(-1);
-            const newState = { variant: variant };
+            const newState = {
+                variant: variant,
+                variantLength: variants[playerId].length,
+            };
             if (shouldUpdate(newState, state)) {
                 setState(newState);
             }
@@ -37,7 +41,7 @@ const PawnPreviewContainer = ({ width, playerId }: PawnPreviewContainerProps) =>
 
     return <View style={{ marginTop: 8, padding: 8, height: width * 0.8, width: width * 0.8 }}>
         <View style={{ ...styles.pawnPreviewContainer, borderColor: theme.colors.text }}>
-            <PawnVisual durability={new Animated.Value(5)} variant={state.variant} color={color}></PawnVisual>
+            <PawnVisual durability={new Animated.Value(5)} variant={state.variant} color={color} animationCursor={state.variantLength}></PawnVisual>
         </View>
     </View>
 }

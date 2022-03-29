@@ -24,23 +24,36 @@ interface Props {
     variant: PawnVariant
     durability: Animated.Value
     color: string
+    animationCursor?: number
 }
 
-const PawnVisual = ({ variant, durability, color }: Props) => {
+const PawnVisual = ({ variant, durability, color, animationCursor = 0 }: Props) => {
     const theme = useTheme();
     const rotateAnim = useRef(new Animated.Value(0)).current;
 
+    const getVariantAngle = (variant: PawnVariant) => variant === 'SLASH' ? 90 : 0;
+
+    let initialDegrees = getVariantAngle(variant);
+    const currentRotation = useRef(initialDegrees);
+
     useEffect(() => {
+        let visualAngle = currentRotation.current;
+        let directtion = Math.random() < 0.5 ? -1 : 1;
+
+        const currentVariant = currentRotation.current / 180 === Math.round(currentRotation.current / 180) ? 'BACKSLASH' : 'SLASH';
+        visualAngle += directtion * (variant === currentVariant ? 180 : 90);
+        currentRotation.current = visualAngle;
+
         Animated.timing(
             rotateAnim,
             {
-                toValue: variant === 'SLASH' ? 1 : 0,
-                duration: 500,
-                easing: Easing.in(Easing.elastic(3)),
+                toValue: visualAngle,
+                duration: animationCursor === 0 ? 0 : 600,
+                easing: Easing.in(Easing.elastic(2)),
                 useNativeDriver: true
             }
         ).start();
-    }, [rotateAnim, variant]);
+    }, [rotateAnim, variant, animationCursor]);
 
     const images = durabilityImages.map((img, i) => {
         const animatedDurability = durability.interpolate({
@@ -66,7 +79,7 @@ const PawnVisual = ({ variant, durability, color }: Props) => {
             height: '100%',
             transform: [{
                 rotateZ: rotateAnim.interpolate({
-                    inputRange: [0, 1],
+                    inputRange: [0, 90],
                     outputRange: ['-45deg', '45deg']
                 })
             }]
