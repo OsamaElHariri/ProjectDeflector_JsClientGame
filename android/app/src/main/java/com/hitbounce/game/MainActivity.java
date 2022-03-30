@@ -1,4 +1,4 @@
-package com.jsclientgame;
+package com.hitbounce.game;
 
 import com.facebook.react.ReactActivity;
 import android.os.Bundle;
@@ -12,7 +12,7 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "JsClientGame";
+    return "HitBounce";
   }
 
   @Override

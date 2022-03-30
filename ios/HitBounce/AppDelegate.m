@@ -33,7 +33,7 @@ static void InitializeFlipper(UIApplication *application) {
 
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
-                                                   moduleName:@"JsClientGame"
+                                                   moduleName:@"HitBounce"
                                             initialProperties:nil];
 
   if (@available(iOS 13.0, *)) {
