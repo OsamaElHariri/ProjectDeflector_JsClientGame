@@ -74,7 +74,7 @@ export function GameStateProvider({ children, game, players }: Props) {
         const interval = setInterval(() => {
             const turnEnd = gameStateSubject.value.game.lastTurnEndTime + gameStateSubject.value.game.timePerTurn;
             const hasEnded = Date.now() > turnEnd;
-            if (hasEnded) {
+            if (hasEnded && !gameStateSubject.value.winner) {
                 GameService.expireTurn({
                     gameId: game.gameId,
                     eventCount: eventCount.current.eventCount,
