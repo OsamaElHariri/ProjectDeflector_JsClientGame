@@ -132,7 +132,7 @@ const LobbyScreen = () => {
     useEffect(() => {
         restartAnim();
         () => { isMounted.current = false }
-    });
+    }, []);
 
     const onPlayPress = () => {
         if (!player || checkingOngoingGame) return;
@@ -240,7 +240,6 @@ const LobbyScreen = () => {
     );
 };
 
-
 const styles = StyleSheet.create({
     lobbyContainer: {
         display: 'flex',
@@ -260,7 +259,8 @@ const styles = StyleSheet.create({
     button: {
         width: '100%',
         borderWidth: 4,
-        padding: 8,
+        paddingHorizontal: 8,
+        paddingVertical: 12,
     },
     buttonText: {
         fontWeight: 'bold',

@@ -82,7 +82,7 @@ const TurnTimer = ({ playerId }: Props) => {
     const scaleAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        scaleAnim.setValue(state.playerTurn === playerId ? 2 : 0)
+        scaleAnim.setValue(state.playerTurn === playerId ? 2 : 0);
         Animated.timing(
             scaleAnim,
             {

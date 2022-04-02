@@ -1,5 +1,5 @@
 import { useTheme } from '@react-navigation/native';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import {
     Animated,
@@ -14,41 +14,62 @@ import { usePlayer } from '../main_providers/player_provider';
 const visualWidth = 140;
 const visualMargin = 40;
 
-const ScoreBarTutorial = () => {
+
+interface TutorialScreenSkeletonProps {
+    title: string
+    text1: string
+    text2: string
+    children: ReactNode
+}
+const TutorialScreenSkeleton = ({ title, text1, text2, children }: TutorialScreenSkeletonProps) => {
     const theme = useTheme();
-    const { player } = usePlayer();
     return <>
         <View>
             <Text style={{ fontWeight: 'bold', fontSize: 28, color: theme.colors.text }}>
-                New here? These are the basics
+                {title}
             </Text>
         </View>
 
-        <View style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-around', marginLeft: 80 }}>
-            <View style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{ width: visualWidth + visualMargin, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <View style={{ width: 32, height: 32, borderColor: player?.color, borderWidth: 8, marginBottom: 6 }} />
-                    <View style={{ width: 32, height: 32, backgroundColor: player?.color, marginBottom: 6 }} />
-                    <View style={{ width: 32, height: 32, backgroundColor: player?.color }} />
-                </View>
-                <Text style={{ marginLeft: 16, fontWeight: 'bold', fontSize: 18, color: theme.colors.text }}>
-                    Fill all you score boxes.
-                </Text>
+        <View style={{ flex: 1, display: 'flex', flexDirection: 'row' }}>
+
+            <View style={{ width: visualWidth, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around' }}>
+                {children}
             </View>
 
-            <View style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{ width: visualWidth + visualMargin, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <View style={{ width: 32, height: 32, backgroundColor: player?.color, marginBottom: 6, transform: [{ rotateZ: '45deg' }] }} />
-                    <View style={{ width: 32, height: 32, backgroundColor: player?.color, marginBottom: 6, transform: [{ rotateZ: '45deg' }] }} />
-                    <View style={{ width: 32, height: 32, backgroundColor: player?.color, transform: [{ rotateZ: '45deg' }] }} />
-                </View>
-                <Text style={{ marginLeft: 16, fontWeight: 'bold', fontSize: 18, color: theme.colors.text }}>
-                    {`When filled, the boxes will flip.\nScore 1 more to win!`}
-                </Text>
-            </View>
+            <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, display: 'flex', marginLeft: visualMargin }}>
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
+                        <Text style={{ marginLeft: 16, fontWeight: 'bold', fontSize: 18, color: theme.colors.text }}>
+                            {text1}
+                        </Text>
+                    </View>
 
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
+                        <Text style={{ marginLeft: 16, fontWeight: 'bold', fontSize: 18, color: theme.colors.text }}>
+                            {text2}
+                        </Text>
+                    </View>
+                </View>
+            </View>
         </View>
     </>
+}
+
+const ScoreBarTutorial = () => {
+    const { player } = usePlayer();
+
+    return <TutorialScreenSkeleton title='New here? These are the basics!' text1='Fill all you score boxes.' text2={`When filled, the boxes will flip.\nScore 1 more to win!`}>
+        <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <View style={{ width: 32, height: 32, borderColor: player?.color, borderWidth: 8, marginBottom: 6 }} />
+            <View style={{ width: 32, height: 32, backgroundColor: player?.color, marginBottom: 6 }} />
+            <View style={{ width: 32, height: 32, backgroundColor: player?.color }} />
+        </View>
+        <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <View style={{ width: 32, height: 32, backgroundColor: player?.color, marginBottom: 6, transform: [{ rotateZ: '45deg' }] }} />
+            <View style={{ width: 32, height: 32, backgroundColor: player?.color, marginBottom: 6, transform: [{ rotateZ: '45deg' }] }} />
+            <View style={{ width: 32, height: 32, backgroundColor: player?.color, transform: [{ rotateZ: '45deg' }] }} />
+        </View>
+    </TutorialScreenSkeleton>
 }
 
 const PlacePawnsTutorial = () => {
@@ -56,45 +77,19 @@ const PlacePawnsTutorial = () => {
     const { player } = usePlayer();
     if (!player) return <></>;
 
-    return <>
-        <View>
-            <Text style={{ fontWeight: 'bold', fontSize: 28, color: theme.colors.text }}>
-                Put Pieces
-            </Text>
-        </View>
-
-        <View style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-around', marginLeft: 80 }}>
-            <View style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{ display: 'flex', flexDirection: 'column' }}>
-                    <View style={{ width: visualWidth + visualMargin, alignItems: 'center' }}>
-                        <View style={{ height: 100, width: 100 }}>
-                            <View style={{ borderWidth: 4, borderColor: theme.colors.text }}>
-                                <PawnVisual durability={new Animated.Value(5)} variant={'SLASH'} color={player?.color}></PawnVisual>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-                <Text style={{ marginLeft: 16, fontWeight: 'bold', fontSize: 18, color: theme.colors.text }}>
-                    Every piece costs 1 score box.
-                </Text>
-            </View>
-
-            <View style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{ display: 'flex', flexDirection: 'column' }}>
-                    <View style={{ width: visualWidth + visualMargin, alignItems: 'center' }}>
-                        <View style={{ height: 100, width: 100 }}>
-                            <View style={{ borderWidth: 4, borderColor: theme.colors.text }}>
-                                <PawnVisual durability={new Animated.Value(5)} variant={'BACKSLASH'} color={player?.color}></PawnVisual>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-                <Text style={{ marginLeft: 16, fontWeight: 'bold', fontSize: 18, color: theme.colors.text }}>
-                    You get +1 every turn.
-                </Text>
+    return <TutorialScreenSkeleton title='Put Pieces' text1='Every piece costs 1 score box.' text2='You get +1 every turn.'>
+        <View style={{ height: 100, width: 100 }}>
+            <View style={{ borderWidth: 4, borderColor: theme.colors.text }}>
+                <PawnVisual durability={new Animated.Value(5)} variant={'SLASH'} color={player?.color}></PawnVisual>
             </View>
         </View>
-    </>
+
+        <View style={{ height: 100, width: 100 }}>
+            <View style={{ borderWidth: 4, borderColor: theme.colors.text }}>
+                <PawnVisual durability={new Animated.Value(5)} variant={'BACKSLASH'} color={player?.color}></PawnVisual>
+            </View>
+        </View>
+    </TutorialScreenSkeleton>
 }
 
 const DeflectBallTutorial = () => {
@@ -102,57 +97,32 @@ const DeflectBallTutorial = () => {
     const { player } = usePlayer();
     if (!player) return <></>;
 
-    return <>
-        <View>
-            <Text style={{ fontWeight: 'bold', fontSize: 28, color: theme.colors.text }}>
-                Collect points
-            </Text>
-        </View>
 
-        <View style={{ flex: 1, display: 'flex', flexDirection: 'row' }}>
-
-            <View style={{ width: visualWidth, display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 80 }}>
-                <View style={{
-                    width: BALL_DIAMETER,
-                    height: BALL_DIAMETER,
-                    borderRadius: 100,
-                    backgroundColor: theme.colors.text,
-                }} />
-                <View style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
-                    <View style={{ marginTop: visualWidth - 45, height: 100, width: 100 }}>
-                        <View style={{ borderWidth: 4, borderColor: theme.colors.text }}>
-                            <PawnVisual durability={new Animated.Value(5)} variant={'SLASH'} color={player?.color}></PawnVisual>
-                        </View>
-                    </View>
-
-                    <View style={{ position: 'absolute', transform: [{ rotateZ: '90deg' }, { translateX: visualWidth / 2 }, { translateY: 4 }] }}>
-                        <PreviewLine color={player.color} width={visualWidth} isAnimated={false} />
-                    </View>
-
-                    <View style={{ position: 'absolute', transform: [{ translateX: visualWidth / 4 + 5 }, { translateY: visualWidth }] }}>
-                        <PreviewLine color={player.color} width={visualWidth / 2} isAnimated={false} />
+    return <TutorialScreenSkeleton title='Collect points' text1='Place peices on the board.' text2={`Bounce the ball to your side\nto collect points.`}>
+        <View style={{ width: visualWidth, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{
+                width: BALL_DIAMETER,
+                height: BALL_DIAMETER,
+                borderRadius: 100,
+                backgroundColor: theme.colors.text,
+            }} />
+            <View style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+                <View style={{ marginTop: visualWidth - 45, height: 100, width: 100 }}>
+                    <View style={{ borderWidth: 4, borderColor: theme.colors.text }}>
+                        <PawnVisual durability={new Animated.Value(5)} variant={'SLASH'} color={player?.color}></PawnVisual>
                     </View>
                 </View>
-            </View>
 
-            <View style={{ flex: 1 }}>
+                <View style={{ position: 'absolute', transform: [{ rotateZ: '90deg' }, { translateX: visualWidth / 2 }, { translateY: 4 }] }}>
+                    <PreviewLine color={player.color} width={visualWidth} isAnimated={false} />
+                </View>
 
-                <View style={{ flex: 1, display: 'flex', marginLeft: visualMargin }}>
-                    <View style={{ flex: 1, justifyContent: 'center' }}>
-                        <Text style={{ marginLeft: 16, fontWeight: 'bold', fontSize: 18, color: theme.colors.text }}>
-                            Place peices on the board.
-                        </Text>
-                    </View>
-
-                    <View style={{ flex: 1, justifyContent: 'center' }}>
-                        <Text style={{ marginLeft: 16, fontWeight: 'bold', fontSize: 18, color: theme.colors.text }}>
-                            {`Bounce the ball to your side\nto collect points.`}
-                        </Text>
-                    </View>
+                <View style={{ position: 'absolute', transform: [{ translateX: visualWidth / 4 + 5 }, { translateY: visualWidth }] }}>
+                    <PreviewLine color={player.color} width={visualWidth / 2} isAnimated={false} />
                 </View>
             </View>
         </View>
-    </>
+    </TutorialScreenSkeleton>
 }
 
 
