@@ -95,6 +95,7 @@ const LobbyScreen = () => {
     const nav = useNavigation<AppNavigation>()
     const { bounceAnim, restartAnim } = useSyncedAnimation();
     const isMounted = useRef(true);
+    const [checkingOngoingGame, setCheckingOngoingGame] = useState(true);
 
     const maxTutorialScreen = 2;
     const [tutorialScreen, setTutorialScreen] = useState(0);
@@ -112,15 +113,29 @@ const LobbyScreen = () => {
             setColors(colorResult.colors)
         }
         getColors();
-        restartAnim();
     }, []);
 
-    useEffect(() => () => {
-        isMounted.current = false
+    useEffect(() => {
+        const checkingOngoingGame = async () => {
+            const ongoingGameId = await GameService.getOngoingGame()
+                .catch(err => undefined);
+            if (!isMounted.current) return;
+            if (ongoingGameId) {
+                nav.navigate('LoadingGame', { gameId: ongoingGameId });
+            } else {
+                setCheckingOngoingGame(false);
+            }
+        }
+        checkingOngoingGame();
+    }, []);
+
+    useEffect(() => {
+        restartAnim();
+        () => { isMounted.current = false }
     });
 
     const onPlayPress = () => {
-        if (!player) return;
+        if (!player || checkingOngoingGame) return;
         GameService.findGame()
         nav.replace('AwaitingGame')
     }
@@ -198,12 +213,15 @@ const LobbyScreen = () => {
                 <Pressable
                     style={{ ...styles.button, backgroundColor: player?.color, borderColor: theme.colors.text }}
                     onPress={onPlayPress}>
-                    <Animated.Text style={{
-                        ...styles.buttonText,
-                        fontSize: 32,
-                        color: theme.colors.background,
-                        transform: [{ scale: dampenedBounceAnim }]
-                    }}>Play</Animated.Text>
+                    {checkingOngoingGame
+                        ? <View style={{ marginVertical: 8, width: 32, height: 32, alignSelf: 'center' }}><Spinner /></View>
+                        : <Animated.Text style={{
+                            ...styles.buttonText,
+                            fontSize: 32,
+                            color: theme.colors.background,
+                            transform: [{ scale: dampenedBounceAnim }]
+                        }}>Play</Animated.Text>
+                    }
                 </Pressable>
                 <View style={{ paddingTop: 24 }}></View>
                 <Pressable

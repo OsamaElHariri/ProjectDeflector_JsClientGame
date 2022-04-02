@@ -26,6 +26,13 @@ export default class GameService {
         return json;
     }
 
+    static async getOngoingGame(): Promise<string> {
+        const res = await ApiClient.get(`/game/ongoing/game`);
+        const json = await res.json();
+
+        return json.gameId;
+    }
+
     static async getGame(gameId: string): Promise<Game> {
         const res = await ApiClient.get(`/game/game/${gameId}`);
         const json: Game = await res.json();
