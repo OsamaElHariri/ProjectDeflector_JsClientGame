@@ -30,14 +30,14 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
     const { player } = usePlayer();
     const networkKey = `grid_cell_${rowIdx}_${colIdx}`;
 
+    const { stateSubject, networkRequestStatus, updateState } = useGameState();
     const gestureHandler = useRef<BehaviorSubject<GestureState>>(new BehaviorSubject<GestureState>({
-        isEnabled: true,
+        isEnabled: stateSubject.value.game.playerTurn === player?.id,
         isHeld: false,
         isLongPressTriggered: false,
         isPressTriggered: false,
     }));
 
-    const { stateSubject, networkRequestStatus, updateState } = useGameState();
 
     const getCellPawn = ({ game: { gameBoard: { pawns } } }: GameState) => {
         let pawn = pawns[rowIdx][colIdx];
@@ -116,7 +116,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
     }, [state.playerTurn, state.isProcessingDeflections, state.playerScore])
 
     useEffect(() => {
-        if (state.isPreview || state.variant === '') {
+        if (player?.id === state.playerTurn && (state.isPreview || state.variant === '')) {
             gestureHandler.current.next({
                 ...gestureHandler.current.value,
                 isEnabled: true
@@ -131,6 +131,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
     }, [state.variant, state.isPreview])
 
     const peek = async () => {
+        if (state.playerTurn !== player?.id) return;
         if (state.networkState === 'LOADING') return;
         networkRequestStatus.update(networkKey, 'LOADING');
 
