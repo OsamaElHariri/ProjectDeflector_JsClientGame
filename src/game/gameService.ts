@@ -12,6 +12,13 @@ export default class GameService {
         return json;
     }
 
+    static async cancelFindGame() {
+        const res = await ApiClient.post(`/match/cancel`);
+        const json = await res.json();
+
+        return json;
+    }
+
     static async findSolo() {
         const res = await ApiClient.post(`/match/solo`);
         const json = await res.json();
