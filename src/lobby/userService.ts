@@ -55,4 +55,10 @@ export default class UserService {
         const json = await res.json();
         return json;
     }
+
+    static async refreshStats(): Promise<{}> {
+        const res = await ApiClient.post(`/game/stats/game`);
+        const json = await res.json();
+        return json;
+    }
 }

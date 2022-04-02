@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import {
     Animated,
+    DevSettings,
     Pressable,
     StyleSheet,
     Text,
@@ -47,10 +48,7 @@ const WinnerOverlay = () => {
     }
 
     const backToMenu = () => {
-        if (player) {
-            player.gameStats.games += 1;
-        }
-        nav.replace('Lobby');
+        DevSettings.reload();
     }
 
     const text = winner === player?.id ? 'YOU WON' : 'YOU LOST...';

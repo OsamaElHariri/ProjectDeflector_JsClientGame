@@ -28,6 +28,7 @@ export function PlayerProvider({ children }: Props) {
             }
             const token = await UserService.getAccessToken(uuid);
             ApiClient.accessToken = token;
+            await UserService.refreshStats().catch(() => { });
             const user = await UserService.getCurrentUser();
 
             setPlayerState({
