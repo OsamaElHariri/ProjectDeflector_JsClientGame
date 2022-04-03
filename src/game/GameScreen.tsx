@@ -31,6 +31,8 @@ const GameScreen = ({ route }: Props) => {
     const scoreBarWidth = 50;
     const gridSize = Math.min(dimensions.width - hudWidth * 2 - scoreBarWidth * 2, dimensions.height);
 
+    const targetScore = initialGame.targetScore;
+
     return (
         <GameStateProvider game={initialGame} players={route.params.players}>
             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'stretch', position: 'relative', height: '100%' }}>
@@ -44,7 +46,7 @@ const GameScreen = ({ route }: Props) => {
 
                 <View style={{ position: 'relative' }}>
                     <View style={{ width: scoreBarWidth }}>
-                        <ScoreBar playerId={initialGame.playerIds[0]} maxScore={7} />
+                        <ScoreBar playerId={initialGame.playerIds[0]} maxScore={targetScore} />
                     </View>
                 </View>
 
@@ -52,7 +54,7 @@ const GameScreen = ({ route }: Props) => {
 
                 <View style={{ position: 'relative', transform: [{ scaleX: -1 }] }}>
                     <View style={{ width: scoreBarWidth }}>
-                        <ScoreBar playerId={initialGame.playerIds[1]} maxScore={7} />
+                        <ScoreBar playerId={initialGame.playerIds[1]} maxScore={targetScore} />
                     </View>
                 </View>
 
