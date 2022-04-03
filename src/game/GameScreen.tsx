@@ -15,6 +15,7 @@ import WinnerOverlay from './WinnerOverlay';
 import PlayerHud from './PlayerHud';
 import { Player } from '../types/types';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
+import PlayerNameTag from './PlayerNameTag';
 
 interface Props {
     route: RouteProp<{ params: { game: Game, players: { [playerId: string]: Player } } }, 'params'>
@@ -27,7 +28,7 @@ const GameScreen = ({ route }: Props) => {
 
     const dimensions = useWindowDimensions();
 
-    const hudWidth = 120;
+    const hudWidth = 115;
     const scoreBarWidth = 50;
     const gridSize = Math.min(dimensions.width - hudWidth * 2 - scoreBarWidth * 2, dimensions.height);
 
@@ -37,6 +38,7 @@ const GameScreen = ({ route }: Props) => {
         <GameStateProvider game={initialGame} players={route.params.players}>
             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'stretch', position: 'relative', height: '100%' }}>
                 <PlayerHud playerId={initialGame.playerIds[0]} hudWidth={hudWidth} >
+                    <PlayerNameTag playerId={initialGame.playerIds[0]} />
                     <View style={{ width: '100%', flex: 1 }}>
                         <TurnTimer playerId={initialGame.playerIds[0]} />
                     </View>
@@ -59,6 +61,7 @@ const GameScreen = ({ route }: Props) => {
                 </View>
 
                 <PlayerHud playerId={initialGame.playerIds[1]} hudWidth={hudWidth}>
+                    <PlayerNameTag playerId={initialGame.playerIds[1]} />
                     <View style={{ width: '100%', flex: 1 }}>
                         <TurnTimer playerId={initialGame.playerIds[1]} />
                     </View>

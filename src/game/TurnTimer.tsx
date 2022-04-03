@@ -127,7 +127,7 @@ const TurnTimer = ({ playerId }: Props) => {
 
 
     return (
-        <View style={{ marginTop: 16 }}>
+        <View style={{ marginTop: 12 }}>
             <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
                 <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
                     <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>

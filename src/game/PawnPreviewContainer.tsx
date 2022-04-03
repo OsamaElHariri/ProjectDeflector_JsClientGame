@@ -39,7 +39,7 @@ const PawnPreviewContainer = ({ width, playerId }: PawnPreviewContainerProps) =>
     }, [state])
     let color = stateSubject.value.players[playerId].color;
 
-    return <View style={{ marginTop: 8, padding: 8, height: width * 0.8, width: width * 0.8 }}>
+    return <View style={{ marginTop: 8, padding: 8, height: width * 0.75, width: width * 0.75 }}>
         <View style={{ ...styles.pawnPreviewContainer, borderColor: theme.colors.text }}>
             <PawnVisual durability={new Animated.Value(5)} variant={state.variant} color={color} animationCursor={state.variantLength}></PawnVisual>
         </View>

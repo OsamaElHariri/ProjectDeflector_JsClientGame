@@ -105,7 +105,7 @@ const ShuffleButton = ({ width, playerId }: Props) => {
                     scale: Animated.multiply(bounceAnim, scaleAnim)
                 }]
             }}>
-                <View style={{ width: width, height: width * 0.4 }}>
+                <View style={{ width: width, height: width * 0.3 }}>
                     <Image source={require('./assets/shuffle.png')} style={{
                         resizeMode: 'center',
                         width: '100%',
@@ -113,7 +113,7 @@ const ShuffleButton = ({ width, playerId }: Props) => {
                         tintColor: theme.colors.text,
                     }} />
                 </View>
-                <Text style={{ fontWeight: 'bold', color: theme.colors.text, paddingTop: 8 }}>Shuffle</Text>
+                <Text style={{ fontWeight: 'bold', color: theme.colors.text, paddingTop: 8, fontSize: 14 }}>Shuffle</Text>
             </Animated.View>
         </Pressable>
     </View>
