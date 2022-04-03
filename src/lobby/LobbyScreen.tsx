@@ -171,18 +171,7 @@ const LobbyScreen = () => {
 
     const SidePanel = () => {
         if (player?.gameStats.games === 0) {
-            return <View style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', justifyContent: 'center' }}>
-                <Pressable
-                    style={{ ...styles.button, backgroundColor: theme.colors.background, borderColor: theme.colors.text, borderWidth: 2, opacity: tutorialScreen === maxTutorialScreen ? 0 : 1 }}
-                    onPress={() => setTutorialScreenClamped(tutorialScreen + 1)}>
-                    <Animated.Text style={{
-                        ...styles.buttonText,
-                        fontSize: 14,
-                        color: theme.colors.text,
-                        transform: [{ scale: dampenedBounceAnim }]
-                    }}>Next tip</Animated.Text>
-                </Pressable>
-                <View style={{ paddingTop: 24 }}></View>
+            return <View style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', justifyContent: 'center', marginBottom: 16 }}>
                 <Pressable
                     style={{ ...styles.button, backgroundColor: theme.colors.background, borderColor: theme.colors.text, borderWidth: 2, opacity: tutorialScreen === 0 ? 0 : 1 }}
                     onPress={() => setTutorialScreenClamped(tutorialScreen - 1)}>
@@ -199,6 +188,31 @@ const LobbyScreen = () => {
         }
     }
 
+    const MainActionButton = () => player?.gameStats.games === 0 && tutorialScreen < maxTutorialScreen
+        ? <Pressable
+            style={{ ...styles.button, backgroundColor: player?.color, borderColor: theme.colors.text }}
+            onPress={() => setTutorialScreenClamped(tutorialScreen + 1)}>
+            <Animated.Text style={{
+                ...styles.buttonText,
+                fontSize: 20,
+                color: theme.colors.background,
+                transform: [{ scale: dampenedBounceAnim }]
+            }}>Next</Animated.Text>
+        </Pressable>
+        : <Pressable
+            style={{ ...styles.button, backgroundColor: player?.color, borderColor: theme.colors.text }}
+            onPress={onPlayPress}>
+            {checkingOngoingGame
+                ? <View style={{ marginVertical: 8, width: 32, height: 32, alignSelf: 'center' }}><Spinner /></View>
+                : <Animated.Text style={{
+                    ...styles.buttonText,
+                    fontSize: 32,
+                    color: theme.colors.background,
+                    transform: [{ scale: dampenedBounceAnim }]
+                }}>Play</Animated.Text>
+            }
+        </Pressable>;
+
     return (
         <View style={{ backgroundColor: theme.colors.background, ...styles.lobbyContainer }}>
             <View style={{ flex: 1, display: 'flex' }}>
@@ -210,19 +224,7 @@ const LobbyScreen = () => {
                 <View style={{ flex: 1, width: '100%' }}>
                     <SidePanel />
                 </View>
-                <Pressable
-                    style={{ ...styles.button, backgroundColor: player?.color, borderColor: theme.colors.text }}
-                    onPress={onPlayPress}>
-                    {checkingOngoingGame
-                        ? <View style={{ marginVertical: 8, width: 32, height: 32, alignSelf: 'center' }}><Spinner /></View>
-                        : <Animated.Text style={{
-                            ...styles.buttonText,
-                            fontSize: 32,
-                            color: theme.colors.background,
-                            transform: [{ scale: dampenedBounceAnim }]
-                        }}>Play</Animated.Text>
-                    }
-                </Pressable>
+                <MainActionButton />
                 <View style={{ paddingTop: 24 }}></View>
                 <Pressable
                     style={{ ...styles.button, backgroundColor: theme.colors.background, borderColor: theme.colors.text, borderWidth: 2 }}
