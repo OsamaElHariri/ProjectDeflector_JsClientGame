@@ -45,7 +45,8 @@ const TurnTimer = ({ playerId }: Props) => {
         networkState: networkRequestStatus.subject.value[networkKey],
         playerTurn: stateSubject.value.game.playerTurn,
         lastTurnEndTime: stateSubject.value.game.lastTurnEndTime,
-        icon: getTimerIcon(stateSubject.value)
+        icon: getTimerIcon(stateSubject.value),
+        playerScore: stateSubject.value.game.gameBoard.scoreBoard[playerId],
     });
 
     useEffect(() => {
@@ -54,9 +55,9 @@ const TurnTimer = ({ playerId }: Props) => {
                 ...state,
                 playerTurn: gameState.game.playerTurn,
                 lastTurnEndTime: gameState.game.lastTurnEndTime,
-                icon: getTimerIcon(gameState)
+                icon: getTimerIcon(gameState),
+                playerScore: gameState.game.gameBoard.scoreBoard[playerId],
             }
-
 
             if (shouldUpdate(newState, state)) {
                 setState(newState);
@@ -80,7 +81,6 @@ const TurnTimer = ({ playerId }: Props) => {
     }, [state.networkState]);
 
     const scaleAnim = useRef(new Animated.Value(0)).current;
-
     useEffect(() => {
         scaleAnim.setValue(state.playerTurn === playerId ? 2 : 0);
         Animated.timing(
@@ -93,6 +93,46 @@ const TurnTimer = ({ playerId }: Props) => {
             }
         ).start();
     }, [scaleAnim, state.playerTurn, state.lastTurnEndTime]);
+
+    const shakeAnim = useRef(new Animated.Value(0.5)).current;
+    useEffect(() => {
+        if (state.playerTurn !== playerId || state.playerTurn !== player?.id || state.playerScore > 0) {
+            shakeAnim.setValue(0.5);
+            return;
+        }
+
+        const sequence = Animated.sequence([
+            Animated.timing(
+                shakeAnim,
+                {
+                    toValue: 0,
+                    duration: 150,
+                    easing: Easing.linear,
+                    useNativeDriver: true
+                }
+            ),
+            Animated.timing(
+                shakeAnim,
+                {
+                    toValue: 1,
+                    duration: 300,
+                    easing: Easing.linear,
+                    useNativeDriver: true
+                }
+            ),
+            Animated.timing(
+                shakeAnim,
+                {
+                    toValue: 0.5,
+                    duration: 150,
+                    easing: Easing.linear,
+                    useNativeDriver: true
+                }
+            ),
+        ]);
+
+        Animated.loop(sequence).start();
+    }, [scaleAnim, state.playerTurn, state.playerScore])
 
     const endTurn = async () => {
         if (playerId !== player?.id) return;
@@ -125,11 +165,17 @@ const TurnTimer = ({ playerId }: Props) => {
 
     let color = stateSubject.value.players[playerId].color;
 
-
     return (
         <View style={{ marginTop: 12 }}>
             <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
-                <View style={{ ...styles.turnTimerContainer, backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text }}>
+                <Animated.View style={{
+                    ...styles.turnTimerContainer,
+                    backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text,
+                    transform: [
+                        { scaleY: shakeAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.97, 1, 1.03] }) },
+                        { scaleX: shakeAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1, 0.97] }) }
+                    ]
+                }}>
                     <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
                         <Animated.View style={{ width: '100%', height: '100%', backgroundColor: color, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
                     </View>
@@ -137,7 +183,7 @@ const TurnTimer = ({ playerId }: Props) => {
                         <TurnTimerIcon key={'timer_icon'} icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} playerColor={color} />
                     </Animated.View>
                     <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
-                </View>
+                </Animated.View>
             </Pressable>
 
             <View style={{ position: 'absolute', width: 18, height: 18, right: leftSide ? 10 : undefined, top: 10, left: leftSide ? undefined : 10 }}>
