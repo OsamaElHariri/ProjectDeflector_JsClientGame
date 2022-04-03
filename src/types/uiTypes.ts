@@ -7,6 +7,7 @@ export type GameNavigatorParamList = {
     AwaitingGame: undefined
     Game: { game: Game, players: { [playerId: string]: Player } }
     LoadingGame: { gameId: string, otherPlayer?: Player }
+    Winner: { winner: string }
 }
 
 export type AppNavigation = NativeStackNavigationProp<GameNavigatorParamList>

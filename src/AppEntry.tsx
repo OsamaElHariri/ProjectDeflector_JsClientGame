@@ -9,6 +9,7 @@ import GameScreen from './game/GameScreen';
 import AwaitingGameScreen from './game/AwaitingGameScreen';
 import { SyncedAnimationProvider } from './main_providers/synced_animation';
 import LoadingGameScreen from './game/LoadingGameScreen';
+import WinnerOverlay from './game/WinnerOverlay';
 
 export const GameTheme = {
     ...DefaultTheme,
@@ -45,6 +46,10 @@ const AppEntry = () => {
                             <Stack.Screen
                                 name="Game"
                                 component={GameScreen} />
+
+                            <Stack.Screen
+                                name="Winner"
+                                component={WinnerOverlay} />
 
                         </Stack.Navigator>
 

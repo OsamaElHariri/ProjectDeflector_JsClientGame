@@ -71,6 +71,11 @@ export function GameStateProvider({ children, game, players }: Props) {
     })).current;
 
     useEffect(() => {
+        if ((game as any).winner) {
+            nav.replace('Winner', { winner: (game as any).winner });
+            return;
+        }
+
         const interval = setInterval(() => {
             const turnEnd = gameStateSubject.value.game.lastTurnEndTime + gameStateSubject.value.game.timePerTurn;
             const hasEnded = Date.now() > turnEnd;
@@ -186,10 +191,14 @@ export function GameStateProvider({ children, game, players }: Props) {
             });
         },
         updateDeflectionProcessing: (deflectionProcessing) => {
-            gameStateSubject.next({
-                ...gameStateSubject.value,
-                deflectionProcessing
-            });
+            if (!deflectionProcessing.isActive && gameStateSubject.value.winner) {
+                nav.replace('Winner', { winner: gameStateSubject.value.winner });
+            } else {
+                gameStateSubject.next({
+                    ...gameStateSubject.value,
+                    deflectionProcessing
+                });
+            }
         },
 
         onCancelPeek: () => {

@@ -69,7 +69,6 @@ const GameScreen = ({ route }: Props) => {
                     <ShuffleButton width={hudWidth} playerId={initialGame.playerIds[1]} />
                 </PlayerHud>
             </View>
-            <WinnerOverlay />
         </GameStateProvider>
     );
 };

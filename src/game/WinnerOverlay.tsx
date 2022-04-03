@@ -1,5 +1,5 @@
-import { useNavigation, useTheme } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import { RouteProp, useNavigation, useTheme } from '@react-navigation/native';
+import React, { useState } from 'react';
 
 import {
     Animated,
@@ -13,41 +13,18 @@ import UserService from '../lobby/userService';
 import { usePlayer } from '../main_providers/player_provider';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { AppNavigation } from '../types/uiTypes';
-import { shouldUpdate } from './diffWatcher';
-import { useGameState } from './game_state_provider';
 import Spinner from './Spinner';
 
-const WinnerOverlay = () => {
+interface Props {
+    route: RouteProp<{ params: { winner: string } }, 'params'>
+}
+
+const WinnerOverlay = ({ route: { params: { winner } } }: Props) => {
     const theme = useTheme();
     const { player, updatePlayer } = usePlayer();
-    const { stateSubject } = useGameState();
     const nav = useNavigation<AppNavigation>();
     const { bounceAnim } = useSyncedAnimation();
     const [isLoading, setIsLoading] = useState(false);
-
-    const [state, setState] = useState({
-        winner: stateSubject.value.winner,
-        isDeflecting: stateSubject.value.deflectionProcessing.isActive
-    });
-
-    useEffect(() => {
-        const sub = stateSubject.subscribe(({ winner, deflectionProcessing: { isActive } }) => {
-            const newState = {
-                winner,
-                isDeflecting: isActive
-            };
-            if (shouldUpdate(newState, state)) {
-                setState(newState);
-            }
-        });
-
-        return () => sub.unsubscribe();
-    }, [state]);
-
-    const winner = state.winner;
-    if (!winner || state.isDeflecting) {
-        return <View></View>
-    }
 
     const backToMenu = async () => {
         if (!player || !updatePlayer || isLoading) return;
