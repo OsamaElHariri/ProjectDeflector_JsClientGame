@@ -20,19 +20,19 @@ const Clock = ({ color }: { color: string }) => (
 
 const EndTurn = ({ fillColor, borderColor }: { fillColor: string, borderColor: string }) => (
     <View style={{ height: 60, width: '100%' }}>
-        <Svg height='100%' width='100%' viewBox='0 0 60 60'>
+        <Svg height='100%' width='100%' viewBox='0 0 50 50'>
             <Text
-                y={'-10'}
+                x={'26'}
+                y={'38'}
                 textAnchor='middle'
                 stroke={borderColor}
                 strokeWidth="2"
                 fill={fillColor}
-                fontSize="28"
+                fontSize="30"
                 fontWeight='bold'
                 letterSpacing={2}
             >
-                <TSpan x='30' dy='1.1em'>END</TSpan>
-                <TSpan x='30' dy='1.1em'>TURN</TSpan>
+                Done
             </Text>
         </Svg>
     </View>
