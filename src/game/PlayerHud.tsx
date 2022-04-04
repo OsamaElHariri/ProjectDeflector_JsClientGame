@@ -155,12 +155,12 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
 
     const mainHudPos = mainPosAnim.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, direction * hudWidth],
+        outputRange: [0, direction * (hudWidth + 10)],
     });
 
     const actionsPos = actionsPosAnim.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, direction * hudWidth],
+        outputRange: [0, direction * (hudWidth + 10)],
     });
 
     const addPawn = async () => {
@@ -249,7 +249,7 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
 
             </Animated.View>
 
-            <View style={{ position: 'absolute', width: hudWidth, height: '100%', backgroundColor: theme.colors.background, transform: [{ translateX: direction * hudWidth }] }}>
+            <View style={{ position: 'absolute', width: hudWidth + 2, height: '100%', backgroundColor: theme.colors.background, transform: [{ translateX: direction * (hudWidth + 10 - direction) }] }}>
             </View>
 
         </View>

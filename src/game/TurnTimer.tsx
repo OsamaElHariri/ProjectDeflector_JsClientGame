@@ -94,23 +94,9 @@ const TurnTimer = ({ playerId }: Props) => {
         ).start();
     }, [scaleAnim, state.playerTurn, state.lastTurnEndTime]);
 
-    const shakeAnim = useRef(new Animated.Value(0.5)).current;
+    const shakeAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
-        if (state.playerTurn !== playerId || state.playerTurn !== player?.id || state.playerScore > 0) {
-            shakeAnim.setValue(0.5);
-            return;
-        }
-
         const sequence = Animated.sequence([
-            Animated.timing(
-                shakeAnim,
-                {
-                    toValue: 0,
-                    duration: 150,
-                    easing: Easing.linear,
-                    useNativeDriver: true
-                }
-            ),
             Animated.timing(
                 shakeAnim,
                 {
@@ -123,8 +109,8 @@ const TurnTimer = ({ playerId }: Props) => {
             Animated.timing(
                 shakeAnim,
                 {
-                    toValue: 0.5,
-                    duration: 150,
+                    toValue: 0,
+                    duration: 300,
                     easing: Easing.linear,
                     useNativeDriver: true
                 }
@@ -132,7 +118,21 @@ const TurnTimer = ({ playerId }: Props) => {
         ]);
 
         Animated.loop(sequence).start();
-    }, [scaleAnim, state.playerTurn, state.playerScore])
+    }, [scaleAnim]);
+
+    const shakeControllerAnim = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+        const shouldAnimate = state.playerTurn === playerId && state.playerTurn === player?.id && state.playerScore === 0;
+
+        Animated.timing(
+            shakeControllerAnim,
+            {
+                toValue: shouldAnimate ? 1 : 0,
+                duration: 200,
+                useNativeDriver: true
+            }
+        ).start();
+    }, [shakeControllerAnim, state.playerTurn, state.playerScore]);
 
     const endTurn = async () => {
         if (playerId !== player?.id) return;
@@ -165,6 +165,17 @@ const TurnTimer = ({ playerId }: Props) => {
 
     let color = stateSubject.value.players[playerId].color;
 
+    const rotateAnim = Animated.multiply(
+        shakeControllerAnim,
+        shakeAnim.interpolate({ inputRange: [0, 1], outputRange: [-0.5, 0.5] })
+    ).interpolate({ inputRange: [-0.5, 0, 0.5], outputRange: ['-1deg', '0deg', '1deg'] });
+    const yScaleAnim = Animated.add(1, Animated.multiply(
+        shakeControllerAnim,
+        shakeAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.02, -0.02, 0.02] })));
+    const xScaleAnim = Animated.add(1, Animated.multiply(
+        shakeControllerAnim,
+        shakeAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [-0.02, 0.02, -0.02] })));
+
     return (
         <View style={{ marginTop: 12 }}>
             <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
@@ -172,8 +183,9 @@ const TurnTimer = ({ playerId }: Props) => {
                     ...styles.turnTimerContainer,
                     backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text,
                     transform: [
-                        { scaleY: shakeAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.97, 1, 1.03] }) },
-                        { scaleX: shakeAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1, 0.97] }) }
+                        { rotateZ: rotateAnim },
+                        { scaleY: yScaleAnim },
+                        { scaleX: xScaleAnim },
                     ]
                 }}>
                     <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
