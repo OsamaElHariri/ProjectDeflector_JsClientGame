@@ -28,11 +28,14 @@ export function PlayerProvider({ children }: Props) {
             }
             const token = await UserService.getAccessToken(uuid);
             ApiClient.accessToken = token;
-            await UserService.refreshStats().catch(() => { });
+            const stats = await UserService.getStats();
             const user = await UserService.getCurrentUser();
 
             setPlayerState({
-                player: user,
+                player: {
+                    ...user,
+                    gameStats: stats
+                },
             });
         }
 

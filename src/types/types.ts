@@ -1,6 +1,9 @@
 export interface PlayerGameStats {
     games: number
     wins: number
+    hasWonToday: boolean
+    winStreak: number
+    nextDay: number
 }
 
 export interface Player {

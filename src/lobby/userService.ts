@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ApiClient from "../network/apiClient";
-import { Player } from "../types/types";
+import { Player, PlayerGameStats } from "../types/types";
 
 export default class UserService {
 
@@ -56,7 +56,7 @@ export default class UserService {
         return json;
     }
 
-    static async refreshStats(): Promise<{}> {
+    static async getStats(): Promise<PlayerGameStats> {
         const res = await ApiClient.post(`/game/stats/game`);
         const json = await res.json();
         return json;

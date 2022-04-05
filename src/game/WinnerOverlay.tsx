@@ -30,13 +30,16 @@ const WinnerOverlay = ({ route: { params: { winner } } }: Props) => {
         if (!player || !updatePlayer || isLoading) return;
         setIsLoading(true);
 
-        await UserService.refreshStats().catch(() => { });
-        const user = await UserService.getCurrentUser().catch(() => undefined);
+        const stats = await UserService.getStats();
+        const user = await UserService.getCurrentUser();
         if (!user) {
             player.gameStats.games += 1;
             updatePlayer({ ...player });
         } else {
-            updatePlayer(user);
+            updatePlayer({
+                ...user,
+                gameStats: stats
+            });
         }
         nav.navigate('Lobby');
     }

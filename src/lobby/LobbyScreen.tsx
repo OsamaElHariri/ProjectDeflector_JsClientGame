@@ -17,6 +17,7 @@ import { NetworkRequestStatus } from '../network/types';
 import { AppNavigation } from '../types/uiTypes';
 import TutorialScreen from './TutorialScreen';
 import UserService from './userService';
+import WinStreakDisplay from './WinStreakDisplay';
 
 interface ColorBoxProps {
     color: string
@@ -150,7 +151,7 @@ const LobbyScreen = () => {
 
     const MainLobbyScreen = () => <>
         <Text style={{ fontWeight: 'bold', fontSize: 28, color: theme.colors.text }}>
-            Hello {player?.nickname}, what color would you like to go for today?
+            Choose a color that speaks to you
         </Text>
         <View style={{ paddingTop: 12 }}></View>
         <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
@@ -184,7 +185,7 @@ const LobbyScreen = () => {
                 </Pressable>
             </View>
         } else {
-            return <></>
+            return <WinStreakDisplay />
         }
     }
 
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
         alignItems: 'stretch',
         position: 'relative',
         height: '100%',
-        padding: 24,
+        padding: 20,
     },
     buttonPanel: {
         minWidth: 160,
