@@ -103,10 +103,15 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
 
     useEffect(() => {
         const sub = stateSubject.subscribe((gameState) => {
-            const { game: { matchPointPlayers, playerTurn, gameBoard: { scoreBoard } } } = gameState;
+            const { allPostDeflectionPartialGameBoards, deflectionProcessing, game: { matchPointPlayers, playerTurn, gameBoard: { scoreBoard } } } = gameState;
+            let score = scoreBoard[playerId];
+            const activeDeflectionScore = allPostDeflectionPartialGameBoards[deflectionProcessing.allDeflectionsIndex]?.scoreBoard[playerId];
+            if (deflectionProcessing.isActive && activeDeflectionScore) {
+                score = activeDeflectionScore;
+            }
 
             const newState = {
-                score: scoreBoard[playerId],
+                score,
                 isMatchPoint: matchPointPlayers[playerId],
                 playerTurn,
                 isCurrentlyScoring: getIsCurrentlyScoring(gameState),

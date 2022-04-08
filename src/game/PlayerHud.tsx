@@ -34,7 +34,7 @@ const TimerContent = ({ textFillColor, textBorderColor, text, fullImage, borderI
                 tintColor: textBorderColor,
                 width: '100%',
                 height: 40,
-                transform: [{ scale: 0.98 }]
+                transform: [{ scale: 0.96 }]
             }} />
             <Image source={borderImage} style={{
                 resizeMode: 'center',
