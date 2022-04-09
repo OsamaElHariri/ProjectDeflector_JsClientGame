@@ -55,7 +55,10 @@ const ColorBox = ({ color }: ColorBoxProps) => {
         });
         if (!updateResult) return;
         setNetworkState('NONE');
-        updatePlayer(updateResult);
+        updatePlayer({
+            ...updateResult,
+            gameStats: player.gameStats
+        });
     }
 
     const anim = Animated.add(
