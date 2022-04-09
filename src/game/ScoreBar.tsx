@@ -84,6 +84,12 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
             .fill(undefined)
             .map((_, idx) => new Animated.Value(1)), []);
     const scaleAnims = useRef(initScaleAnims).current;
+
+    const initShakeAnims = useMemo(
+        () => Array(maxScore)
+            .fill(undefined)
+            .map((_, idx) => new Animated.Value(0.5)), []);
+    const shakeAnims = useRef(initShakeAnims).current;
     const turnStartAnim = useRef(new Animated.Value(1)).current;
 
     const getIsCurrentlyScoring = (gameState: GameState) => {
@@ -99,11 +105,12 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
         isMatchPoint: stateSubject.value.game.matchPointPlayers[playerId],
         playerTurn: stateSubject.value.game.playerTurn,
         isCurrentlyScoring: getIsCurrentlyScoring(stateSubject.value),
+        previewPawn: stateSubject.value.previewPawn
     });
 
     useEffect(() => {
         const sub = stateSubject.subscribe((gameState) => {
-            const { allPostDeflectionPartialGameBoards, deflectionProcessing, game: { matchPointPlayers, playerTurn, gameBoard: { scoreBoard } } } = gameState;
+            const { previewPawn, allPostDeflectionPartialGameBoards, deflectionProcessing, game: { matchPointPlayers, playerTurn, gameBoard: { scoreBoard } } } = gameState;
             let score = scoreBoard[playerId];
             const activeDeflectionScore = allPostDeflectionPartialGameBoards[deflectionProcessing.allDeflectionsIndex]?.scoreBoard[playerId];
             if (deflectionProcessing.isActive && activeDeflectionScore) {
@@ -115,6 +122,7 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
                 isMatchPoint: matchPointPlayers[playerId],
                 playerTurn,
                 isCurrentlyScoring: getIsCurrentlyScoring(gameState),
+                previewPawn,
             }
             if (shouldUpdate(newState, state)) {
                 setState(newState);
@@ -180,6 +188,55 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
         Animated.stagger(150, anims).start();
     }, [state.isCurrentlyScoring]);
 
+    useEffect(() => {
+        if (playerId !== player?.id) return;
+        if (!state.previewPawn || state.score === 0) {
+            shakeAnims.forEach(anim => {
+                Animated.timing(
+                    anim,
+                    {
+                        toValue: 0.5,
+                        duration: 100,
+                        useNativeDriver: true
+                    }
+                ).start();
+            });
+        } else {
+            const idx = state.score - 1;
+            Animated.loop(
+                Animated.sequence([
+                    Animated.timing(
+                        shakeAnims[idx],
+                        {
+                            toValue: 0,
+                            duration: 50,
+                            easing: Easing.linear,
+                            useNativeDriver: true,
+                        }
+                    ),
+                    Animated.timing(
+                        shakeAnims[idx],
+                        {
+                            toValue: 1,
+                            duration: 100,
+                            easing: Easing.linear,
+                            useNativeDriver: true,
+                        }
+                    ),
+                    Animated.timing(
+                        shakeAnims[idx],
+                        {
+                            toValue: 0.5,
+                            duration: 50,
+                            easing: Easing.linear,
+                            useNativeDriver: true,
+                        }
+                    ),
+                ])
+            ).start();
+        }
+    }, [state.previewPawn, state.score]);
+
     const onLayout = (evt: any) => {
         setCurrentLayout(evt.nativeEvent.layout)
     }
@@ -198,12 +255,16 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
 
         nodes = Array(maxScore).fill(undefined).map((_, idx) => {
             const scaleAnim = scaleAnims[idx];
+            const shakeAnim = shakeAnims[idx];
 
             const isPoint = idx < state.score;
             return <Animated.View key={`score_${idx}`} style={{
                 marginBottom: width * ratioMargin,
                 marginTop: idx === maxScore - 1 ? width * ratioMargin : 0,
-                transform: [{ scale: Animated.multiply(turnStartAnim, scaleAnim) }]
+                transform: [
+                    { scale: Animated.multiply(turnStartAnim, scaleAnim) },
+                    { rotateZ: shakeAnim.interpolate({ inputRange: [0, 1], outputRange: ['-10deg', '10deg'] }) },
+                ]
             }}>
                 <ScoreBox index={idx} isMatchPoint={state.isMatchPoint} width={width}>
                     <View style={{ ...styles.expanded, position: 'absolute', top: -width * 0.5, left: -width * 0.5, transform: [{ translateX: width * 0.5 }, { translateY: width * 0.5 }] }}>
