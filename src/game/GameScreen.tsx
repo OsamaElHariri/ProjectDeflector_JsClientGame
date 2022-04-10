@@ -46,7 +46,7 @@ const GameScreen = ({ route }: Props) => {
                     <ShuffleButton width={hudWidth} playerId={initialGame.playerIds[0]} />
                 </PlayerHud>
 
-                <View style={{ position: 'relative' }}>
+                <View style={{ zIndex: 2, position: 'relative' }}>
                     <View style={{ width: scoreBarWidth }}>
                         <ScoreBar playerId={initialGame.playerIds[0]} maxScore={targetScore} />
                     </View>
@@ -54,7 +54,7 @@ const GameScreen = ({ route }: Props) => {
 
                 <GameGrid gridSize={gridSize} />
 
-                <View style={{ position: 'relative', transform: [{ scaleX: -1 }] }}>
+                <View style={{ zIndex: 2, position: 'relative', transform: [{ scaleX: -1 }] }}>
                     <View style={{ width: scoreBarWidth }}>
                         <ScoreBar playerId={initialGame.playerIds[1]} maxScore={targetScore} />
                     </View>

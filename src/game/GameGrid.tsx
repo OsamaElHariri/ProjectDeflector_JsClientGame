@@ -11,7 +11,7 @@ import BallPathPreview from './BallPathPreview';
 import { shouldUpdate } from './diffWatcher';
 import { useGameState } from './game_state_provider';
 import GridCell from './GridCell';
-import { getDeflectionAnimations } from './gridDeflectionAnimations';
+import { getDeflectionAnimations, getGridDoublePulseAnimation, getGridPulseAnimation } from './gridDeflectionAnimations';
 import { Deflection } from './types';
 
 interface Props {
@@ -49,6 +49,7 @@ const GameGrid = ({ gridSize }: Props) => {
         allDeflections: stateSubject.value.allDeflections,
         ...stateSubject.value.deflectionProcessing,
     });
+    const gridPulseAnim = useRef(new Animated.Value(1)).current;
 
     const initialBallPos = stateSubject.value.currentTurnDeflections?.[0]?.position || { x: 0, y: 0 }
     const posAnim = useRef(new Animated.ValueXY(initialBallPos)).current;
@@ -99,6 +100,12 @@ const GameGrid = ({ gridSize }: Props) => {
                 posAnim.setValue(deflections[0].position)
             }
             (async () => {
+                if (allDeflections.length > 1 && deflectionProcessing.allDeflectionsIndex === 0) {
+                    await startAnimation(getGridDoublePulseAnimation(gridPulseAnim));
+                } else {
+                    getGridPulseAnimation(gridPulseAnim).start();
+                }
+
                 await startAnimation(getDeflectionAnimations({
                     durabilityAnims: durabilityAnims.current,
                     ballPosAnim: posAnim,
@@ -168,9 +175,18 @@ const GameGrid = ({ gridSize }: Props) => {
     return (
         <View style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column' }}>
             <View style={{ height: cellSize / 2 }}></View>
-            <View style={{ position: 'relative', display: 'flex', flexDirection: 'column', width: cellSize * cols, height: cellSize * rows }}>
+            <Animated.View style={{
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                width: cellSize * cols,
+                height: cellSize * rows,
+                transform: [
+                    { scale: gridPulseAnim }
+                ]
+            }}>
                 {grid}
-            </View>
+            </Animated.View>
             <View style={{ position: 'absolute', width: cellSize * rows, height: cellSize * cols }}>
                 <BallPathPreview cellSize={cellSize} />
             </View>

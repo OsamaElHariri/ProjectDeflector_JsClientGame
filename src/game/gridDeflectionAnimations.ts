@@ -20,7 +20,7 @@ export function getDeflectionAnimations({
     pawnPosAnims,
     pawnScaleAnim,
 }: deflectionAnimParams): Animated.CompositeAnimation {
-    const fixedTimePerCell = 150;
+    const fixedTimePerCell = 140;
 
     const anims = deflections.map((deflection, i) => {
         if (i === 0) {
@@ -29,7 +29,7 @@ export function getDeflectionAnimations({
                 {
                     toValue: 1,
                     easing: Easing.elastic(1),
-                    duration: 50,
+                    duration: 20,
                     useNativeDriver: true,
                 }
             );
@@ -163,7 +163,7 @@ export function getDeflectionAnimations({
                 pawnPosAnims[previousKey],
                 {
                     toValue: 0,
-                    duration: timePerCell,
+                    duration: timePerCell * 0.9,
                     easing: Easing.elastic(1),
                     useNativeDriver: true
                 }
@@ -176,4 +176,64 @@ export function getDeflectionAnimations({
     });
 
     return Animated.sequence(anims);
+}
+
+export function getGridDoublePulseAnimation(gridPulseAnim: Animated.Value): Animated.CompositeAnimation {
+    return Animated.sequence([
+        Animated.timing(
+            gridPulseAnim,
+            {
+                toValue: 1.05,
+                duration: 150,
+                useNativeDriver: true,
+            }
+        ),
+        Animated.timing(
+            gridPulseAnim,
+            {
+                toValue: 1.03,
+                duration: 80,
+                useNativeDriver: true,
+            }
+        ),
+        Animated.timing(
+            gridPulseAnim,
+            {
+                toValue: 1.06,
+                duration: 180,
+                useNativeDriver: true,
+            }
+        ),
+        Animated.timing(
+            gridPulseAnim,
+            {
+                toValue: 1,
+                easing: Easing.elastic(2),
+                duration: 200,
+                useNativeDriver: true,
+            }
+        ),
+    ]);
+}
+
+export function getGridPulseAnimation(gridPulseAnim: Animated.Value): Animated.CompositeAnimation {
+    return Animated.sequence([
+        Animated.timing(
+            gridPulseAnim,
+            {
+                toValue: 1.06,
+                duration: 140,
+                useNativeDriver: true,
+            }
+        ),
+        Animated.timing(
+            gridPulseAnim,
+            {
+                toValue: 1,
+                easing: Easing.elastic(2),
+                duration: 190,
+                useNativeDriver: true,
+            }
+        ),
+    ]);
 }
