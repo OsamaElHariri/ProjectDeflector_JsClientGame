@@ -177,7 +177,7 @@ const TurnTimer = ({ playerId }: Props) => {
         shakeAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [-0.02, 0.02, -0.02] })));
 
     return (
-        <View style={{ marginTop: 12 }}>
+        <View>
             <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
                 <Animated.View style={{
                     ...styles.turnTimerContainer,

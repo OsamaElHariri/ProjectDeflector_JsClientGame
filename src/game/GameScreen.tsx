@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
     useWindowDimensions,
     View,
@@ -11,11 +11,12 @@ import GameGrid from './GameGrid';
 import { GameStateProvider } from './game_state_provider';
 import ShuffleButton from './ShuffleButton';
 import PawnPreviewContainer from './PawnPreviewContainer';
-import WinnerOverlay from './WinnerOverlay';
 import PlayerHud from './PlayerHud';
 import { Player } from '../types/types';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import PlayerNameTag from './PlayerNameTag';
+import { BehaviorSubject } from 'rxjs';
+import HintOverlay from './HintOverlay';
 
 interface Props {
     route: RouteProp<{ params: { game: Game, players: { [playerId: string]: Player } } }, 'params'>
@@ -24,6 +25,7 @@ interface Props {
 const GameScreen = ({ route }: Props) => {
     const initialGame = route.params.game;
     const { restartAnim } = useSyncedAnimation();
+    const tutorialDisplay = useRef<BehaviorSubject<boolean>>(new BehaviorSubject<boolean>(false)).current;
     useEffect(() => restartAnim(), []);
 
     const dimensions = useWindowDimensions();
@@ -36,9 +38,10 @@ const GameScreen = ({ route }: Props) => {
 
     return (
         <GameStateProvider game={initialGame} players={route.params.players}>
+            <HintOverlay tutorialDisplay={tutorialDisplay} gridSize={gridSize} />
             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'stretch', position: 'relative', height: '100%' }}>
                 <PlayerHud playerId={initialGame.playerIds[0]} hudWidth={hudWidth} >
-                    <PlayerNameTag playerId={initialGame.playerIds[0]} />
+                    <PlayerNameTag playerId={initialGame.playerIds[0]} tutorialDisplay={tutorialDisplay} />
                     <View style={{ width: '100%', flex: 1 }}>
                         <TurnTimer playerId={initialGame.playerIds[0]} />
                     </View>
@@ -61,7 +64,7 @@ const GameScreen = ({ route }: Props) => {
                 </View>
 
                 <PlayerHud playerId={initialGame.playerIds[1]} hudWidth={hudWidth}>
-                    <PlayerNameTag playerId={initialGame.playerIds[1]} />
+                    <PlayerNameTag playerId={initialGame.playerIds[1]} tutorialDisplay={tutorialDisplay} />
                     <View style={{ width: '100%', flex: 1 }}>
                         <TurnTimer playerId={initialGame.playerIds[1]} />
                     </View>

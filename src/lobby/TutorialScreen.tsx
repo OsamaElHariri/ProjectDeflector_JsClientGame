@@ -9,6 +9,7 @@ import {
 import { BALL_DIAMETER } from '../constants';
 import { PreviewLine } from '../game/BallPathPreview';
 import PawnVisual from '../game/PawnVisual';
+import PlayerNameTag from '../game/PlayerNameTag';
 import { usePlayer } from '../main_providers/player_provider';
 
 const visualWidth = 140;
@@ -125,6 +126,21 @@ const DeflectBallTutorial = () => {
     </TutorialScreenSkeleton>
 }
 
+const InGameHintsTutorial = () => {
+    const { player } = usePlayer();
+    if (!player) return <></>;
+
+
+    return <TutorialScreenSkeleton title='In-game hints' text1='The info icon gives you hints in-game.' text2='Now click Play and have fun!'>
+        <View style={{ width: 100 }}>
+            <PlayerNameTag playerId={player.id} />
+        </View>
+        <View style={{ width: 100, opacity: 0 }}>
+            <PlayerNameTag playerId={player.id} />
+        </View>
+    </TutorialScreenSkeleton>
+}
+
 
 interface Props {
     tutorialScreen: number
@@ -139,6 +155,8 @@ const TutorialScreen = ({ tutorialScreen }: Props) => {
             return <PlacePawnsTutorial />
         } else if (tutorialScreen === 2) {
             return <DeflectBallTutorial />
+        } else if (tutorialScreen === 3) {
+            return <InGameHintsTutorial />
         } else {
             return <></>
         }

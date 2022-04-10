@@ -101,7 +101,7 @@ const LobbyScreen = () => {
     const isMounted = useRef(true);
     const [checkingOngoingGame, setCheckingOngoingGame] = useState(true);
 
-    const maxTutorialScreen = 2;
+    const maxTutorialScreen = 3;
     const [tutorialScreen, setTutorialScreen] = useState(0);
     const setTutorialScreenClamped = (value: number) => {
         setTutorialScreen(Math.min(maxTutorialScreen, Math.max(0, value)));
@@ -122,7 +122,7 @@ const LobbyScreen = () => {
     useEffect(() => {
         const checkingOngoingGame = async () => {
             const ongoingGameId = await GameService.getOngoingGame()
-                .catch(err => undefined);
+                .catch(_ => setCheckingOngoingGame(false));
             if (!isMounted.current) return;
             if (ongoingGameId) {
                 nav.navigate('LoadingGame', { gameId: ongoingGameId });
