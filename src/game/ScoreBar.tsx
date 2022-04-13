@@ -189,7 +189,7 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
     }, [state.isCurrentlyScoring]);
 
     useEffect(() => {
-        if (playerId !== player?.id) return;
+        if (playerId !== player?.id || player.id !== state.playerTurn) return;
         if (!state.previewPawn || state.score === 0) {
             shakeAnims.forEach(anim => {
                 Animated.timing(
