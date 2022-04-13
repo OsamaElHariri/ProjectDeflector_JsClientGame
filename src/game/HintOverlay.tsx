@@ -54,12 +54,12 @@ const HintOverlay = ({ gridSize, tutorialDisplay }: Props) => {
     const ScoreChangesHint = () => <View style={styles.hintContainer}>
         <Text style={{ ...styles.hintText, color: theme.colors.text }}>+1 when your turn starts.</Text>
         <Text style={{ ...styles.hintText, color: theme.colors.text }}>+1 when you score the ball.</Text>
-        <Text style={{ ...styles.hintText, color: theme.colors.text }}>-1 when you place a peice.</Text>
+        <Text style={{ ...styles.hintText, color: theme.colors.text }}>-1 when you place a piece.</Text>
     </View>
 
     const MultiplePawnsHint = () => <View style={styles.hintContainer}>
         <Text style={{ ...styles.hintText, color: theme.colors.text }}>As long as you have score,</Text>
-        <Text style={{ ...styles.hintText, color: theme.colors.text }}>you can place many peices.</Text>
+        <Text style={{ ...styles.hintText, color: theme.colors.text }}>you can place many pieces.</Text>
     </View>
 
     const FullBoardHint = () => <View style={styles.hintContainer}>
@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 8,
         marginBottom: 24,
+        borderRadius: 10,
     },
     buttonText: {
         fontSize: 14,

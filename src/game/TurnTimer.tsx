@@ -189,7 +189,7 @@ const TurnTimer = ({ playerId }: Props) => {
                     ]
                 }}>
                     <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
-                        <Animated.View style={{ width: '100%', height: '100%', backgroundColor: color, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+                        <Animated.View style={{ width: '100%', height: '100%', backgroundColor: color, borderRadius: 20, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
                     </View>
                     <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
                         <TurnTimerIcon key={'timer_icon'} icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} playerColor={color} />
@@ -209,11 +209,13 @@ const styles = StyleSheet.create({
     turnTimerContainer: {
         overflow: 'hidden',
         width: '100%',
+        borderRadius: 20,
     },
     timerBorder: {
         position: 'absolute',
         width: '100%',
         height: '100%',
+        borderRadius: 20,
         borderWidth: 4
     },
     iconContainer: {

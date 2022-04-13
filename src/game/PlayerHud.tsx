@@ -207,7 +207,7 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
                         <Pressable onPress={state.playerTurn === playerId ? onConfirm : undefined}>
                             <View style={{ ...styles.timerContainer }}>
                                 <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
-                                    <Animated.View style={{ width: '100%', height: '100%', backgroundColor: player?.color, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+                                    <Animated.View style={{ width: '100%', height: '100%', borderRadius: 20, backgroundColor: player?.color, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
                                 </View>
                                 <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
                                     <TimerContent
@@ -230,7 +230,7 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
                         <Pressable onPress={state.playerTurn === playerId ? onCancel : undefined}>
                             <View style={{ ...styles.timerContainer }}>
                                 <View style={{ position: 'absolute', width: '100%', height: '100%', top: '-50%' }}>
-                                    <Animated.View style={{ width: '100%', height: '100%', backgroundColor: theme.colors.text, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+                                    <Animated.View style={{ width: '100%', height: '100%', borderRadius: 20, backgroundColor: theme.colors.text, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
                                 </View>
                                 <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
                                     <TimerContent
@@ -262,11 +262,13 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         width: '100%',
         marginVertical: 12,
+        borderRadius: 20,
     },
     timerBorder: {
         position: 'absolute',
         width: '100%',
         height: '100%',
+        borderRadius: 20,
         borderWidth: 4
     },
     iconContainer: {

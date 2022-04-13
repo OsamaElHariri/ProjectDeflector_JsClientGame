@@ -58,7 +58,7 @@ const ScoreDot = ({ isPoint, color }: ScoreDotProps) => {
         Animated.timing(
             expandAnim,
             {
-                toValue: isPoint ? 0.8 : 0,
+                toValue: isPoint ? 1.2 : 0,
                 duration: 200,
                 easing: Easing.quad,
                 useNativeDriver: true
@@ -270,7 +270,7 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
                     <View style={{ ...styles.expanded, position: 'absolute', top: -width * 0.5, left: -width * 0.5, transform: [{ translateX: width * 0.5 }, { translateY: width * 0.5 }] }}>
                         <ScoreDot isPoint={isPoint} color={color} />
                     </View>
-                    <View style={{ ...styles.expanded, borderColor: color, borderWidth: width * 0.25 }}></View>
+                    <View style={{ ...styles.expanded, borderColor: color, borderWidth: width * 0.1, borderRadius: 5 }}></View>
                 </ScoreBox>
             </Animated.View>
         });

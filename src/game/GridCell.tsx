@@ -3,7 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Pressable,
+    StyleProp,
     View,
+    ViewStyle,
 } from 'react-native';
 import { BehaviorSubject } from 'rxjs';
 import { LONG_PRESS_DELAY } from '../constants';
@@ -180,12 +182,28 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
     const canPress = pawn.name === '';
     let color = stateSubject.value.players[pawn.playerOwner]?.color;
 
+    const borderRadiusStyle: StyleProp<ViewStyle> = {
+        // the grid cells without a border are slightly out of place without this workaround
+        borderRadius: 0.01
+    };
+    const borderRadius = 20;
+    if (rowIdx === 0 && colIdx === 0) {
+        borderRadiusStyle['borderTopLeftRadius'] = borderRadius;
+    } else if (rowIdx === 0 && colIdx === cols - 1) {
+        borderRadiusStyle['borderTopRightRadius'] = borderRadius;
+    } else if (rowIdx === rows - 1 && colIdx === 0) {
+        borderRadiusStyle['borderBottomLeftRadius'] = borderRadius;
+    } else if (rowIdx === rows - 1 && colIdx === cols - 1) {
+        borderRadiusStyle['borderBottomRightRadius'] = borderRadius;
+    }
+
     return <View style={{
         borderColor: theme.colors.text,
         borderTopWidth: rowIdx === 0 ? gridBorder * 2 : gridBorder,
         borderLeftWidth: colIdx === 0 ? gridBorder * 2 : gridBorder,
         borderBottomWidth: rowIdx === rows - 1 ? gridBorder * 2 : gridBorder,
         borderRightWidth: colIdx === cols - 1 ? gridBorder * 2 : gridBorder,
+        ...borderRadiusStyle,
     }}>
         <View style={{ position: 'absolute', width: 18, height: 18, right: 10, top: 10 }}>
             {state.networkState === 'LOADING' ? <Spinner /> : null}

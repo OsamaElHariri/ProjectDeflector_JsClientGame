@@ -13,7 +13,6 @@ import PlayerNameTag from '../game/PlayerNameTag';
 import { usePlayer } from '../main_providers/player_provider';
 
 const visualWidth = 140;
-const visualMargin = 40;
 
 
 interface TutorialScreenSkeletonProps {
@@ -26,7 +25,7 @@ const TutorialScreenSkeleton = ({ title, text1, text2, children }: TutorialScree
     const theme = useTheme();
     return <>
         <View>
-            <Text style={{ fontWeight: 'bold', fontSize: 28, color: theme.colors.text }}>
+            <Text style={{ fontSize: 28, color: theme.colors.text }}>
                 {title}
             </Text>
         </View>
@@ -38,15 +37,15 @@ const TutorialScreenSkeleton = ({ title, text1, text2, children }: TutorialScree
             </View>
 
             <View style={{ flex: 1 }}>
-                <View style={{ flex: 1, display: 'flex', marginLeft: visualMargin }}>
+                <View style={{ flex: 1, display: 'flex', marginLeft: 20 }}>
                     <View style={{ flex: 1, justifyContent: 'center' }}>
-                        <Text style={{ marginLeft: 16, fontWeight: 'bold', fontSize: 18, color: theme.colors.text }}>
+                        <Text style={{ marginLeft: 16, fontSize: 18, color: theme.colors.text }}>
                             {text1}
                         </Text>
                     </View>
 
                     <View style={{ flex: 1, justifyContent: 'center' }}>
-                        <Text style={{ marginLeft: 16, fontWeight: 'bold', fontSize: 18, color: theme.colors.text }}>
+                        <Text style={{ marginLeft: 16, fontSize: 18, color: theme.colors.text }}>
                             {text2}
                         </Text>
                     </View>
@@ -61,14 +60,14 @@ const ScoreBarTutorial = () => {
 
     return <TutorialScreenSkeleton title='New here? These are the basics!' text1='Fill all you score boxes.' text2={`When filled, the boxes will flip.\nScore 1 more to win!`}>
         <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <View style={{ width: 32, height: 32, borderColor: player?.color, borderWidth: 8, marginBottom: 6 }} />
-            <View style={{ width: 32, height: 32, backgroundColor: player?.color, marginBottom: 6 }} />
-            <View style={{ width: 32, height: 32, backgroundColor: player?.color }} />
+            <View style={{ width: 32, height: 32, borderRadius: 5, borderColor: player?.color, borderWidth: 4, marginBottom: 6 }} />
+            <View style={{ width: 32, height: 32, borderRadius: 5, backgroundColor: player?.color, marginBottom: 6 }} />
+            <View style={{ width: 32, height: 32, borderRadius: 5, backgroundColor: player?.color }} />
         </View>
         <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <View style={{ width: 32, height: 32, backgroundColor: player?.color, marginBottom: 6, transform: [{ rotateZ: '45deg' }] }} />
-            <View style={{ width: 32, height: 32, backgroundColor: player?.color, marginBottom: 6, transform: [{ rotateZ: '45deg' }] }} />
-            <View style={{ width: 32, height: 32, backgroundColor: player?.color, transform: [{ rotateZ: '45deg' }] }} />
+            <View style={{ width: 32, height: 32, borderRadius: 5, backgroundColor: player?.color, marginBottom: 6, transform: [{ rotateZ: '45deg' }] }} />
+            <View style={{ width: 32, height: 32, borderRadius: 5, backgroundColor: player?.color, marginBottom: 6, transform: [{ rotateZ: '45deg' }] }} />
+            <View style={{ width: 32, height: 32, borderRadius: 5, backgroundColor: player?.color, transform: [{ rotateZ: '45deg' }] }} />
         </View>
     </TutorialScreenSkeleton>
 }
@@ -80,13 +79,13 @@ const PlacePawnsTutorial = () => {
 
     return <TutorialScreenSkeleton title='Put Pieces' text1='Every piece costs 1 score box.' text2='You get +1 every turn.'>
         <View style={{ height: 100, width: 100 }}>
-            <View style={{ borderWidth: 4, borderColor: theme.colors.text }}>
+            <View style={{ borderWidth: 4, borderRadius: 10, borderColor: theme.colors.text }}>
                 <PawnVisual durability={new Animated.Value(5)} variant={'SLASH'} color={player?.color}></PawnVisual>
             </View>
         </View>
 
         <View style={{ height: 100, width: 100 }}>
-            <View style={{ borderWidth: 4, borderColor: theme.colors.text }}>
+            <View style={{ borderWidth: 4, borderRadius: 10, borderColor: theme.colors.text }}>
                 <PawnVisual durability={new Animated.Value(5)} variant={'BACKSLASH'} color={player?.color}></PawnVisual>
             </View>
         </View>
@@ -99,7 +98,7 @@ const DeflectBallTutorial = () => {
     if (!player) return <></>;
 
 
-    return <TutorialScreenSkeleton title='Collect points' text1='Place peices on the board.' text2={`Bounce the ball to your side\nto collect points.`}>
+    return <TutorialScreenSkeleton title='Collect points' text1='Place pieces on the board.' text2={`Bounce the ball to your side\nto collect points.`}>
         <View style={{ width: visualWidth, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <View style={{
                 width: BALL_DIAMETER,
@@ -109,7 +108,7 @@ const DeflectBallTutorial = () => {
             }} />
             <View style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
                 <View style={{ marginTop: visualWidth - 45, height: 100, width: 100 }}>
-                    <View style={{ borderWidth: 4, borderColor: theme.colors.text }}>
+                    <View style={{ borderWidth: 4, borderRadius: 10, borderColor: theme.colors.text }}>
                         <PawnVisual durability={new Animated.Value(5)} variant={'SLASH'} color={player?.color}></PawnVisual>
                     </View>
                 </View>

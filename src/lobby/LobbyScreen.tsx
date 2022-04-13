@@ -66,9 +66,9 @@ const ColorBox = ({ color }: ColorBoxProps) => {
         Animated.multiply(scaleAnim, scaleAnim.interpolate({ inputRange: [0.75, 1], outputRange: [0, 1] }))
     );
 
-    return <View style={{ width: 72, height: 72, borderColor: theme.colors.text, borderWidth: 4 }}>
+    return <View style={{ width: 72, height: 72, borderColor: theme.colors.text, borderWidth: 4, borderRadius: 10, overflow: 'hidden' }}>
         <Pressable onPress={onPress} style={{ width: '100%', height: '100%' }}>
-            <Animated.View style={{ width: '100%', height: '100%', backgroundColor: color, transform: [{ scale: anim }] }} />
+            <Animated.View style={{ width: '100%', height: '100%', backgroundColor: color, borderRadius: 5, transform: [{ scale: anim }] }} />
         </Pressable>
         <View style={{ position: 'absolute', width: 12, height: 12, right: 5, top: 5 }}>
             {networkState === 'LOADING' ? <Spinner /> : null}
@@ -153,16 +153,16 @@ const LobbyScreen = () => {
     const dampenedBounceAnim = Animated.add(0.5, Animated.multiply(0.5, bounceAnim));
 
     const MainLobbyScreen = () => <>
-        <Text style={{ fontWeight: 'bold', fontSize: 28, color: theme.colors.text }}>
+        <Text style={{ fontSize: 28, color: theme.colors.text }}>
             Choose a color that speaks to you
         </Text>
         <View style={{ paddingTop: 12 }}></View>
         <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 16, color: theme.colors.text }}>
+            <Text style={{ fontSize: 18, color: theme.colors.text }}>
                 You are currently rocking this color
             </Text>
             <View style={{ paddingLeft: 8 }}></View>
-            <View style={{ width: 20, height: 20, borderWidth: 2, borderColor: theme.colors.text, backgroundColor: player?.color }} />
+            <View style={{ width: 20, height: 20, borderWidth: 2, borderRadius: 4, borderColor: theme.colors.text, backgroundColor: player?.color }} />
         </View>
         {
             colors.length > 0 && player
@@ -210,6 +210,7 @@ const LobbyScreen = () => {
                 ? <View style={{ marginVertical: 8, width: 32, height: 32, alignSelf: 'center' }}><Spinner /></View>
                 : <Animated.Text style={{
                     ...styles.buttonText,
+                    fontWeight: 'bold',
                     fontSize: 32,
                     color: theme.colors.background,
                     transform: [{ scale: dampenedBounceAnim }]
@@ -267,9 +268,9 @@ const styles = StyleSheet.create({
         borderWidth: 4,
         paddingHorizontal: 8,
         paddingVertical: 12,
+        borderRadius: 10,
     },
     buttonText: {
-        fontWeight: 'bold',
         textAlignVertical: 'center',
         textAlign: 'center',
     }

@@ -91,6 +91,8 @@ const ShuffleButton = ({ width, playerId }: Props) => {
         updateState.onShuffle(res);
     }
 
+    const dampened = Animated.add(0.5, Animated.multiply(0.5, bounceAnim));
+
     return <View>
         <View style={{ position: 'absolute', width: 18, height: 18, right: leftSide ? 5 : undefined, left: leftSide ? undefined : 5 }}>
             {state.networkState === 'LOADING' ? <Spinner /> : null}
@@ -102,18 +104,20 @@ const ShuffleButton = ({ width, playerId }: Props) => {
                 paddingTop: 8,
                 paddingBottom: 16,
                 transform: [{
-                    scale: Animated.multiply(bounceAnim, scaleAnim)
+                    scale: Animated.multiply(dampened, scaleAnim)
                 }]
             }}>
                 <View style={{ width: width, height: width * 0.3 }}>
-                    <Image source={require('./assets/shuffle.png')} style={{
-                        resizeMode: 'center',
-                        width: '100%',
-                        height: '100%',
-                        tintColor: theme.colors.text,
-                    }} />
+                    <View style={{ alignSelf: 'center', borderRadius: 8, backgroundColor: player?.color, width: width * 0.4, height: width * 0.4, padding: 8 }}>
+                        <Image source={require('./assets/shuffle.png')} style={{
+                            resizeMode: 'contain',
+                            width: '100%',
+                            height: '100%',
+                            tintColor: theme.colors.background,
+                        }} />
+                    </View>
                 </View>
-                <Text style={{ fontWeight: 'bold', color: theme.colors.text, paddingTop: 8, fontSize: 14 }}>Shuffle</Text>
+                <Text style={{ color: theme.colors.text, marginTop: 12, fontSize: 14 }}>Shuffle</Text>
             </Animated.View>
         </Pressable>
     </View>

@@ -49,6 +49,7 @@ const PawnPreviewContainer = ({ width, playerId }: PawnPreviewContainerProps) =>
 const styles = StyleSheet.create({
     pawnPreviewContainer: {
         borderWidth: 4,
+        borderRadius: 10
     },
 });
 

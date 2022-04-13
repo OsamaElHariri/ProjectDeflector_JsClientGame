@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         width: 140,
         height: 48,
+        borderRadius: 10,
     },
     buttonText: {
         fontWeight: 'bold',

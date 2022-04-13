@@ -52,21 +52,21 @@ const WinStreakDisplay = () => {
 
     if (player.gameStats.hasWonToday) {
         return <View style={{ alignItems: 'center' }} >
-        <Text style={{ color: theme.colors.text, fontSize: 14, fontWeight: 'bold' }}>You won today</Text>
-            <Text style={{ color: theme.colors.text, fontWeight: 'bold', fontSize: 24, marginBottom: 8 }}>Day Streak</Text>
+            <Text style={{ color: theme.colors.text, fontSize: 14 }}>You won today</Text>
+            <Text style={{ color: theme.colors.text, fontSize: 24, marginBottom: 4 }}>Day Streak</Text>
             <View style={{ borderBottomWidth: 4, borderColor: player.color, paddingHorizontal: 12 }}>
-                <Text style={{ color: theme.colors.text, fontWeight: 'bold', fontSize: 36 }}>{player.gameStats.winStreak}</Text>
+                <Text style={{ color: theme.colors.text, fontSize: 36, fontWeight: 'bold' }}>{player.gameStats.winStreak}</Text>
             </View>
-            <Text style={{ color: theme.colors.text, fontWeight: 'bold', fontSize: 14, marginTop: 12 }}>{timeDisplay}</Text>
+            <Text style={{ color: theme.colors.text, fontSize: 14, marginTop: 12 }}>{timeDisplay}</Text>
         </View>
     } else {
         return <View style={{ alignItems: 'center' }} >
-            <Text style={{ color: theme.colors.text, fontSize: 14, fontWeight: 'bold' }}>Win a game</Text>
-            <Text style={{ color: theme.colors.text, fontWeight: 'bold', fontSize: 16, marginBottom: 16 }}>Keep your streak</Text>
+            <Text style={{ color: theme.colors.text, fontSize: 14 }}>Win a game</Text>
+            <Text style={{ color: theme.colors.text, fontSize: 18, marginBottom: 16 }}>Keep your streak</Text>
             <View style={{ borderBottomWidth: 4, borderColor: player.color, paddingHorizontal: 12 }}>
-                <Text style={{ color: theme.colors.text, fontWeight: 'bold', fontSize: 24 }}>{timeDisplay}</Text>
+                <Text style={{ color: theme.colors.text, fontSize: 24, fontWeight: 'bold' }}>{timeDisplay}</Text>
             </View>
-            <Text style={{ color: theme.colors.text, fontWeight: 'bold', fontSize: 14, marginTop: 8 }}>Currently at {player.gameStats.winStreak}</Text>
+            <Text style={{ color: theme.colors.text, fontSize: 14, marginTop: 8 }}>Currently at {player.gameStats.winStreak}</Text>
         </View>
     }
 }
