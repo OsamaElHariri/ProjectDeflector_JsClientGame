@@ -25,6 +25,7 @@ const TurnTimer = ({ playerId }: Props) => {
     const { player } = usePlayer();
     const { bounceAnim } = useSyncedAnimation();
     const networkKey = `turn_timer_${playerId}`;
+    const [timerHeight, setTimerHeight] = useState(0);
 
     const { stateSubject, networkRequestStatus, updateState } = useGameState();
     const leftSide = stateSubject.value.game.playerIds[0] === playerId;
@@ -80,19 +81,19 @@ const TurnTimer = ({ playerId }: Props) => {
         return () => sub.unsubscribe();
     }, [state.networkState]);
 
-    const scaleAnim = useRef(new Animated.Value(0)).current;
+    const translateAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
-        scaleAnim.setValue(state.playerTurn === playerId ? 2 : 0);
+        translateAnim.setValue(state.playerTurn === playerId ? 0 : timerHeight);
         Animated.timing(
-            scaleAnim,
+            translateAnim,
             {
-                toValue: 0,
+                toValue: timerHeight,
                 duration: Math.max(0, state.lastTurnEndTime + stateSubject.value.game.timePerTurn - Date.now()),
                 easing: Easing.linear,
                 useNativeDriver: true
             }
         ).start();
-    }, [scaleAnim, state.playerTurn, state.lastTurnEndTime]);
+    }, [translateAnim, state.playerTurn, state.lastTurnEndTime, timerHeight]);
 
     const shakeAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
@@ -118,7 +119,7 @@ const TurnTimer = ({ playerId }: Props) => {
         ]);
 
         Animated.loop(sequence).start();
-    }, [scaleAnim]);
+    }, [translateAnim]);
 
     const shakeControllerAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
@@ -179,21 +180,29 @@ const TurnTimer = ({ playerId }: Props) => {
     return (
         <View>
             <Pressable onPress={state.playerTurn === playerId ? onPress : undefined}>
-                <Animated.View style={{
-                    ...styles.turnTimerContainer,
-                    backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text,
-                    transform: [
-                        { rotateZ: rotateAnim },
-                        { scaleY: yScaleAnim },
-                        { scaleX: xScaleAnim },
-                    ]
-                }}>
-                    <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
-                        <Animated.View style={{ width: '100%', height: '100%', backgroundColor: color, borderRadius: 20, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
-                    </View>
+                <Animated.View
+                    onLayout={(event) => setTimerHeight(event.nativeEvent.layout.height)}
+                    style={{
+                        ...styles.turnTimerContainer,
+                        backgroundColor: isCurrentPlayerTimer ? '' : theme.colors.text,
+                        transform: [
+                            { rotateZ: rotateAnim },
+                            { scaleY: yScaleAnim },
+                            { scaleX: xScaleAnim },
+                        ]
+                    }}>
                     <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
-                        <TurnTimerIcon key={'timer_icon'} icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} playerColor={color} />
+                        <TurnTimerIcon icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} mainColor={color} />
                     </Animated.View>
+                    <View style={{ position: 'absolute', width: '100%', height: '100%' }}>
+                        <Animated.View style={{ width: '100%', height: '100%', overflow: 'hidden', backgroundColor: color, borderRadius: 20, transform: [{ translateY: translateAnim }] }}>
+                            <Animated.View style={{ transform: [{ translateY: Animated.multiply(-1, translateAnim) }] }}>
+                                <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
+                                    <TurnTimerIcon icon={timerIcon} dotColor={isCurrentPlayerTimer ? theme.colors.text : theme.colors.background} mainColor={theme.colors.background} />
+                                </Animated.View>
+                            </Animated.View>
+                        </Animated.View>
+                    </View>
                     <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
                 </Animated.View>
             </Pressable>

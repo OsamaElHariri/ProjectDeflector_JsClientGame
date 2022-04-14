@@ -8,8 +8,8 @@ import {
     Pressable,
     StyleSheet,
     View,
+    Text
 } from 'react-native';
-import Svg, { Text } from 'react-native-svg';
 import { usePlayer } from '../main_providers/player_provider';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { shouldUpdate } from './diffWatcher';
@@ -19,47 +19,21 @@ import Spinner from './Spinner';
 
 interface TimerContentProps {
     text: string
-    textFillColor: string
-    textBorderColor: string
-    fullImage: ImageSourcePropType
-    borderImage: ImageSourcePropType
+    color: string
+    image: ImageSourcePropType
 }
 
-const TimerContent = ({ textFillColor, textBorderColor, text, fullImage, borderImage }: TimerContentProps) => (
+const TimerContent = ({ color, text, image }: TimerContentProps) => (
     <View style={{ width: '100%', height: '100%', padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <View style={{ width: '100%' }}>
-            <Image source={fullImage} style={{
-                position: 'absolute',
+            <Image source={image} style={{
                 resizeMode: 'center',
-                tintColor: textBorderColor,
+                tintColor: color,
                 width: '100%',
-                height: 40,
-                transform: [{ scale: 0.96 }]
-            }} />
-            <Image source={borderImage} style={{
-                resizeMode: 'center',
-                tintColor: textFillColor,
-                width: '100%',
-                height: 40,
+                height: 32,
             }} />
         </View>
-        <View style={{ height: 40, width: '100%' }}>
-            <Svg height='100%' width='100%' viewBox='0 0 50 50'>
-                <Text
-                    x={'26'}
-                    y={'38'}
-                    textAnchor='middle'
-                    stroke={textBorderColor}
-                    strokeWidth="2"
-                    fill={textFillColor}
-                    fontSize="34"
-                    fontWeight='bold'
-                    letterSpacing={2}
-                >
-                    {text}
-                </Text>
-            </Svg>
-        </View>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 8, color: color }}>{text}</Text>
     </View>
 )
 
@@ -76,6 +50,7 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
     const { stateSubject, networkRequestStatus, updateState } = useGameState();
     const leftSide = stateSubject.value.game.playerIds[0] === playerId;
     const direction = leftSide ? -1 : 1;
+    const [timerHeight, setTimerHeight] = useState(0);
 
     const networkKey = `hud_actions_${playerId}`;
     const [state, setState] = useState({
@@ -113,19 +88,19 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
         return () => sub.unsubscribe();
     }, [state.networkState]);
 
-    const scaleAnim = useRef(new Animated.Value(0)).current;
+    const translateAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
-        scaleAnim.setValue(state.playerTurn === playerId ? 2 : 0);
+        translateAnim.setValue(state.playerTurn === playerId ? 0 : timerHeight);
         Animated.timing(
-            scaleAnim,
+            translateAnim,
             {
-                toValue: 0,
+                toValue: timerHeight,
                 duration: Math.max(0, state.lastTurnEndTime + stateSubject.value.game.timePerTurn - Date.now()),
                 easing: Easing.linear,
                 useNativeDriver: true
             }
         ).start();
-    }, [scaleAnim, state.playerTurn, state.lastTurnEndTime]);
+    }, [translateAnim, state.playerTurn, state.lastTurnEndTime, timerHeight]);
 
     const mainPosAnim = useRef(new Animated.Value(0)).current
     const actionsPosAnim = useRef(new Animated.Value(1)).current
@@ -205,19 +180,27 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
 
                     <View style={{ flex: 1 }}>
                         <Pressable onPress={state.playerTurn === playerId ? onConfirm : undefined}>
-                            <View style={{ ...styles.timerContainer }}>
-                                <View style={{ position: 'absolute', width: '100%', height: '100%', top: '50%' }}>
-                                    <Animated.View style={{ width: '100%', height: '100%', borderRadius: 20, backgroundColor: player?.color, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+                            <View onLayout={(event) => setTimerHeight(event.nativeEvent.layout.height)} style={{ ...styles.timerContainer }}>
+                                <View style={{ position: 'absolute', width: '100%', height: '100%' }}>
+                                    <Animated.View style={{ ...styles.iconContainer, position: 'absolute', transform: [{ scale: iconScaleAnim }] }}>
+                                        <TimerContent
+                                            text='OK'
+                                            color={player?.color || ""}
+                                            image={require('./assets/confirm.png')} />
+                                    </Animated.View>
+                                    <Animated.View style={{ width: '100%', height: '100%', overflow: 'hidden', borderRadius: 20, backgroundColor: player?.color, transform: [{ translateY: translateAnim }] }}>
+                                        <Animated.View style={{ transform: [{ translateY: Animated.multiply(-1, translateAnim) }] }}>
+                                            <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
+                                                <TimerContent
+                                                    text='OK'
+                                                    color={theme.colors.background}
+                                                    image={require('./assets/confirm.png')} />
+                                            </Animated.View>
+                                        </Animated.View>
+                                    </Animated.View>
                                 </View>
-                                <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
-                                    <TimerContent
-                                        text='OK'
-                                        textBorderColor={player?.color || ""}
-                                        textFillColor={theme.colors.background}
-                                        fullImage={require('./assets/confirm.png')}
-                                        borderImage={require('./assets/confirm_border.png')} />
-                                </Animated.View>
                                 <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
+                                <View style={{ width: '100%', height: '100%' }} />
 
                                 <View style={{ position: 'absolute', width: 18, height: 18, right: leftSide ? 10 : undefined, top: 10, left: leftSide ? undefined : 10 }}>
                                     {state.networkState === 'LOADING' ? <Spinner /> : null}
@@ -229,22 +212,29 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
                     <View style={{ flex: 1 }}>
                         <Pressable onPress={state.playerTurn === playerId ? onCancel : undefined}>
                             <View style={{ ...styles.timerContainer }}>
-                                <View style={{ position: 'absolute', width: '100%', height: '100%', top: '-50%' }}>
-                                    <Animated.View style={{ width: '100%', height: '100%', borderRadius: 20, backgroundColor: theme.colors.text, transform: [{ scaleY: scaleAnim }] }}></Animated.View>
+                                <View style={{ position: 'absolute', width: '100%', height: '100%' }}>
+                                    <Animated.View style={{ ...styles.iconContainer, position: 'absolute', transform: [{ scale: iconScaleAnim }] }}>
+                                        <TimerContent
+                                            text='NO'
+                                            color={theme.colors.text}
+                                            image={require('./assets/cancel.png')} />
+                                    </Animated.View>
+                                    <Animated.View style={{ width: '100%', height: '100%', overflow: 'hidden', borderRadius: 20, backgroundColor: theme.colors.text, transform: [{ translateY: Animated.multiply(-1, translateAnim) }] }}>
+                                        <Animated.View style={{ transform: [{ translateY: translateAnim }] }}>
+                                            <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
+                                                <TimerContent
+                                                    text='NO'
+                                                    color={theme.colors.background}
+                                                    image={require('./assets/cancel.png')} />
+                                            </Animated.View>
+                                        </Animated.View>
+                                    </Animated.View>
                                 </View>
-                                <Animated.View style={{ ...styles.iconContainer, transform: [{ scale: iconScaleAnim }] }}>
-                                    <TimerContent
-                                        text='NO'
-                                        textBorderColor={theme.colors.text}
-                                        textFillColor={theme.colors.background}
-                                        fullImage={require('./assets/cancel.png')}
-                                        borderImage={require('./assets/cancel_border.png')} />
-                                </Animated.View>
                                 <View style={{ ...styles.timerBorder, borderColor: theme.colors.text }} ></View>
+                                <View style={{ width: '100%', height: '100%' }} />
                             </View>
                         </Pressable>
                     </View>
-
                 </View>
 
             </Animated.View>

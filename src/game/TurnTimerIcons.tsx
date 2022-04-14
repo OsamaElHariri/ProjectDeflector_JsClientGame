@@ -1,4 +1,3 @@
-import Svg, { Text, TSpan } from "react-native-svg";
 import { useTheme } from '@react-navigation/native';
 import React, { useEffect, useRef } from 'react';
 import {
@@ -6,6 +5,7 @@ import {
     Image,
     StyleSheet,
     View,
+    Text
 } from 'react-native';
 
 
@@ -18,23 +18,10 @@ const Clock = ({ color }: { color: string }) => (
     }} />
 )
 
-const EndTurn = ({ fillColor, borderColor }: { fillColor: string, borderColor: string }) => (
-    <View style={{ height: 60, width: '100%' }}>
-        <Svg height='100%' width='100%' viewBox='0 0 60 60'>
-            <Text
-                y={'-8'}
-                textAnchor='middle'
-                stroke={borderColor}
-                strokeWidth="2"
-                fill={fillColor}
-                fontSize="28"
-                fontWeight='bold'
-                letterSpacing={2}
-            >
-                <TSpan x='30' dy='1.1em'>SEND</TSpan>
-                <TSpan x='30' dy='1.1em'>BALL</TSpan>
-            </Text>
-        </Svg>
+const EndTurn = ({ color }: { color: string }) => (
+    <View style={{ height: 60, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: color }}>Shoot</Text>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: color }}>Ball</Text>
     </View>
 )
 
@@ -47,7 +34,7 @@ const WaitingDots = ({ color }: { color: string }) => {
 }
 
 export type TurnTimerIconOption = 'CLOCK' | 'END' | 'WAITING'
-const TurnTimerIcon = ({ icon, dotColor, playerColor }: { icon: TurnTimerIconOption, dotColor: string, playerColor: string }) => {
+const TurnTimerIcon = ({ icon, dotColor, mainColor }: { icon: TurnTimerIconOption, dotColor: string, mainColor: string }) => {
     const theme = useTheme();
 
     const clockAnim = useRef(new Animated.Value(0)).current;
@@ -87,7 +74,7 @@ const TurnTimerIcon = ({ icon, dotColor, playerColor }: { icon: TurnTimerIconOpt
             <Clock color={theme.colors.background} />
         </Animated.View>
         <Animated.View style={{ ...styles.iconPosition, transform: [{ scale: endAnim }] }}>
-            <EndTurn fillColor={theme.colors.background} borderColor={playerColor} />
+            <EndTurn color={mainColor} />
         </Animated.View>
         <Animated.View style={{ ...styles.iconPosition, transform: [{ scale: waitingAnim }] }}>
             <WaitingDots color={dotColor} />
