@@ -10,6 +10,7 @@ import AwaitingGameScreen from './game/AwaitingGameScreen';
 import { SyncedAnimationProvider } from './main_providers/synced_animation';
 import LoadingGameScreen from './game/LoadingGameScreen';
 import WinnerOverlay from './game/WinnerOverlay';
+import { AudioProvider } from './main_providers/audio_provider';
 
 export const GameTheme = {
     ...DefaultTheme,
@@ -27,34 +28,35 @@ const AppEntry = () => {
         <SyncedAnimationProvider>
             <PlayerProvider>
                 <WsClientProvider>
+                    <AudioProvider>
 
-                    <NavigationContainer theme={GameTheme}>
-                        <Stack.Navigator screenOptions={{ headerShown: false }}>
+                        <NavigationContainer theme={GameTheme}>
+                            <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-                            <Stack.Screen
-                                name="Lobby"
-                                component={LobbyScreen} />
+                                <Stack.Screen
+                                    name="Lobby"
+                                    component={LobbyScreen} />
 
-                            <Stack.Screen
-                                name="AwaitingGame"
-                                component={AwaitingGameScreen} />
+                                <Stack.Screen
+                                    name="AwaitingGame"
+                                    component={AwaitingGameScreen} />
 
-                            <Stack.Screen
-                                name="LoadingGame"
-                                component={LoadingGameScreen} />
+                                <Stack.Screen
+                                    name="LoadingGame"
+                                    component={LoadingGameScreen} />
 
-                            <Stack.Screen
-                                name="Game"
-                                component={GameScreen} />
+                                <Stack.Screen
+                                    name="Game"
+                                    component={GameScreen} />
 
-                            <Stack.Screen
-                                name="Winner"
-                                component={WinnerOverlay} />
+                                <Stack.Screen
+                                    name="Winner"
+                                    component={WinnerOverlay} />
 
-                        </Stack.Navigator>
+                            </Stack.Navigator>
 
-                    </NavigationContainer>
-
+                        </NavigationContainer>
+                    </AudioProvider>
                 </WsClientProvider>
             </PlayerProvider>
         </SyncedAnimationProvider>

@@ -9,6 +9,7 @@
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "rename": "react-native-rename \"Hit Bounce\" -b \"com.hitbounce.game\"",
+    "copyAudio": "cpx \"src/audio/**\" \"android/app/src/main/res/raw\"",
     "buildAndroid": "cd android && ./gradlew assembleRelease",
     "bundleAndroid": "cd android && ./gradlew bundleRelease"
   },
@@ -20,6 +21,7 @@
     "react-native": "0.67.2",
     "react-native-safe-area-context": "^3.4.1",
     "react-native-screens": "^3.12.0",
+    "react-native-sound": "^0.11.2",
     "rxjs": "^7.5.4"
   },
   "devDependencies": {
@@ -32,6 +34,7 @@
     "@typescript-eslint/eslint-plugin": "^5.7.0",
     "@typescript-eslint/parser": "^5.7.0",
     "babel-jest": "^26.6.3",
+    "cpx": "^1.5.0",
     "eslint": "^7.14.0",
     "jest": "^26.6.3",
     "metro-react-native-babel-preset": "^0.66.2",

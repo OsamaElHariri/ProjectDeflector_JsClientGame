@@ -10,6 +10,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { LONG_PRESS_DELAY } from '../constants';
 import PressIndicator from '../gesture_feedback/PressIndicator';
+import { useAudio } from '../main_providers/audio_provider';
 import { usePlayer } from '../main_providers/player_provider';
 import { GestureState } from '../types/uiTypes';
 import { shouldUpdate } from './diffWatcher';
@@ -29,6 +30,7 @@ interface Props {
 
 const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => {
     const theme = useTheme();
+    const audio = useAudio();
     const { player } = usePlayer();
     const networkKey = `grid_cell_${rowIdx}_${colIdx}`;
 
@@ -151,6 +153,8 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
     }
 
     const onPress = () => {
+        if (player?.id !== state.playerTurn) return;
+        audio.play('preview_pawn');
         gestureHandler.current.next({
             ...gestureHandler.current.value,
             isHeld: false,
@@ -161,6 +165,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
     }
 
     const onPressIn = () => {
+        if (player?.id !== state.playerTurn) return;
         gestureHandler.current.next({
             ...gestureHandler.current.value,
             isHeld: true,

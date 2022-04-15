@@ -6,6 +6,7 @@ import {
     View,
 } from 'react-native';
 import { BALL_DIAMETER } from '../constants';
+import { useAudio } from '../main_providers/audio_provider';
 import { Pawn } from '../types/types';
 import BallPathPreview from './BallPathPreview';
 import { shouldUpdate } from './diffWatcher';
@@ -40,8 +41,9 @@ const startAnimation = async (animation: { start: Function }) => {
 }
 
 const GameGrid = ({ gridSize }: Props) => {
-    const { stateSubject, updateState } = useGameState();
     const theme = useTheme();
+    const audio = useAudio();
+    const { stateSubject, updateState } = useGameState();
     const durabilityAnims = useRef<{ [key: string]: Animated.Value }>({});
     const pawnScaleAnim = useRef<{ [key: string]: Animated.Value }>({});
     const pawnPosAnims = useRef<{ [key: string]: Animated.ValueXY }>({});
@@ -104,6 +106,16 @@ const GameGrid = ({ gridSize }: Props) => {
                     await startAnimation(getGridDoublePulseAnimation(gridPulseAnim));
                 } else {
                     getGridPulseAnimation(gridPulseAnim).start();
+                }
+
+                if (deflectionProcessing.allDeflectionsIndex > 0) {
+                    const sounds = [
+                        () => audio.play('multi_bounce_1'),
+                        () => audio.play('multi_bounce_2'),
+                        () => audio.play('multi_bounce_3'),
+                    ];
+                    const soundIdx = Math.floor(sounds.length * Math.random());
+                    sounds[soundIdx]();
                 }
 
                 await startAnimation(getDeflectionAnimations({

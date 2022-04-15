@@ -9,6 +9,7 @@ import {
     Text,
     View,
 } from 'react-native';
+import { useAudio } from '../main_providers/audio_provider';
 import { usePlayer } from '../main_providers/player_provider';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { shouldUpdate } from './diffWatcher';
@@ -23,6 +24,7 @@ interface Props {
 
 const ShuffleButton = ({ width, playerId }: Props) => {
     const theme = useTheme();
+    const audio = useAudio();
     const { player } = usePlayer();
     const { stateSubject, networkRequestStatus, updateState } = useGameState();
     const leftSide = stateSubject.value.game.playerIds[0] === playerId;
@@ -77,6 +79,8 @@ const ShuffleButton = ({ width, playerId }: Props) => {
     const shuffle = async () => {
         if (state.networkState === 'LOADING') return;
         networkRequestStatus.update(networkKey, 'LOADING');
+
+        audio.play('shuffle');
         const res = await GameService.shuffle({
             gameId: stateSubject.value.game.gameId,
             hasPeek: false,

@@ -10,6 +10,7 @@ import {
     View,
     Text
 } from 'react-native';
+import { useAudio } from '../main_providers/audio_provider';
 import { usePlayer } from '../main_providers/player_provider';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { shouldUpdate } from './diffWatcher';
@@ -45,6 +46,7 @@ interface Props {
 
 const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
     const theme = useTheme();
+    const audio = useAudio();
     const { player } = usePlayer();
     const { bounceAnim } = useSyncedAnimation();
     const { stateSubject, networkRequestStatus, updateState } = useGameState();
@@ -144,6 +146,7 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
         if (state.networkState === 'LOADING') return;
         networkRequestStatus.update(networkKey, 'LOADING');
 
+        audio.play('confirm_pawn');
         const res = await GameService.addPawn({
             gameId: stateSubject.value.game.gameId,
             x: state.previewPawn.position.x,
@@ -157,11 +160,8 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
         updateState.onAddPawn(res);
     }
 
-    const onConfirm = () => {
-        addPawn();
-    }
-
     const onCancel = () => {
+        audio.play('cancel');
         updateState.onCancelPeek();
     }
 
@@ -179,7 +179,7 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
                 <View style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
 
                     <View style={{ flex: 1 }}>
-                        <Pressable onPress={state.playerTurn === playerId ? onConfirm : undefined}>
+                        <Pressable onPress={state.playerTurn === playerId ? addPawn : undefined}>
                             <View onLayout={(event) => setTimerHeight(event.nativeEvent.layout.height)} style={{ ...styles.timerContainer }}>
                                 <View style={{ position: 'absolute', width: '100%', height: '100%' }}>
                                     <Animated.View style={{ ...styles.iconContainer, position: 'absolute', transform: [{ scale: iconScaleAnim }] }}>

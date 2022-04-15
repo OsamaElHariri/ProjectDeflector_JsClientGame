@@ -7,6 +7,7 @@ import {
     StyleSheet,
     View,
 } from 'react-native';
+import { useAudio } from '../main_providers/audio_provider';
 import { usePlayer } from '../main_providers/player_provider';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { shouldUpdate } from './diffWatcher';
@@ -22,6 +23,7 @@ interface Props {
 
 const TurnTimer = ({ playerId }: Props) => {
     const theme = useTheme();
+    const audio = useAudio();
     const { player } = usePlayer();
     const { bounceAnim } = useSyncedAnimation();
     const networkKey = `turn_timer_${playerId}`;
@@ -80,6 +82,12 @@ const TurnTimer = ({ playerId }: Props) => {
         });
         return () => sub.unsubscribe();
     }, [state.networkState]);
+
+    useEffect(() => {
+        if (playerId === player?.id && state.playerTurn === player.id) {
+            audio.play('turn_start');
+        }
+    }, [state.playerTurn]);
 
     const translateAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
@@ -141,6 +149,7 @@ const TurnTimer = ({ playerId }: Props) => {
         if (state.networkState === 'LOADING') return;
         networkRequestStatus.update(networkKey, 'LOADING');
 
+        audio.play('end_turn');
         const res = await GameService.endTurn({
             gameId: stateSubject.value.game.gameId,
         }).catch(err => {

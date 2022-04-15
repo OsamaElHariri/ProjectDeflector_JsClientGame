@@ -1,5 +1,5 @@
 import { RouteProp, useNavigation, useTheme } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
     Animated,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import PlainOverlay from '../lobby/PlainOverlay';
 import UserService from '../lobby/userService';
+import { useAudio } from '../main_providers/audio_provider';
 import { usePlayer } from '../main_providers/player_provider';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { AppNavigation } from '../types/uiTypes';
@@ -21,14 +22,24 @@ interface Props {
 
 const WinnerOverlay = ({ route: { params: { winner } } }: Props) => {
     const theme = useTheme();
+    const audio = useAudio();
     const { player, updatePlayer } = usePlayer();
     const nav = useNavigation<AppNavigation>();
     const { bounceAnim } = useSyncedAnimation();
     const [isLoading, setIsLoading] = useState(false);
 
+    useEffect(() => {
+        if (player?.id === winner) {
+            audio.play('win_game');
+        } else {
+            audio.play('lose_game');
+        }
+    }, []);
+
     const backToMenu = async () => {
         if (!player || !updatePlayer || isLoading) return;
         setIsLoading(true);
+        audio.play('cancel');
 
         const stats = await UserService.getStats();
         const user = await UserService.getCurrentUser();

@@ -7,6 +7,7 @@ import {
     View,
 } from 'react-native';
 import PlainOverlay from '../lobby/PlainOverlay';
+import { useAudio } from '../main_providers/audio_provider';
 import { useWsClient } from '../main_providers/ws_provider';
 import { NetworkRequestStatus } from '../network/types';
 import { AppNavigation } from '../types/uiTypes';
@@ -15,6 +16,7 @@ import Spinner from './Spinner';
 
 const AwaitingGameScreen = () => {
     const theme = useTheme();
+    const audio = useAudio();
     const clientConnection = useWsClient();
     const nav = useNavigation<AppNavigation>();
     const [networkStatus, setNetworkStatus] = useState<NetworkRequestStatus>('NONE');
@@ -35,6 +37,7 @@ const AwaitingGameScreen = () => {
 
     const cancelFindGame = () => {
         setNetworkStatus('LOADING');
+        audio.play('cancel');
         GameService.cancelFindGame()
             .then(() => nav.replace('Lobby'))
             .catch(err => {

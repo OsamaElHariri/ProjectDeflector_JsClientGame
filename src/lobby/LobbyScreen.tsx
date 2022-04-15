@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import GameService from '../game/gameService';
 import Spinner from '../game/Spinner';
+import { useAudio } from '../main_providers/audio_provider';
 import { usePlayer } from '../main_providers/player_provider';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { NetworkRequestStatus } from '../network/types';
@@ -24,6 +25,7 @@ interface ColorBoxProps {
 }
 
 const ColorBox = ({ color }: ColorBoxProps) => {
+    const audio = useAudio();
     const theme = useTheme();
     const { player, updatePlayer } = usePlayer();
     const [networkState, setNetworkState] = useState<NetworkRequestStatus>('NONE');
@@ -47,6 +49,14 @@ const ColorBox = ({ color }: ColorBoxProps) => {
         if (networkState === 'LOADING') return;
         setNetworkState('LOADING');
 
+        const sounds = [
+            () => audio.play('shuffle'),
+            () => audio.play('multi_bounce_1'),
+            () => audio.play('multi_bounce_2'),
+            () => audio.play('multi_bounce_3'),
+        ];
+        const soundIdx = Math.floor(sounds.length * Math.random());
+        sounds[soundIdx]();
         const updateResult = await UserService.updateUser({
             ...player,
             color,
@@ -95,6 +105,7 @@ const ColorChoice = ({ colors }: ColorChoiceProps) => {
 
 const LobbyScreen = () => {
     const theme = useTheme();
+    const audio = useAudio();
     const { player } = usePlayer();
     const nav = useNavigation<AppNavigation>()
     const { bounceAnim, restartAnim } = useSyncedAnimation();
@@ -140,12 +151,14 @@ const LobbyScreen = () => {
 
     const onPlayPress = () => {
         if (!player || checkingOngoingGame) return;
+        audio.play('turn_start');
         GameService.findGame()
         nav.replace('AwaitingGame')
     }
 
     const onSoloPress = () => {
         if (!player) return;
+        audio.play('turn_start');
         GameService.findSolo()
         nav.replace('AwaitingGame')
     }
