@@ -1,11 +1,12 @@
 import { useTheme } from '@react-navigation/native';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 
 import {
     Animated,
     Text,
     View,
 } from 'react-native';
+import { BehaviorSubject } from 'rxjs';
 import { BALL_DIAMETER } from '../constants';
 import { PreviewLine } from '../game/BallPathPreview';
 import PawnVisual from '../game/PawnVisual';
@@ -58,7 +59,7 @@ const TutorialScreenSkeleton = ({ title, text1, text2, children }: TutorialScree
 const ScoreBarTutorial = () => {
     const { player } = usePlayer();
 
-    return <TutorialScreenSkeleton title='New here? These are the basics!' text1='Fill all you score boxes.' text2={`When filled, the boxes will flip.\nScore 1 more to win!`}>
+    return <TutorialScreenSkeleton title='New here? These are the basics!' text1='These boxes are your score.' text2={`When filled, the boxes will flip.\nScore 1 more to win!`}>
         <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <View style={{ width: 32, height: 32, borderRadius: 5, borderColor: player?.color, borderWidth: 4, marginBottom: 6 }} />
             <View style={{ width: 32, height: 32, borderRadius: 5, backgroundColor: player?.color, marginBottom: 6 }} />
@@ -77,7 +78,7 @@ const PlacePawnsTutorial = () => {
     const { player } = usePlayer();
     if (!player) return <></>;
 
-    return <TutorialScreenSkeleton title='Put Pieces' text1='Every piece costs 1 score box.' text2='You get +1 every turn.'>
+    return <TutorialScreenSkeleton title='Put Pieces' text1='You get -1 for each piece you put.' text2='You get +1 every turn.'>
         <View style={{ height: 100, width: 100 }}>
             <View style={{ borderWidth: 4, borderRadius: 10, borderColor: theme.colors.text }}>
                 <PawnVisual durability={new Animated.Value(5)} variant={'SLASH'} color={player?.color}></PawnVisual>
@@ -98,7 +99,7 @@ const DeflectBallTutorial = () => {
     if (!player) return <></>;
 
 
-    return <TutorialScreenSkeleton title='Collect points' text1='Place pieces on the board.' text2={`Bounce the ball to your side\nto collect points.`}>
+    return <TutorialScreenSkeleton title='Score points' text1='Put pieces on the board.' text2={`Send the ball to your side\nto score points.`}>
         <View style={{ width: visualWidth, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <View style={{
                 width: BALL_DIAMETER,
@@ -127,12 +128,37 @@ const DeflectBallTutorial = () => {
 
 const InGameHintsTutorial = () => {
     const { player } = usePlayer();
+    const [counter, setCounter] = useState(0);
+    const dummySubject = useRef(new BehaviorSubject<boolean>(false)).current;
+    const hintLines = [
+        'Tap the info icon for in-game hints.',
+        'Nope! Don\'t tap it now, tap it in-game.',
+        'Look out, we\'ve got a pro tapper over here.',
+        'The actual game is pretty fun you know.',
+        'Maybe tap the Play button instead?',
+        'I\'m running out of short and cute sentences.',
+        'Once I run out of sentences, I\'ll need to loop one...',
+        'But I can\'t do that, I wouldn\'t want to dissapoint you.',
+    ];
+
+    useEffect(() => {
+        let current = dummySubject.value;
+        const sub = dummySubject.subscribe(dummyValue => {
+            if (dummyValue !== current) {
+                const increment = counter === hintLines.length - 1 ? -1 : 1;
+                setCounter(counter + increment);
+            }
+        });
+        return () => sub.unsubscribe();
+    }, [counter]);
+
     if (!player) return <></>;
 
 
-    return <TutorialScreenSkeleton title='In-game hints' text1='The info icon gives you hints in-game.' text2='Now click Play and have fun!'>
+
+    return <TutorialScreenSkeleton title='In-game hints' text1={hintLines[counter]} text2='Now tap Play and have fun!'>
         <View style={{ width: 100 }}>
-            <PlayerNameTag playerId={player.id} />
+            <PlayerNameTag playerId={player.id} tutorialDisplay={dummySubject} />
         </View>
         <View style={{ width: 100, opacity: 0 }}>
             <PlayerNameTag playerId={player.id} />

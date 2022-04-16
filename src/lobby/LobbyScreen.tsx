@@ -186,8 +186,10 @@ const LobbyScreen = () => {
         }
     </>
 
+    const isTutorialShown = player?.gameStats.games === 0;
+
     const SidePanel = () => {
-        if (player?.gameStats.games === 0) {
+        if (isTutorialShown) {
             return <View style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', justifyContent: 'center', marginBottom: 16 }}>
                 <Pressable
                     style={{ ...styles.button, backgroundColor: theme.colors.background, borderColor: theme.colors.text, borderWidth: 2, opacity: tutorialScreen === 0 ? 0 : 1 }}
@@ -205,7 +207,7 @@ const LobbyScreen = () => {
         }
     }
 
-    const MainActionButton = () => player?.gameStats.games === 0 && tutorialScreen < maxTutorialScreen
+    const MainActionButton = () => isTutorialShown && tutorialScreen < maxTutorialScreen
         ? <Pressable
             style={{ ...styles.button, backgroundColor: player?.color, borderColor: theme.colors.text }}
             onPress={() => setTutorialScreenClamped(tutorialScreen + 1)}>
@@ -234,7 +236,7 @@ const LobbyScreen = () => {
     return (
         <View style={{ backgroundColor: theme.colors.background, ...styles.lobbyContainer }}>
             <View style={{ flex: 1, display: 'flex' }}>
-                {player?.gameStats.games === 0
+                {isTutorialShown
                     ? <TutorialScreen tutorialScreen={tutorialScreen} />
                     : <MainLobbyScreen />}
             </View>
