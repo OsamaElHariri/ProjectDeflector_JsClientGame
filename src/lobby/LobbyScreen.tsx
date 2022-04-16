@@ -110,7 +110,7 @@ const LobbyScreen = () => {
     const nav = useNavigation<AppNavigation>()
     const { bounceAnim, restartAnim } = useSyncedAnimation();
     const isMounted = useRef(true);
-    const [checkingOngoingGame, setCheckingOngoingGame] = useState(true);
+    const [checkingOngoingGame, setCheckingOngoingGame] = useState(false);
 
     const maxTutorialScreen = 3;
     const [tutorialScreen, setTutorialScreen] = useState(0);
@@ -132,6 +132,7 @@ const LobbyScreen = () => {
 
     useEffect(() => {
         const checkingOngoingGame = async () => {
+            setCheckingOngoingGame(true);
             const ongoingGameId = await GameService.getOngoingGame()
                 .catch(_ => setCheckingOngoingGame(false));
             if (!isMounted.current) return;

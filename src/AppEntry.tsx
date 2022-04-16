@@ -17,7 +17,7 @@ export const GameTheme = {
     colors: {
         ...DefaultTheme.colors,
         background: '#E5D4CE',
-        text: '#000000',
+        text: '#212121',
     },
 };
 
