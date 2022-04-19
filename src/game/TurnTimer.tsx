@@ -92,7 +92,7 @@ const TurnTimer = ({ playerId }: Props) => {
     const translateAnim = useRef(new Animated.Value(state.playerTurn === playerId ? 0 : timerHeight)).current;
     useEffect(() => {
         translateAnim.setValue(state.playerTurn === playerId ? 0 : timerHeight);
-    }, [translateAnim, state.playerTurn]);
+    }, [translateAnim, state.playerTurn, timerHeight]);
 
     useEffect(() => {
         Animated.timing(
