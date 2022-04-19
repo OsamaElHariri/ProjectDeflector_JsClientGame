@@ -88,12 +88,12 @@ const PlayerHud = ({ playerId, children, hudWidth }: Props) => {
             }
         });
         return () => sub.unsubscribe();
-    }, [state.networkState]);
+    }, [state]);
 
     const translateAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
         translateAnim.setValue(state.playerTurn === playerId ? 0 : timerHeight);
-    }, [translateAnim, state.playerTurn]);
+    }, [state.playerTurn, timerHeight]);
 
     useEffect(() => {
         Animated.timing(

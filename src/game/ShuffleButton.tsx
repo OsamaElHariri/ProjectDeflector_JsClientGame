@@ -74,7 +74,7 @@ const ShuffleButton = ({ width, playerId }: Props) => {
             }
         });
         return () => sub.unsubscribe();
-    }, [state.networkState]);
+    }, [state]);
 
     const shuffle = async () => {
         if (state.networkState === 'LOADING') return;

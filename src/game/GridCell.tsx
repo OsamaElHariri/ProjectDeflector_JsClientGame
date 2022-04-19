@@ -102,7 +102,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
             }
         });
         return () => sub.unsubscribe();
-    }, [state.networkState]);
+    }, [state]);
 
     useEffect(() => {
         if (pawn.name === '' && state.playerTurn === player?.id && !state.isProcessingDeflections && state.playerScore > 0) {

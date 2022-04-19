@@ -81,7 +81,7 @@ const TurnTimer = ({ playerId }: Props) => {
             }
         });
         return () => sub.unsubscribe();
-    }, [state.networkState]);
+    }, [state]);
 
     useEffect(() => {
         if (playerId === player?.id && state.playerTurn === player.id) {
@@ -92,7 +92,7 @@ const TurnTimer = ({ playerId }: Props) => {
     const translateAnim = useRef(new Animated.Value(state.playerTurn === playerId ? 0 : timerHeight)).current;
     useEffect(() => {
         translateAnim.setValue(state.playerTurn === playerId ? 0 : timerHeight);
-    }, [translateAnim, state.playerTurn, timerHeight]);
+    }, [state.playerTurn, timerHeight]);
 
     useEffect(() => {
         Animated.timing(
