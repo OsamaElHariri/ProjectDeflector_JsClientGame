@@ -137,7 +137,7 @@ const LobbyScreen = () => {
                 .catch(_ => setCheckingOngoingGame(false));
             if (!isMounted.current) return;
             if (ongoingGameId) {
-                nav.navigate('LoadingGame', { gameId: ongoingGameId });
+                nav.replace('LoadingGame', { gameId: ongoingGameId });
             } else {
                 setCheckingOngoingGame(false);
             }

@@ -52,7 +52,7 @@ const WinnerOverlay = ({ route: { params: { winner } } }: Props) => {
                 gameStats: stats
             });
         }
-        nav.navigate('Lobby');
+        nav.replace('Lobby');
     }
 
     const text = winner === player?.id ? 'YOU WON' : 'YOU LOST...';
