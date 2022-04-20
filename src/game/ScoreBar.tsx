@@ -101,7 +101,7 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
     }
 
     const [state, setState] = useState({
-        score: stateSubject.value.game.gameBoard.scoreBoard[playerId],
+        score: Math.min(maxScore, stateSubject.value.game.gameBoard.scoreBoard[playerId]),
         isMatchPoint: stateSubject.value.game.matchPointPlayers[playerId],
         playerTurn: stateSubject.value.game.playerTurn,
         isCurrentlyScoring: getIsCurrentlyScoring(stateSubject.value),
@@ -118,7 +118,7 @@ const ScoreBar = ({ playerId, maxScore }: Props) => {
             }
 
             const newState = {
-                score,
+                score: Math.min(maxScore, score),
                 isMatchPoint: matchPointPlayers[playerId],
                 playerTurn,
                 isCurrentlyScoring: getIsCurrentlyScoring(gameState),

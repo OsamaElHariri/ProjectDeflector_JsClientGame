@@ -29,8 +29,8 @@ const ColorBox = ({ color }: ColorBoxProps) => {
     const theme = useTheme();
     const { player, updatePlayer } = usePlayer();
     const [networkState, setNetworkState] = useState<NetworkRequestStatus>('NONE');
-    const scaleAnim = useRef(new Animated.Value(1)).current;
     const { bounceAnim } = useSyncedAnimation();
+    const scaleAnim = useRef(new Animated.Value(0.75)).current;
 
     useEffect(() => {
         Animated.timing(
@@ -41,7 +41,7 @@ const ColorBox = ({ color }: ColorBoxProps) => {
                 useNativeDriver: true,
             }
         ).start();
-    }, [player?.color]);
+    }, [scaleAnim, player?.color]);
 
     const onPress = async () => {
         if (!updatePlayer || !player || player?.color === color) return;
@@ -134,7 +134,7 @@ const LobbyScreen = () => {
         const checkingOngoingGame = async () => {
             setCheckingOngoingGame(true);
             const ongoingGameId = await GameService.getOngoingGame()
-                .catch(_ => setCheckingOngoingGame(false));
+                .catch(_ => isMounted.current && setCheckingOngoingGame(false));
             if (!isMounted.current) return;
             if (ongoingGameId) {
                 nav.replace('LoadingGame', { gameId: ongoingGameId });
@@ -146,22 +146,22 @@ const LobbyScreen = () => {
     }, []);
 
     useEffect(() => {
-        restartAnim();
+        setTimeout(() => restartAnim(), 100);
         () => { isMounted.current = false }
     }, []);
 
     const onPlayPress = () => {
         if (!player || checkingOngoingGame) return;
         audio.play('turn_start');
-        GameService.findGame()
-        nav.replace('AwaitingGame')
+        GameService.findGame();
+        nav.replace('AwaitingGame');
     }
 
     const onSoloPress = () => {
         if (!player) return;
         audio.play('turn_start');
-        GameService.findSolo()
-        nav.replace('AwaitingGame')
+        GameService.findSolo();
+        nav.replace('AwaitingGame');
     }
 
     const dampenedBounceAnim = Animated.add(0.5, Animated.multiply(0.5, bounceAnim));
