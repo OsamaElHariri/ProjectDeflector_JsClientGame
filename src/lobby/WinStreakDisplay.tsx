@@ -53,7 +53,7 @@ const WinStreakDisplay = () => {
     if (player.gameStats.hasWonToday) {
         return <View style={{ alignItems: 'center' }} >
             <Text style={{ color: theme.colors.text, fontSize: 14 }}>You won today</Text>
-            <Text style={{ color: theme.colors.text, fontSize: 24, marginBottom: 4 }}>Day Streak</Text>
+            <Text style={{ color: theme.colors.text, fontSize: 24, marginBottom: 4 }}>Days in a Row</Text>
             <View style={{ borderBottomWidth: 4, borderColor: player.color, paddingHorizontal: 12 }}>
                 <Text style={{ color: theme.colors.text, fontSize: 36, fontWeight: 'bold' }}>{player.gameStats.winStreak}</Text>
             </View>
