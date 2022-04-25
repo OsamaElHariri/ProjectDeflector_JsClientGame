@@ -30,8 +30,13 @@ const AwaitingGameScreen = () => {
             }
         });
 
+        const interval = setInterval(() => {
+            GameService.touchQueue().catch(() => undefined);
+        }, 10000)
+
         return () => {
             sub.unsubscribe();
+            clearInterval(interval);
         };
     }, []);
 
