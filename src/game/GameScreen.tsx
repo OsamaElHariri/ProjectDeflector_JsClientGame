@@ -32,7 +32,7 @@ const GameScreen = ({ route }: Props) => {
 
     const hudWidth = 115;
     const scoreBarWidth = 50;
-    const gridSize = Math.min(dimensions.width - hudWidth * 2 - scoreBarWidth * 2, dimensions.height);
+    const gridSize = Math.min(dimensions.width - hudWidth * 2 - scoreBarWidth * 2, dimensions.height - 1);
 
     const targetScore = initialGame.targetScore;
 

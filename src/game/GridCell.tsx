@@ -187,10 +187,7 @@ const GridCell = ({ rowIdx, colIdx, durability, scaleAnim, posAnim }: Props) => 
     const canPress = pawn.name === '';
     let color = stateSubject.value.players[pawn.playerOwner]?.color;
 
-    const borderRadiusStyle: StyleProp<ViewStyle> = {
-        // the grid cells without a border are slightly out of place without this workaround
-        borderRadius: 0.01
-    };
+    const borderRadiusStyle: StyleProp<ViewStyle> = {};
     const borderRadius = 20;
     if (rowIdx === 0 && colIdx === 0) {
         borderRadiusStyle['borderTopLeftRadius'] = borderRadius;
