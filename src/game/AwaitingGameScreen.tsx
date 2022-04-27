@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import PlainOverlay from '../lobby/PlainOverlay';
 import { useAudio } from '../main_providers/audio_provider';
+import { usePlayer } from '../main_providers/player_provider';
 import { useSyncedAnimation } from '../main_providers/synced_animation';
 import { useWsClient } from '../main_providers/ws_provider';
 import { NetworkRequestStatus } from '../network/types';
@@ -24,6 +25,7 @@ const AwaitingGameScreen = () => {
     const { bounceAnim, restartAnim } = useSyncedAnimation();
     const clientConnection = useWsClient();
     const nav = useNavigation<AppNavigation>();
+    const { player } = usePlayer();
     const [networkStatus, setNetworkStatus] = useState<NetworkRequestStatus>('NONE');
     const isMounted = useRef(true);
     const longWaitScaleAnim = useRef(new Animated.Value(0)).current;
@@ -85,12 +87,12 @@ const AwaitingGameScreen = () => {
         </Text>
         <View style={{ paddingTop: 20 }} />
         <Pressable
-            style={{ ...styles.button, backgroundColor: theme.colors.background, borderColor: theme.colors.text, borderWidth: 2 }}
+            style={{ ...styles.button, backgroundColor: player?.color, borderColor: theme.colors.text, borderWidth: 2 }}
             onPress={shareGame}>
             <Animated.Text style={{
                 ...styles.buttonText,
                 fontWeight: 'bold',
-                color: theme.colors.text,
+                color: theme.colors.background,
                 transform: [{ scale: dampenedBounceAnim }],
             }}>
                 Invite Friend
