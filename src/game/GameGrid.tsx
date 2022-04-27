@@ -10,6 +10,7 @@ import { useAudio } from '../main_providers/audio_provider';
 import { Pawn } from '../types/types';
 import BallPathPreview from './BallPathPreview';
 import { shouldUpdate } from './diffWatcher';
+import FullBoardIndicator from './FullBoardIndicator';
 import { useGameState } from './game_state_provider';
 import GridCell from './GridCell';
 import { getDeflectionAnimations, getGridDoublePulseAnimation, getGridPulseAnimation } from './gridDeflectionAnimations';
@@ -186,7 +187,9 @@ const GameGrid = ({ gridSize }: Props) => {
 
     return (
         <View style={{ alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column' }}>
-            <View style={{ height: cellSize / 2 }}></View>
+            <View style={{ height: cellSize / 2 }}>
+                <FullBoardIndicator gridSize={cellSize * cols} />
+            </View>
             <Animated.View style={{
                 position: 'relative',
                 display: 'flex',
@@ -217,7 +220,9 @@ const GameGrid = ({ gridSize }: Props) => {
                     ]
                 }}></Animated.View>
             </View>
-            <View style={{ height: cellSize / 2 }}></View>
+            <View style={{ height: cellSize / 2 }}>
+                <FullBoardIndicator gridSize={cellSize * cols} />
+            </View>
         </View>
     );
 };
